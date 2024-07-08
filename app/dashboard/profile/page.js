@@ -1,13 +1,12 @@
+"use client";
+
 import { MdEdit } from "react-icons/md";
-import NavBar from "../components/navbar.component";
 import { Button, Checkbox, Icon, Input } from "@chakra-ui/react";
 
 const Profile = () => {
   return (
-    <div className="h-screen w-screen flex flex-row">
-      <NavBar />
-      <div className="h-screen w-3/4 flex flex-col p-10 bg-[#FCF0F250] gap-y-5">
-        <p>Settings</p>
+      <div className="flex flex-col gap-y-5">
+        <p>Profile</p>
         <div className="h-1/2 flex flex-col rounded-[20px] border border-[#393E4610] p-5 bg-white gap-y-2.5">
           <div className="flex flex-row items-center gap-x-2.5">
             <p>User details</p>
@@ -57,7 +56,6 @@ const Profile = () => {
           </div>
         </div>
       </div>
-    </div>
   );
 };
 
