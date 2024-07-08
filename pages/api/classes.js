@@ -1,4 +1,4 @@
-import Class from "../../app/models/class.model";
+import Class from "../../database/models/class.model";
 
 export default (req, res) => {
   Class.findAll().then((data) => {
@@ -6,4 +6,3 @@ export default (req, res) => {
     res.status(200).json({ json: data });
   });
 };
-

@@ -1,4 +1,4 @@
-import User from "../../app/models/user.model";
+import User from "../../database/models/user.model";
 
 export default (req, res) => {
   const method = req.method;
