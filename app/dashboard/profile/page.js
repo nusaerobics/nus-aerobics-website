@@ -3,7 +3,7 @@
 import { MdEdit } from "react-icons/md";
 import { Button, Checkbox, Icon, Input } from "@chakra-ui/react";
 
-const Profile = () => {
+export default function Page() {
   return (
       <div className="flex flex-col gap-y-5">
         <p>Profile</p>
@@ -58,5 +58,3 @@ const Profile = () => {
       </div>
   );
 };
-
-export default Profile;

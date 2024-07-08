@@ -15,7 +15,7 @@ import {
   InputRightElement,
 } from "@chakra-ui/react";
 
-const Wallet = () => {
+export default function Page() {
   return (
     <div className="flex flex-colgap-y-5">
       <p>Wallet</p>
@@ -81,5 +81,3 @@ const Wallet = () => {
     </div>
   );
 };
-
-export default Wallet;
