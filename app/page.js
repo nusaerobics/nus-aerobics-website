@@ -17,19 +17,7 @@ export default function Home({}) {
   }, []);
 
   return (
-    <Layout home>
-      <Head>
-        <title>{siteTitle}</title>
-      </Head>
-      <section className={utilStyles.headingMd}>
-        <ul>
-          {users.map((user) => (
-            <li key={user.id}>
-              {user.name} - {user.email}
-            </li>
-          ))}
-        </ul>
-      </section>
-    </Layout>
+    <>
+    </>
   );
 }
