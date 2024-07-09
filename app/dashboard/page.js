@@ -14,6 +14,7 @@ export default function Page() {
   // TODO: Method which calls backend to retrieve all upcoming class bookings
   return (
     <div className="flex flex-col gap-y-5">
+      {/* TODO: This page should be under app/page.js probably */}
       <p>Dashboard</p>
       <div className="h-full flex flex-row gap-x-5">
         <div className="h-full w-2/3 flex flex-col rounded-[20px] border border-[#393E4610] p-5 bg-white gap-y-2.5">
