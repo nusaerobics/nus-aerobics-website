@@ -31,6 +31,7 @@ img {
 }
 
 p {
+  /* color: #393E46; */
   cursor: default;
   -webkit-user-select: none; /* Safari */
   -ms-user-select: none; /* IE 10 and IE 11 */

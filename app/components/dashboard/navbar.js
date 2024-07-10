@@ -43,6 +43,7 @@ export default function NavBar() {
                 href={link.href}
                 className={clsx(
                   // TODO: Fix the MD versions
+                  // TODO: It's not keeping focused when selected the tab
                   "flex flex-row justify-center items-center gap-x-2.5 h-[50px] rounded-[10px] text-[#393E46] bg-white p-2.5 hover:bg-[#1F477610] hover:text-[#1F4776] md:flex-none md:justify-start md:p-2 md:px-3",
                   {
                     "bg-[#1F477620] text-[#1F4776]": pathname === link.href,
@@ -74,7 +75,7 @@ export default function NavBar() {
           onClick={handleLogout}
         >
           <MdLogout className="w-[30px]" />
-          <p className="font-poppins hidden md:block">Log out</p>
+          <p className="hidden md:block">Log out</p>
         </Link>
       </div>
     </div>

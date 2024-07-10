@@ -1,4 +1,4 @@
-import PrimaryButton from "../PrimaryButton";
+import { PrimaryButton } from "../Buttons";
 
 export default function ClassCard({ name, date }) {
   return (

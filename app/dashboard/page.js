@@ -2,20 +2,38 @@
 
 import {
   Table,
-  Thead,
-  Tbody,
-  Tr,
-  Th,
-  Td,
-  TableContainer,
-} from "@chakra-ui/react";
-import PageTitle from "../components/PageTitle";
-import SectionTitle from "../components/SectionTitle";
-
+  TableHeader,
+  TableBody,
+  TableColumn,
+  TableRow,
+  TableCell,
+} from "@nextui-org/table";
+import { PageTitle, SectionTitle } from "../components/Titles";
 import ClassCard from "../components/dashboard/ClassCard";
 import { transactions, upcomingClasses } from "../components/Data";
+import { useMemo } from "react";
 
 export default function Page() {
+  const tableClassNames = useMemo(
+    () => ({
+      // wrapper: ["max-h-[382px]", "max-w-3xl"],
+      // TODO: Make the font not bold
+      th: ["bg-white", "text-[#393E4650]", "text-base", "border-b"],
+      td: [
+        // changing the rows border radius
+        // first
+        "group-data-[first=true]:first:before:rounded-none",
+        "group-data-[first=true]:last:before:rounded-none",
+        // middle
+        "group-data-[middle=true]:before:rounded-none",
+        // last
+        "group-data-[last=true]:first:before:rounded-none",
+        "group-data-[last=true]:last:before:rounded-none",
+      ],
+    }),
+    []
+  );
+
   // TODO: Method which calls backend to retrieve all upcoming class bookings
   return (
     <div className="h-full flex flex-col gap-y-5">
@@ -43,26 +61,24 @@ export default function Page() {
           </div>
           <div className="h-3/4 flex flex-col rounded-[20px] border border-[#393E4610] p-5 bg-white">
             <SectionTitle title="Recent transactions" />
-            <TableContainer className="text-[#393E46] text-base">
-              <Table variant="simple">
-                <Thead>
-                  <Tr>
-                    <Th>Description</Th>
-                    <Th isNumeric>Amount</Th>
-                  </Tr>
-                </Thead>
-                <Tbody>
-                  {transactions.map((transaction) => {
-                    return (
-                      <Tr key={transaction.description}>
-                        <Td>{transaction.description.split(" ")[0]}</Td>
-                        <Td isNumeric>{transaction.amount}</Td>
-                      </Tr>
-                    );
-                  })}
-                </Tbody>
-              </Table>
-            </TableContainer>
+            <Table removeWrapper classNames={tableClassNames}>
+              <TableHeader>
+                <TableColumn>Description</TableColumn>
+                <TableColumn>Amount</TableColumn>
+              </TableHeader>
+              <TableBody>
+                {transactions.map((transaction) => {
+                  return (
+                    <TableRow key={transaction.id}>
+                      <TableCell>
+                        {transaction.description.split(" ")[0]}
+                      </TableCell>
+                      <TableCell>{transaction.amount}</TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
           </div>
         </div>
       </div>
