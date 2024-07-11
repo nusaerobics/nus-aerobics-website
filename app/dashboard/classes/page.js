@@ -17,18 +17,17 @@ export default function Page() {
   return (
     <div className="w-full h-full flex flex-col gap-y-5">
       <PageTitle title="Classes" />
-      <div className="h-full w-full rounded-[20px] border border-[#393E4610] bg-white gap-y-2.5">
+      <div className="h-full w-full rounded-[20px] border border-a-black/10 bg-white gap-y-2.5">
         {/* NOTE: Might be complicated to make calendar view of calsses */}
         <Tabs
           variant={"underlined"}
           selectedKey={selected}
           onSelectionChange={setSelected}
           classNames={{
-            tabList:
-              "gap-5 w-full relative rounded-none mx-5 p-0",
-            cursor: "w-full bg-[#393E46]",
+            tabList: "gap-5 w-full relative rounded-none mx-5 p-0",
+            cursor: "w-full bg-a-black", // Horizontal indicator line
             tab: "max-w-fit px-2.5 h-12",
-            tabContent: "group-data-[selected=true]:text-[#393E46]",
+            tabContent: ["group-data-[selected=true]:text-a-black"], // Content of a tab
           }}
         >
           <Tab

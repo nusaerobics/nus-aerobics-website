@@ -16,7 +16,13 @@ module.exports = {
       fontFamily: {
         poppins: ['var(--font-poppins)'],
         display: ['var(--font-noto-serif-display)'],
-      }
+      },
+      colors: {
+        "a-navy": "#1F4776",
+        "a-grey": "#393E46",
+        "a-black": "#393E46",
+        "a-pink": "#FCF0F2",
+      },
     },
   },
   darkMode: "class",

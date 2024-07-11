@@ -6,7 +6,7 @@ export default function Layout({ children }) {
       <div className="w-full flex-none md:w-64">
         <NavBar />
       </div>
-      <div className="w-full h-screen p-10 bg-[#FCF0F250] gap-y-5 md:overflow-y-auto">{children}</div>
+      <div className="w-full h-screen p-10 bg-a-pink/80 gap-y-5 md:overflow-y-auto">{children}</div>
     </div>
   );
 }

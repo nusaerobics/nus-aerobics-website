@@ -19,7 +19,7 @@ export default function Page() {
     () => ({
       // wrapper: ["max-h-[382px]", "max-w-3xl"],
       // TODO: Make the font not bold
-      th: ["bg-white", "text-[#393E4650]", "text-base", "border-b"],
+      th: ["bg-white", "text-a-black/50", "text-base", "border-b"],
       td: [
         // changing the rows border radius
         // first
@@ -39,18 +39,18 @@ export default function Page() {
     <div className="h-full flex flex-col gap-y-5">
       <PageTitle title="Wallet" />
       <div className="h-1/4 flex flex-row gap-x-5">
-        <div className="w-1/2 rounded-[20px] border border-[#393E4610] p-5 bg-white">
-          <p className="font-poppins font-bold text-[#1F4776] text-3xl">10</p>
+        <div className="w-1/2 rounded-[20px] border border-a-black/10 p-5 bg-white">
+          <p className="font-poppins font-bold text-a-navy text-3xl">10</p>
           <p className="font-poppins text-[#393E46] text-lg">
             credits remaining
           </p>
         </div>
-        <div className="w-1/2 rounded-[20px] border border-[#393E4610] p-5 bg-white">
-          <p className="font-poppins font-bold text-[#1F4776] text-3xl">8</p>
-          <p className="font-poppins text-[#393E46] text-lg">credits spent</p>
+        <div className="w-1/2 rounded-[20px] border border-a-black/10 p-5 bg-white">
+          <p className="font-poppins font-bold text-a-navy text-3xl">8</p>
+          <p className="font-poppins text-a-black text-lg">credits spent</p>
         </div>
       </div>
-      <div className="h-full flex flex-col rounded-[20px] border border-[#393E4610] p-5 bg-white gap-y-2.5">
+      <div className="h-full flex flex-col rounded-[20px] border border-a-black/10 p-5 bg-white gap-y-2.5">
         <div className="flex flex-row">
           <div className="w-3/4">
             <SectionTitle title="All transactions" />
@@ -60,9 +60,9 @@ export default function Page() {
               placeholder="Search"
               radius="full"
               classNames={{
-                input: ["text-[#393E46]", "placeholder:text-[#393E4650]"],
+                input: ["text-a-black", "placeholder:text-a-black/50"],
               }}
-              startContent={<MdSearch className="text-[#393E4650]" />}
+              startContent={<MdSearch className="text-a-black/50" />}
             />
           </div>
         </div>

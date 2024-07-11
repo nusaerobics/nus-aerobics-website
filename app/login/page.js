@@ -1,10 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import { Input } from "@nextui-org/react";
+import { MdVisibility, MdVisibilityOff } from "react-icons/md";
 
 export default function Page() {
   const [isLogin, setIsLogin] = useState(true);
-  const handleLogin = () => {
+  const toggleLogin = () => {
     setIsLogin(!isLogin);
   };
 
@@ -15,94 +17,230 @@ export default function Page() {
     : "Already have an account?";
   const bottomButton = isLogin ? "Sign-up" : "Login";
 
-  function handleSubmit(formData) {
-    if (isLogin) {
-      const email = formData.get("email");
-      const password = formData.get("password");
-      alert(`Logging in with: ${email}, ${password}`);
+  const inputClassNames = useMemo(() => ({
+    label: ["text-a-grey/50", "group-data-[filled-within=true]:text-a-grey/50"],
+    input: "bg-transparent text-a-black",
+    innerWrapper: ["bg-transparent", "hover:bg-transparent"],
+    inputWrapper: [
+      "bg-transparent",
+      "rounded-[80px]",
+      "border-[1px]",
+      "border-a-grey/10",
+      "hover:border-a-grey/10",
+      "group-data-[focus=true]:border-a-grey/10",
+      "group-data-[hover=true]:border-a-grey/10",
+    ],
+  }));
+
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+
+  const [isPWVisible, setIsPWVisible] = useState(false);
+  const [isCPWVisible, setIsCPWVisible] = useState(false);
+
+  const togglePWVisible = () => {
+    setIsPWVisible(!isPWVisible);
+  };
+  const toggleCPWVisible = () => {
+    setIsCPWVisible(!isCPWVisible);
+  };
+
+  const PWEndContent = useMemo(() => (
+    <button
+      className="focus:outline-none"
+      type="button"
+      onClick={togglePWVisible}
+    >
+      {isPWVisible ? (
+        <MdVisibilityOff className="text-2xl text-a-black/50 pointer-events-none" />
+      ) : (
+        <MdVisibility className="text-2xl text-a-black/50 pointer-events-none" />
+      )}
+    </button>
+  ));
+  const CPWEndContent = useMemo(() => (
+    <button
+      className="focus:outline-none"
+      type="button"
+      onClick={toggleCPWVisible}
+    >
+      {isCPWVisible ? (
+        <MdVisibilityOff className="text-2xl text-a-black/50 pointer-events-none" />
+      ) : (
+        <MdVisibility className="text-2xl text-a-black/50 pointer-events-none" />
+      )}
+    </button>
+  ));
+
+  // const [isInvalidName, setIsInvalidName] = useState(false);
+  const [isInvalidEmail, setIsInvalidEmail] = useState(false);
+
+  const isInvalidName = useMemo(() => {
+    if (name != "") {
+      // TODO: Allow space between
+      const isValid = name.match(/^[a-zA-Z]+$/);
+      return !isValid;
     } else {
-      const name = formData.get("name");
-      const email = formData.get("email");
-      const password = formData.get("password");
-      const confirmPassword = formData.get("confirmPassword");
-      alert(
-        `Registering with: ${name}, ${email}, ${password}, ${confirmPassword}`
-      );
+      return false;
     }
+  });
+
+  const isInvalidPW = useMemo(() => {
+    if (!isLogin && password != "") {
+      const isLength = password.length >= 5;
+      return !isLength;
+    } else {
+      return false;
+    }
+  });
+
+  const isInvalidCPW = useMemo(() => {
+    if (confirmPassword != "") {
+      return !(password === confirmPassword);
+    } else {
+      return false;
+    }
+  });
+
+  function validateName(name) {
+    const isValid = name.test(/^[a-zA-Z\s]+$/);
+    setIsInvalidName(!isValid);
+  }
+
+  function validateEmail(email) {
+    const isValid = email.match(/^[A-Z0-9._%+-]+@[A-Z0-9.-]+.[A-Z]{2,4}$/i);
+    setIsInvalidEmail(!isValid);
+  }
+
+  function validatePassword(password) {
+    const isLength = password.length > 5;
+    // TODO: Other validation for password strengths
+    setIsInvalidEmail(!isLength);
+  }
+
+  function handleLogin() {
+    validateEmail(email);
+    validatePassword(password);
+
+    console.log(`Email invalidity: ${isInvalidEmail}`);
+    console.log(`Logging in with: ${email}, ${password}`);
+
+    // TODO: Handle incorrect email/password
+  }
+
+  function handleSignUp() {
+    validateName(name);
+    validateEmail(email);
+    validatePassword(password);
+    validatePassword(confirmPassword);
+
+    if (password != confirmPassword) {
+      // TODO: Indicate CPW error message as not matching password
+    }
+
+    console.log(
+      `Signing up with: ${name}, ${email}, ${password}, ${confirmPassword}`
+    );
   }
 
   return (
     // TODO: Make text unable to be highlighted
-    <div className="w-screen h-screen p-16 bg-[#FCF0F250] flex flex-row justify-center">
-      <div className="w-[400px] h-full p-10 rounded-[20px] border border-[#393E4610] bg-white flex flex-col justify-center items-center">
-        <div className="flex flex-col gap-y-10">
-          <p className="font-display font-bold text-2xl text-[#1F4776] text-center">
+    <div className="w-screen h-screen flex flex-row justify-center p-8 bg-a-pink/80">
+      <div className="w-[400px] flex flex-col justify-center overflow-scroll p-5 gap-y-5 rounded-[20px] border border-a-black/10 bg-white">
+        <div className="w-full flex flex-col items-center gap-y-5">
+          <p className="font-display font-bold text-2xl text-a-navy">
             NUS AEROBICS
           </p>
-          <p className="font-poppins font-bold text-2xl text-[#393E46]">
+          <p className="font-poppins font-bold text-lg text-a-black">
             {message}
           </p>
         </div>
-        <form action={handleSubmit}>
-          <div className="py-10 flex flex-col">
-            {!isLogin ? (
-              <input
-                className="w-full p-[10px] mb-5 rounded-[30px] border border-[#393E4650] font-poppins placeholder:text-[#393E4650]"
-                name="name"
-                placeholder="Name"
-                required
-              />
-            ) : (
-              <></>
-            )}
-            <input
-              className="w-full p-[10px] rounded-[30px] border border-[#393E4650] font-poppins placeholder:text-[#393E4650]"
-              name="email"
-              type="email"
-              placeholder="Email"
-              required
+
+        <div className="w-full flex flex-col gap-y-1">
+          {!isLogin ? (
+            <Input
+              label="Full name"
+              value={name}
+              onValueChange={setName}
+              isInvalid={isInvalidName}
+              errorMessage="Please enter a valid name"
+              isRequired
+              variant="bordered"
+              size="sm"
+              classNames={inputClassNames}
             />
-            <input
-              className="w-full p-[10px] mt-5 rounded-[30px] border border-[#393E4650] font-poppins placeholder:text-[#393E4650]"
-              name="password"
-              type="password"
-              placeholder="Password"
-              required
+          ) : (
+            <></>
+          )}
+          <Input
+            label="Email"
+            value={email}
+            onValueChange={setEmail}
+            isInvalid={isInvalidEmail}
+            errorMessage="Please enter a valid email"
+            isRequired
+            variant="bordered"
+            size="sm"
+            classNames={inputClassNames}
+          />
+          <Input
+            label="Password"
+            value={password}
+            onValueChange={setPassword}
+            type={isPWVisible ? "text" : "password"}
+            endContent={PWEndContent}
+            isInvalid={isInvalidPW}
+            errorMessage="Password should be at least 5 characters"
+            isRequired
+            variant="bordered"
+            size="sm"
+            classNames={inputClassNames}
+          />
+          {!isLogin ? (
+            <Input
+              label="Confirm password"
+              value={confirmPassword}
+              onValueChange={setConfirmPassword}
+              type={isCPWVisible ? "text" : "password"}
+              endContent={CPWEndContent}
+              isInvalid={isInvalidCPW}
+              errorMessage="Passwords do not match"
+              isRequired
+              variant="bordered"
+              size="sm"
+              classNames={inputClassNames}
             />
-            {!isLogin ? (
-              <input
-                className="w-full p-[10px] mt-5 rounded-[30px] border border-[#393E4650] font-poppins placeholder:text-[#393E4650]"
-                name="confirmPassword"
-                type="password"
-                placeholder="Confirm password"
-                required
-              />
-            ) : (
-              <></>
-            )}
-            {isLogin ? (
-              <button className="mt-2.5 text-end text-[#1F4776] font-bold underline">
-                Forgot password?
-              </button>
-            ) : (
-              <></>
-            )}
+          ) : (
+            <></>
+          )}
+          {isLogin ? (
+            <button className="text-end text-xs text-a-navy font-bold underline">
+              Forgot password?
+            </button>
+          ) : (
+            <></>
+          )}
+        </div>
+
+        <div className="w-full flex flex-col gap-y-1">
+          <button
+            className="rounded-[30px] px-[20px] py-[10px] bg-[#1F4776] text-sm text-white"
+            onClick={isLogin ? handleLogin : handleSignUp}
+          >
+            {button}
+          </button>
+
+          <div className="w-full flex flex-row justify-center gap-x-1">
+            <p className="text-xs text-a-black">{bottomAction}</p>
             <button
-              type="submit"
-              className="w-full mt-10 rounded-[30px] p-[10px] bg-[#1F4776] text-white"
+              className="text-end text-xs text-a-navy font-bold underline"
+              onClick={toggleLogin}
             >
-              {button}
+              {bottomButton}
             </button>
           </div>
-        </form>
-        <div className="flex flex-row gap-x-1">
-          <p>{bottomAction}</p>
-          <button
-            className="text-end text-[#1F4776] font-bold underline"
-            onClick={handleLogin}
-          >
-            {bottomButton}
-          </button>
         </div>
       </div>
     </div>
