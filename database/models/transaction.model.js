@@ -1,25 +1,28 @@
+
 import { DataTypes } from "sequelize";
 import sequelize from "../utils/sequelize";
 
 const Transaction = sequelize.define("transaction", {
-  description: {
-    type: DataTypes.STRING,
+  user_id: { // User who's wallet the transaction is affecting
+    type: DataTypes.DECIMAL(10, 0),
     allowNull: false,
   },
-  // amount: {
-  //   type: DataTypes.NUMBER,
-  //   allowNull: false,
-  // },
-  // date: {
-  //   type: DataTypes.DATE,
-  //   allowNull: false,
-  // },
-  // TODO: Add user who did the transaction
+  date: {
+    type: DataTypes.DATE,
+    allowNull: false,
+  },
+  amount: {
+    type: DataTypes.DECIMAL(10, 0),
+    allowNull: false,
+  },
+  description: {
+    type: DataTypes.ENUM("Deposit", "Refund", "Booking"),
+    allowNull: false,
+  },
+  booking_id: {
+    type: DataTypes.DECIMAL(10, 0),
+    allowNull: true,
+  }
 });
-
-// NOTE: How will it know what models is?
-// Transaction.associate = (models) => {
-//   Transaction.hasOne(models.User);
-// }
 
 export default Transaction;

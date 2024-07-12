@@ -8,12 +8,12 @@ import {
   MdOpenInNew,
 } from "react-icons/md";
 import { Tabs, Tab } from "@nextui-org/react";
-import { PageTitle, SectionTitle } from "../../components/Titles";
+import { PageTitle } from "../../components/Titles";
 import { useState } from "react";
 
 export default function Page() {
   const [selected, setSelected] = useState("schedule");
-
+  
   return (
     <div className="w-full h-full flex flex-col gap-y-5">
       <PageTitle title="Classes" />
@@ -39,7 +39,7 @@ export default function Page() {
               </div>
             }
           >
-            <div className="">
+            <div>
               <p>Class schedule</p>
             </div>
           </Tab>

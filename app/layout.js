@@ -2,7 +2,6 @@
 
 import Head from "next/head";
 import "../styles/globals.css";
-import styles from "./layout.module.css";
 import Providers from "./providers";
 import { noto_serif_display, poppins } from "./components/Fonts";
 
@@ -14,7 +13,7 @@ export default function Layout({ children, home }) {
     <html lang="en">
       <body>
         <Providers>
-          <div className={styles.container}>
+          <div>
             <Head>
               <link rel="icon" href="/favicon.ico" />
             </Head>

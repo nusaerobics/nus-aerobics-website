@@ -9,20 +9,19 @@ const User = sequelize.define("user", {
   email: {
     type: DataTypes.STRING,
     allowNull: false,
-    unique: true,
   },
   password: {
     type: DataTypes.STRING,
     allowNull: false,
   },
-  // balance: {
-  //   type: DataTypes.NUMBER,
-  // }
+  permission: {
+    type: DataTypes.STRING,
+    defaultValue: "normal",
+  },
+  balance: {
+    type: DataTypes.DECIMAL(10, 0),
+    defaultValue: 0,
+  }
 });
-
-// User.associate = (models) => {
-//   User.hasMany(models.Booking);
-//   User.hasMany(models.Transaction);
-// }
 
 export default User;
