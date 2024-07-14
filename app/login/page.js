@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { Input } from "@nextui-org/react";
 import { MdVisibility, MdVisibilityOff } from "react-icons/md";
+import { inputClassNames } from "../components/ClassNames";
 
 export default function Page() {
   const [isLogin, setIsLogin] = useState(true);
@@ -16,21 +17,6 @@ export default function Page() {
     ? "Don't have an account?"
     : "Already have an account?";
   const bottomButton = isLogin ? "Sign-up" : "Login";
-
-  const inputClassNames = useMemo(() => ({
-    label: ["text-a-grey/50", "group-data-[filled-within=true]:text-a-grey/50"],
-    input: "bg-transparent text-a-black",
-    innerWrapper: ["bg-transparent", "hover:bg-transparent"],
-    inputWrapper: [
-      "bg-transparent",
-      "rounded-[80px]",
-      "border-[1px]",
-      "border-a-grey/10",
-      "hover:border-a-grey/10",
-      "group-data-[focus=true]:border-a-grey/10",
-      "group-data-[hover=true]:border-a-grey/10",
-    ],
-  }));
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -47,32 +33,36 @@ export default function Page() {
     setIsCPWVisible(!isCPWVisible);
   };
 
-  const PWEndContent = useMemo(() => (
-    <button
-      className="focus:outline-none"
-      type="button"
-      onClick={togglePWVisible}
-    >
-      {isPWVisible ? (
-        <MdVisibilityOff className="text-2xl text-a-black/50 pointer-events-none" />
-      ) : (
-        <MdVisibility className="text-2xl text-a-black/50 pointer-events-none" />
-      )}
-    </button>
-  ));
-  const CPWEndContent = useMemo(() => (
-    <button
-      className="focus:outline-none"
-      type="button"
-      onClick={toggleCPWVisible}
-    >
-      {isCPWVisible ? (
-        <MdVisibilityOff className="text-2xl text-a-black/50 pointer-events-none" />
-      ) : (
-        <MdVisibility className="text-2xl text-a-black/50 pointer-events-none" />
-      )}
-    </button>
-  ));
+  const PWEndContent = () => {
+    return (
+      <button
+        className="focus:outline-none"
+        type="button"
+        onClick={togglePWVisible}
+      >
+        {isPWVisible ? (
+          <MdVisibilityOff className="text-2xl text-a-black/50 pointer-events-none" />
+        ) : (
+          <MdVisibility className="text-2xl text-a-black/50 pointer-events-none" />
+        )}
+      </button>
+    );
+  };
+  const CPWEndContent = () => {
+    return (
+      <button
+        className="focus:outline-none"
+        type="button"
+        onClick={toggleCPWVisible}
+      >
+        {isCPWVisible ? (
+          <MdVisibilityOff className="text-2xl text-a-black/50 pointer-events-none" />
+        ) : (
+          <MdVisibility className="text-2xl text-a-black/50 pointer-events-none" />
+        )}
+      </button>
+    );
+  };
 
   // const [isInvalidName, setIsInvalidName] = useState(false);
   const [isInvalidEmail, setIsInvalidEmail] = useState(false);

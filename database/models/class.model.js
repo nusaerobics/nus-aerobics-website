@@ -24,6 +24,11 @@ const Class = sequelize.define("class", {
     type: DataTypes.DECIMAL(10, 0),
     allowNull: false,
   },
+  status: {
+    type: DataTypes.STRING,
+    defaultValue: "open",
+    allowNull: false,
+  },
   /**
    * TODO: Would later need to do a JOIN between CLASS and BOOKING and USER
    * to get the USERs who have made a BOOKING for this CLASS  

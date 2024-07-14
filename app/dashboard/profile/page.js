@@ -1,11 +1,33 @@
 "use client";
 
-import { MdEdit } from "react-icons/md";
+import { MdEdit, MdVisibility, MdVisibilityOff } from "react-icons/md";
 import { Checkbox, Input } from "@nextui-org/react";
 import { PageTitle, SectionTitle } from "../../components/Titles";
 import { PrimaryButton, SecondaryButton } from "../../components/Buttons";
+import { inputClassNames } from "../../components/ClassNames";
+import { useState } from "react";
 
 export default function Page() {
+  const [name, setName] = useState("Nara Smith");
+  const [email, setEmail] = useState("nara@email.com");
+  const [currentPW, setCurrentPW] = useState("");
+  const [newPW, setNewPW] = useState("");
+  const [confirmPW, setConfirmPW] = useState("");
+
+  const [isCurrentPWVisible, setIsCurrentPWVisible] = useState(false);
+  const [isNewPWVisible, setIsNewPWVisible] = useState(false);
+  const [isConfirmPWVisible, setIsConfirmPWVisible] = useState(false);
+
+  const toggleCurrentPW = () => {
+    setIsCurrentPWVisible(!isCurrentPWVisible);
+  };
+  const toggleNewPW = () => {
+    setIsNewPWVisible(!isNewPWVisible);
+  };
+  const toggleConfirmPW = () => {
+    setIsConfirmPWVisible(!isConfirmPWVisible);
+  };
+
   return (
     <div className="flex flex-col gap-y-5">
       <PageTitle title="Profile" />
@@ -17,23 +39,11 @@ export default function Page() {
         <div className="flex flex-col gap-y-2.5 w-[265px]">
           <p className="text-a-black/50 text-sm">Full name</p>
           <Input
-            placeholder="Nara Smith"
-            radius="full"
-            classNames={{
-              input: ["text-a-black", "placeholder:text-a-black/50"],
-              inputWrapper: [
-                // "shadow-xl",
-                // "bg-default-200/50",
-                // "dark:bg-default/60",
-                // "backdrop-blur-xl",
-                // "backdrop-saturate-200",
-                // "hover:bg-default-200/70",
-                // "dark:hover:bg-default/70",
-                // "group-data-[focus=true]:bg-default-200/50",
-                // "dark:group-data-[focus=true]:bg-default/60",
-                // "!cursor-text",
-              ],
-            }}
+            value={name}
+            onValueChange={setName}
+            variant="bordered"
+            size="xs"
+            classNames={inputClassNames}
           />
         </div>
         <div className="flex flex-col gap-y-2.5 items-start">
@@ -41,27 +51,18 @@ export default function Page() {
           <div className="flex flex-row gap-x-2.5">
             <div className="w-[265px]">
               <Input
-                placeholder="narasmith@email.com"
-                radius="full"
-                classNames={{
-                  input: ["text-a-black", "placeholder:text-a-black/50"],
-                  inputWrapper: [
-                    // "shadow-xl",
-                    // "bg-default-200/50",
-                    // "dark:bg-default/60",
-                    // "backdrop-blur-xl",
-                    // "backdrop-saturate-200",
-                    // "hover:bg-default-200/70",
-                    // "dark:hover:bg-default/70",
-                    // "group-data-[focus=true]:bg-default-200/50",
-                    // "dark:group-data-[focus=true]:bg-default/60",
-                    // "!cursor-text",
-                  ],
-                }}
+                value={email}
+                onValueChange={setEmail}
+                variant="bordered"
+                size="xs"
+                classNames={inputClassNames}
               />
             </div>
             <Checkbox defaultChecked color="default">
-              <p className="text-a-black"> Get email notifications for upcoming classes</p>
+              <p className="text-a-black text-sm">
+                {" "}
+                Get email notifications
+              </p>
             </Checkbox>
           </div>
         </div>
@@ -71,72 +72,79 @@ export default function Page() {
         <div className="flex flex-col gap-y-2.5 w-[265px]">
           <p className="text-a-black/50 text-sm">Current password</p>
           <Input
-            placeholder=""
-            radius="full"
-            classNames={{
-              input: ["text-a-black", "placeholder:text-a-black/50"],
-              inputWrapper: [
-                // "shadow-xl",
-                // "bg-default-200/50",
-                // "dark:bg-default/60",
-                // "backdrop-blur-xl",
-                // "backdrop-saturate-200",
-                // "hover:bg-default-200/70",
-                // "dark:hover:bg-default/70",
-                // "group-data-[focus=true]:bg-default-200/50",
-                // "dark:group-data-[focus=true]:bg-default/60",
-                // "!cursor-text",
-              ],
-            }}
+            value={currentPW}
+            onValueChange={setCurrentPW}
+            type={isCurrentPWVisible ? "text" : "password"}
+            endContent={
+              <button
+                className="focus:outline-none"
+                type="button"
+                onClick={toggleCurrentPW}
+              >
+                {isCurrentPWVisible ? (
+                  <MdVisibilityOff className="text-2xl text-a-black/50 pointer-events-none" />
+                ) : (
+                  <MdVisibility className="text-2xl text-a-black/50 pointer-events-none" />
+                )}
+              </button>
+            }
+            variant="bordered"
+            size="sm"
+            classNames={inputClassNames}
           />
         </div>
         <div className="flex flex-row gap-x-2.5">
           <div className="flex flex-col gap-y-2.5 w-[265px]">
             <p className="text-a-black/50 text-sm">New password</p>
             <Input
-              placeholder=""
-              radius="full"
-              classNames={{
-                input: ["text-a-black", "placeholder:text-a-black/50"],
-                inputWrapper: [
-                  // "shadow-xl",
-                  // "bg-default-200/50",
-                  // "dark:bg-default/60",
-                  // "backdrop-blur-xl",
-                  // "backdrop-saturate-200",
-                  // "hover:bg-default-200/70",
-                  // "dark:hover:bg-default/70",
-                  // "group-data-[focus=true]:bg-default-200/50",
-                  // "dark:group-data-[focus=true]:bg-default/60",
-                  // "!cursor-text",
-                ],
-              }}
+              value={newPW}
+              onValueChange={setNewPW}
+              type={isNewPWVisible ? "text" : "password"}
+              endContent={
+                <button
+                  className="focus:outline-none"
+                  type="button"
+                  onClick={toggleNewPW}
+                >
+                  {isNewPWVisible ? (
+                    <MdVisibilityOff className="text-2xl text-a-black/50 pointer-events-none" />
+                  ) : (
+                    <MdVisibility className="text-2xl text-a-black/50 pointer-events-none" />
+                  )}
+                </button>
+              }
+              variant="bordered"
+              size="sm"
+              classNames={inputClassNames}
             />
           </div>
           <div className="flex flex-col gap-y-2.5 w-[265px]">
             <p className="text-a-black/50 text-sm">Confirm password</p>
             <Input
-              placeholder=""
-              radius="full"
-              classNames={{
-                input: ["text-a-black", "placeholder:text-a-black/50"],
-                inputWrapper: [
-                  // "shadow-xl",
-                  // "bg-default-200/50",
-                  // "dark:bg-default/60",
-                  // "backdrop-blur-xl",
-                  // "backdrop-saturate-200",
-                  // "hover:bg-default-200/70",
-                  // "dark:hover:bg-default/70",
-                  // "group-data-[focus=true]:bg-default-200/50",
-                  // "dark:group-data-[focus=true]:bg-default/60",
-                  // "!cursor-text",
-                ],
-              }}
+              value={confirmPW}
+              onValueChange={setConfirmPW}
+              type={isConfirmPWVisible ? "text" : "password"}
+              endContent={
+                <button
+                  className="focus:outline-none"
+                  type="button"
+                  onClick={toggleConfirmPW}
+                >
+                  {isConfirmPWVisible ? (
+                    <MdVisibilityOff className="text-2xl text-a-black/50 pointer-events-none" />
+                  ) : (
+                    <MdVisibility className="text-2xl text-a-black/50 pointer-events-none" />
+                  )}
+                </button>
+              }
+              variant="bordered"
+              size="sm"
+              classNames={inputClassNames}
             />
           </div>
         </div>
         <div className="flex flex-row justify-end gap-x-2.5">
+          {/* TODO: Change this because it won't handle the function */}
           <SecondaryButton label="Cancel" />
           <PrimaryButton label="Save changes" />
         </div>

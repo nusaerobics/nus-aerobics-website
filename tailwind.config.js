@@ -19,12 +19,15 @@ module.exports = {
       },
       colors: {
         "a-navy": "#1F4776",
-        "a-grey": "#393E46",
         "a-black": "#393E46",
         "a-pink": "#FCF0F2",
+        "a-green": "#2A9E2F",
+        "a-red": "#9E2A2A",
       },
     },
   },
   darkMode: "class",
-  plugins: [nextui()],
+  plugins: [nextui({
+    
+  })],
 }

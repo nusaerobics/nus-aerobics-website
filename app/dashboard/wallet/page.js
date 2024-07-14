@@ -1,6 +1,5 @@
 "use client";
 
-import { MdSearch } from "react-icons/md";
 import {
   Table,
   TableHeader,
@@ -10,36 +9,20 @@ import {
   TableCell,
 } from "@nextui-org/table";
 import { Input } from "@nextui-org/react";
-import { useMemo } from "react";
 import { PageTitle, SectionTitle } from "../../components/Titles";
 import { transactions } from "../../components/Data";
+import { inputClassNames, tableClassNames } from "../../components/ClassNames";
+import { useState } from "react";
 
 export default function Page() {
-  const tableClassNames = useMemo(
-    () => ({
-      // wrapper: ["max-h-[382px]", "max-w-3xl"],
-      // TODO: Make the font not bold
-      th: ["bg-white", "text-a-black/50", "text-base", "border-b"],
-      td: [
-        // changing the rows border radius
-        // first
-        "group-data-[first=true]:first:before:rounded-none",
-        "group-data-[first=true]:last:before:rounded-none",
-        // middle
-        "group-data-[middle=true]:before:rounded-none",
-        // last
-        "group-data-[last=true]:first:before:rounded-none",
-        "group-data-[last=true]:last:before:rounded-none",
-      ],
-    }),
-    []
-  );
-
+  const [searchInput, setSearchInput] = useState("");
+  
   return (
     <div className="h-full flex flex-col gap-y-5">
       <PageTitle title="Wallet" />
       <div className="h-1/4 flex flex-row gap-x-5">
         <div className="w-1/2 rounded-[20px] border border-a-black/10 p-5 bg-white">
+          {/* TODO: For a given User, get the User's balance */}
           <p className="font-poppins font-bold text-a-navy text-3xl">10</p>
           <p className="font-poppins text-[#393E46] text-lg">
             credits remaining
@@ -58,11 +41,11 @@ export default function Page() {
           <div className="w-1/4">
             <Input
               placeholder="Search"
-              radius="full"
-              classNames={{
-                input: ["text-a-black", "placeholder:text-a-black/50"],
-              }}
-              startContent={<MdSearch className="text-a-black/50" />}
+              value={searchInput}
+              onValueChange={setSearchInput}
+              variant="bordered"
+              size="xs"
+              classNames={inputClassNames}
             />
           </div>
         </div>

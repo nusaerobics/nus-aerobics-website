@@ -2,18 +2,81 @@
 
 import {
   MdCalendarMonth,
-  MdChevronLeft,
-  MdChevronRight,
   MdList,
   MdOpenInNew,
+  MdOutlineCalendarMonth,
+  MdOutlineLocationOn,
+  MdPersonOutline,
 } from "react-icons/md";
-import { Tabs, Tab } from "@nextui-org/react";
-import { PageTitle } from "../../components/Titles";
-import { useState } from "react";
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableColumn,
+  TableRow,
+  TableCell,
+} from "@nextui-org/table";
+import {
+  Modal,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  useDisclosure,
+} from "@nextui-org/modal";
+import moment from "moment/moment"; // NOTE: Might have to change to datefns
+import { Input, Tabs, Tab, Chip } from "@nextui-org/react";
+import { PageTitle, SectionTitle } from "../../components/Titles";
+
+import { useEffect, useState } from "react";
+import { getClasses } from "../../services/DataService";
+import {
+  chipClassNames,
+  modalClassNames,
+  tabsClassNames,
+  tableClassNames,
+  inputClassNames,
+} from "../../components/ClassNames";
 
 export default function Page() {
   const [selected, setSelected] = useState("schedule");
-  
+  const [classes, setClasses] = useState([]); // All Classes from DB
+  const [bookings, setBookings] = useState([]); // All Bookings from DB of a given User
+  const [selectedClass, setSelectedClass] = useState({});
+  const [searchInput, setSearchInput] = useState("");
+
+  const { isOpen, onOpen, onOpenChange } = useDisclosure(); // NOTE: Might be able to use useState and handlers instead?
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const classesData = await getClasses();
+      setClasses(classesData);
+
+      // const bookingsData = await getBookings();
+      // setBookings(bookingsData);
+    };
+    fetchData();
+  }, []);
+
+  const handleClick = (rowData) => {
+    setSelectedClass(rowData);
+    onOpen();
+  };
+
+  const types = {
+    open: {
+      message: "Open for booking",
+    },
+    full: {
+      message: "Fully booked",
+    },
+    closed: {
+      message: "Closed for booking",
+    },
+    booked: {
+      message: "Booked",
+    },
+  };
+
   return (
     <div className="w-full h-full flex flex-col gap-y-5">
       <PageTitle title="Classes" />
@@ -23,24 +86,63 @@ export default function Page() {
           variant={"underlined"}
           selectedKey={selected}
           onSelectionChange={setSelected}
-          classNames={{
-            tabList: "gap-5 w-full relative rounded-none mx-5 p-0",
-            cursor: "w-full bg-a-black", // Horizontal indicator line
-            tab: "max-w-fit px-2.5 h-12",
-            tabContent: ["group-data-[selected=true]:text-a-black"], // Content of a tab
-          }}
+          classNames={tabsClassNames}
         >
           <Tab
             key="schedule"
             title={
               <div className="flex flex-row items-center gap-x-2">
                 <MdCalendarMonth />
-                <p className="text-lg">Class schedule</p>
+                <p className="text-base">Class schedule</p>
               </div>
             }
           >
-            <div>
-              <p>Class schedule</p>
+            <div className="w-full flex flex-col p-5 pt-0 items-end gap-y-5">
+              {/* TODO: Link Search to the Classes array, search based on name */}
+              {/* TODO: Add in filtering for Classes */}
+              <div className="w-1/4">
+                <Input
+                  placeholder="Search"
+                  value={searchInput}
+                  onValueChange={setSearchInput}
+                  variant="bordered"
+                  size="xs"
+                  classNames={inputClassNames}
+                />
+              </div>
+              {/* TODO: Later change mapping of table to use COLUMNS and ITEMS */}
+              {/* TODO: Add in sort on the date */}
+              {/* TODO: Add in paginations */}
+              <Table removeWrapper classNames={tableClassNames}>
+                <TableHeader>
+                  <TableColumn>Class</TableColumn>
+                  <TableColumn></TableColumn>
+                  <TableColumn allowsSorting>Status</TableColumn>
+                  <TableColumn allowsSorting>Date</TableColumn>
+                </TableHeader>
+                <TableBody>
+                  {classes.map((c) => {
+                    return (
+                      <TableRow key={c.id}>
+                        <TableCell>{c.name}</TableCell>
+                        <TableCell>
+                          <button onClick={() => handleClick(c)}>
+                            <MdOpenInNew />
+                          </button>
+                        </TableCell>
+                        <TableCell>
+                          <Chip classNames={chipClassNames[c.status]}>
+                            {types[c.status].message}
+                          </Chip>
+                        </TableCell>
+                        <TableCell>
+                          {moment(c.date).format("MMM Do, h:mm")}
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
             </div>
           </Tab>
           <Tab
@@ -48,189 +150,109 @@ export default function Page() {
             title={
               <div className="flex flex-row items-center gap-x-2">
                 <MdList />
-                <p className="text-lg">Booked classes</p>
+                <p className="text-base">Booked classes</p>
               </div>
             }
           >
-            <div>
-              <p>Booked classes</p>
+            <div className="w-full flex flex-col items-end gap-y-5">
+              {/* TODO: Link Search to the Bookings array, search based on name */}
+              {/* TODO: Add in filtering for Bookings */}
+              <div className="w-1/4">
+                <Input
+                  placeholder="Search"
+                  value={searchInput}
+                  onValueChange={setSearchInput}
+                  variant="bordered"
+                  size="xs"
+                  classNames={inputClassNames}
+                />
+              </div>
+              {/* TODO: Later change mapping of table to use COLUMNS and ITEMS */}
+              {/* TODO: Add in sort on the date */}
+              {/* TODO: Add in paginations */}
+              {/* TODO: Add in Booking logic */}
+              {/* <Table removeWrapper classNames={tableClassNames}>
+                <TableHeader>
+                  <TableColumn>Class</TableColumn>
+                  <TableColumn></TableColumn>
+                  <TableColumn>Status</TableColumn>
+                  <TableColumn allowsSorting>Class date</TableColumn>
+                  <TableColumn allowsSorting>Booking date</TableColumn>
+                </TableHeader>
+                <TableBody>
+                  {bookings.map((booking) => {
+                    return (
+                      <TableRow key={booking.id}>
+                        <TableCell>{booking.name}</TableCell>
+                        <TableCell>
+                          <button onClick={() => handleClick(booking)}>
+                            <MdOpenInNew />
+                          </button>
+                        </TableCell>
+                        <TableCell>
+                          <Chip classNames={chipClassNames["booked"]}>
+                            {types["booked"].message}
+                          </Chip>
+                        </TableCell>
+                        <TableCell>
+                          {moment(c.date).format("MMM Do, h:mm")}
+                        </TableCell>
+                        <TableCell>
+                          {moment(c.date).format("MMM Do, h:mm")}
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table> */}
             </div>
           </Tab>
         </Tabs>
-        {/* <Tabs>
-          <TabList>
-            <Tab>
-              <div className="flex flex-row gap-x-2.5 items-center">
-                <MdCalendarMonth />
-                <p className="text-[#393E46]" style={{ cursor: "auto" }}>
-                  Class schedule
-                </p>
-              </div>
-            </Tab>
-            <Tab>
-              <div className="flex flex-row gap-x-2.5 items-center">
-                <MdList />
-                <p className="ftext-[#393E46]" style={{ cursor: "auto" }}>
-                  Booked classes
-                </p>
-              </div>
-            </Tab>
-          </TabList>
-          <TabPanels>
-            <TabPanel>
-              <div className="h-full flex flex-col gap-y-2.5">
-                <div className="flex flex-row justify-center items-center gap-x-2.5 text-[#393E46]">
-                  <button>
-                    <Icon as={MdChevronLeft} boxSize={6} color="" />
-                  </button>
-                  <p className="font-bold text-2xl">Week 1</p>
-                  <button>
-                    <Icon as={MdChevronRight} boxSize={6} color="" />
-                  </button>
-                </div>
-                <div className="flex flex-row">
-                  <div className="w-1/5 flex flex-row justify-start items-end gap-x-1">
-                    <p className="font-bold text-[#393E4650] text-2xl">Mon</p>
-                    <p className="text-[#393E4650] text-lg">14/02</p>
-                  </div>
-                  <div className="w-1/5 flex flex-row justify-start items-end gap-x-1">
-                    <p className="font-bold text-[#393E4650] text-2xl">Tue</p>
-                    <p className="text-[#393E4650] text-lg">15/02</p>
-                  </div>
-                  <div className="w-1/5 flex flex-row justify-start items-end gap-x-1">
-                    <p className="font-bold text-[#393E4650] text-2xl">Wed</p>
-                    <p className="text-[#393E4650] text-lg">16/02</p>
-                  </div>
-                  <div className="w-1/5 flex flex-row justify-start items-end gap-x-1">
-                    <p className="font-bold text-[#393E4650] text-2xl">Thu</p>
-                    <p className="text-[#393E4650] text-lg">17/02</p>
-                  </div>
-                  <div className="w-1/5 flex flex-row justify-start items-end gap-x-1">
-                    <p className="font-bold text-[#393E4650] text-2xl">Fri</p>
-                    <p className="text-[#393E4650] text-lg">18/02</p>
-                  </div>
-                </div>
-                <div className="flex flex-col gap-y-5">
-                  <div className="h-1/3 flex flex-row gap-x-2.5">
-                    <div className="w-1/5 flex flex-col bg-[#2A9E2F10] rounded-[20px] border-[#2A9E2F] border-l-[4px] p-2.5">
-                      <div className="flex flex-row justify-end">
-                        <Icon as={MdOpenInNew} />
-                      </div>
-                      <p className="text-[#2A9E2F]">Class 1</p>
-                      <p>Open for booking</p>
-                    </div>
-                    <div className="w-1/5 flex flex-col bg-[#2A9E2F10] rounded-[20px] border-[#2A9E2F] border-l-[4px] p-2.5">
-                      <div className="flex flex-row justify-end">
-                        <Icon as={MdOpenInNew} />
-                      </div>
-                      <p className="text-[#2A9E2F]">Class 1</p>
-                      <p>Open for booking</p>
-                    </div>
-                    <div className="w-1/5 flex flex-col bg-[#2A9E2F10] rounded-[20px] border-[#2A9E2F] border-l-[4px] p-2.5">
-                      <div className="flex flex-row justify-end">
-                        <Icon as={MdOpenInNew} />
-                      </div>
-                      <p className="text-[#2A9E2F]">Class 1</p>
-                      <p>Open for booking</p>
-                    </div>
-                    <div className="w-1/5 flex flex-col bg-[#2A9E2F10] rounded-[20px] border-[#2A9E2F] border-l-[4px] p-2.5">
-                      <div className="flex flex-row justify-end">
-                        <Icon as={MdOpenInNew} />
-                      </div>
-                      <p className="text-[#2A9E2F]">Class 1</p>
-                      <p>Open for booking</p>
-                    </div>
-                    <div className="w-1/5 flex flex-col bg-[#2A9E2F10] rounded-[20px] border-[#2A9E2F] border-l-[4px] p-2.5">
-                      <div className="flex flex-row justify-end">
-                        <Icon as={MdOpenInNew} />
-                      </div>
-                      <p className="text-[#2A9E2F]">Class 1</p>
-                      <p>Open for booking</p>
-                    </div>
-                  </div>
-                  <div className="h-1/3 flex flex-row gap-x-2.5">
-                    <div className="w-1/5 flex flex-col bg-[#2A9E2F10] rounded-[20px] border-[#2A9E2F] border-l-[4px] p-2.5">
-                      <div className="flex flex-row justify-end">
-                        <Icon as={MdOpenInNew} />
-                      </div>
-                      <p className="text-[#2A9E2F]">Class 1</p>
-                      <p>Open for booking</p>
-                    </div>
-                    <div className="w-1/5 flex flex-col bg-[#2A9E2F10] rounded-[20px] border-[#2A9E2F] border-l-[4px] p-2.5">
-                      <div className="flex flex-row justify-end">
-                        <Icon as={MdOpenInNew} />
-                      </div>
-                      <p className="text-[#2A9E2F]">Class 1</p>
-                      <p>Open for booking</p>
-                    </div>
-                    <div className="w-1/5 flex flex-col bg-[#2A9E2F10] rounded-[20px] border-[#2A9E2F] border-l-[4px] p-2.5">
-                      <div className="flex flex-row justify-end">
-                        <Icon as={MdOpenInNew} />
-                      </div>
-                      <p className="text-[#2A9E2F]">Class 1</p>
-                      <p>Open for booking</p>
-                    </div>
-                    <div className="w-1/5 flex flex-col bg-[#2A9E2F10] rounded-[20px] border-[#2A9E2F] border-l-[4px] p-2.5">
-                      <div className="flex flex-row justify-end">
-                        <Icon as={MdOpenInNew} />
-                      </div>
-                      <p className="text-[#2A9E2F]">Class 1</p>
-                      <p>Open for booking</p>
-                    </div>
-                    <div className="w-1/5 flex flex-col bg-[#2A9E2F10] rounded-[20px] border-[#2A9E2F] border-l-[4px] p-2.5">
-                      <div className="flex flex-row justify-end">
-                        <Icon as={MdOpenInNew} />
-                      </div>
-                      <p className="text-[#2A9E2F]">Class 1</p>
-                      <p>Open for booking</p>
-                    </div>
-                  </div>
-                  <div className="h-1/3 flex flex-row gap-x-2.5">
-                    <div className="w-1/5 flex flex-col bg-[#2A9E2F10] rounded-[20px] border-[#2A9E2F] border-l-[4px] p-2.5">
-                      <div className="flex flex-row justify-end">
-                        <Icon as={MdOpenInNew} />
-                      </div>
-                      <p className="text-[#2A9E2F]">Class 1</p>
-                      <p>Open for booking</p>
-                    </div>
-                    <div className="w-1/5 flex flex-col bg-[#2A9E2F10] rounded-[20px] border-[#2A9E2F] border-l-[4px] p-2.5">
-                      <div className="flex flex-row justify-end">
-                        <Icon as={MdOpenInNew} />
-                      </div>
-                      <p className="text-[#2A9E2F]">Class 1</p>
-                      <p>Open for booking</p>
-                    </div>
-                    <div className="w-1/5 flex flex-col bg-[#2A9E2F10] rounded-[20px] border-[#2A9E2F] border-l-[4px] p-2.5">
-                      <div className="flex flex-row justify-end">
-                        <Icon as={MdOpenInNew} />
-                      </div>
-                      <p className="text-[#2A9E2F]">Class 1</p>
-                      <p>Open for booking</p>
-                    </div>
-                    <div className="w-1/5 flex flex-col bg-[#2A9E2F10] rounded-[20px] border-[#2A9E2F] border-l-[4px] p-2.5">
-                      <div className="flex flex-row justify-end">
-                        <Icon as={MdOpenInNew} />
-                      </div>
-                      <p className="text-[#2A9E2F]">Class 1</p>
-                      <p>Open for booking</p>
-                    </div>
-                    <div className="w-1/5 flex flex-col bg-[#2A9E2F10] rounded-[20px] border-[#2A9E2F] border-l-[4px] p-2.5">
-                      <div className="flex flex-row justify-end">
-                        <Icon as={MdOpenInNew} />
-                      </div>
-                      <p className="text-[#2A9E2F]">Class 1</p>
-                      <p>Open for booking</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </TabPanel>
-            <TabPanel>
-              <p>Class list</p>
-            </TabPanel>
-          </TabPanels>
-        </Tabs> */}
       </div>
+      {/* TODO: Change size of modal to only occupy area of Classes section not including NavBar */}
+      <Modal
+        isOpen={isOpen}
+        onOpenChange={onOpenChange}
+        size="2xl"
+        backdrop="opaque"
+        classNames={modalClassNames}
+      >
+        <ModalContent>
+          {(onClose) => (
+            <>
+              <ModalHeader>
+                <div className="flex flex-row items-center gap-x-2.5">
+                  <SectionTitle title={selectedClass.name} />
+                </div>
+              </ModalHeader>
+              <ModalBody>
+                <div className="flex flex-col gap-y-2.5">
+                  <div className="flex flex-row items-center gap-2.5">
+                    <MdOutlineCalendarMonth />
+                    <p>{selectedClass.date}</p>
+                  </div>
+                  <div className="flex flex-row items-center gap-2.5">
+                    <MdOutlineLocationOn />
+                    <p>UTown Gym Aerobics Studio</p>
+                  </div>
+                  <div className="flex flex-row items-center gap-2.5">
+                    <MdPersonOutline />
+                    <p>Alpha Fitness</p>
+                  </div>
+                </div>
+                <div>
+                  <p>{selectedClass.description}</p>
+                </div>
+                <div className="flex justify-end">
+                  <button className="rounded-[30px] px-[20px] py-[10px] bg-[#1F4776] text-white">
+                    Book class
+                  </button>
+                </div>
+              </ModalBody>
+            </>
+          )}
+        </ModalContent>
+      </Modal>
     </div>
   );
 }

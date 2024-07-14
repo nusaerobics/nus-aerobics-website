@@ -11,29 +11,9 @@ import {
 import { PageTitle, SectionTitle } from "../components/Titles";
 import ClassCard from "../components/dashboard/ClassCard";
 import { transactions, upcomingClasses } from "../components/Data";
-import { useMemo } from "react";
+import { tableClassNames } from "../components/ClassNames";
 
 export default function Page() {
-  const tableClassNames = useMemo(
-    () => ({
-      // wrapper: ["max-h-[382px]", "max-w-3xl"],
-      // TODO: Make the font not bold
-      th: ["bg-white", "text-a-black/50", "text-base", "border-b"],
-      td: [
-        // changing the rows border radius
-        // first
-        "group-data-[first=true]:first:before:rounded-none",
-        "group-data-[first=true]:last:before:rounded-none",
-        // middle
-        "group-data-[middle=true]:before:rounded-none",
-        // last
-        "group-data-[last=true]:first:before:rounded-none",
-        "group-data-[last=true]:last:before:rounded-none",
-      ],
-    }),
-    []
-  );
-
   // TODO: Method which calls backend to retrieve all upcoming class bookings
   return (
     <div className="h-full flex flex-col gap-y-5">
