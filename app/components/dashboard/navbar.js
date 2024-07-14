@@ -10,7 +10,7 @@ import {
   MdWallet,
 } from "react-icons/md";
 import clsx from "clsx";
-import Logo from "../Logo";
+import Logo from "../logo";
 
 const links = [
   { name: "Dashboard", href: "/dashboard", icon: MdGridView },
