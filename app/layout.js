@@ -3,7 +3,7 @@
 import Head from "next/head";
 import "../styles/globals.css";
 import Providers from "./providers";
-import { noto_serif_display, poppins } from "./components/Fonts";
+import { noto_serif_display, poppins } from "./components/fonts";
 
 const name = "NUS Aerobics";
 export const siteTitle = "Next.js Sample Website";
