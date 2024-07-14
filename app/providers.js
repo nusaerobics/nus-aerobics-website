@@ -1,6 +1,6 @@
 "use client";
+import { NextUIProvider } from "@nextui-org/react";
 
-import { ChakraProvider } from "@chakra-ui/react";
 export default function Providers({ children }) {
-  return <ChakraProvider>{children}</ChakraProvider>;
+  return <NextUIProvider>{children}</NextUIProvider>;
 }

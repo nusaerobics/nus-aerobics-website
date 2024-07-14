@@ -27,7 +27,7 @@ db.booking = require("../models/booking.model.js");
     console.log("Connection has been established successfully.");
 
     db.sequelize.sync();
-    await sequelize.sync({ alter: true });
+    // await sequelize.sync({ alter: true });
   } catch (error) {
     console.error("Unable to establish connection:", error);
   }
