@@ -17,6 +17,21 @@ export const chipClassNames = {
   },
 };
 
+export const chipTypes = {
+  open: {
+    message: "Open for booking",
+  },
+  full: {
+    message: "Fully booked",
+  },
+  closed: {
+    message: "Closed for booking",
+  },
+  booked: {
+    message: "Booked",
+  },
+};
+
 // TODO: Style the placeholder
 export const inputClassNames = {
   label: ["text-a-black/50", "group-data-[filled-within=true]:text-a-black/50"],

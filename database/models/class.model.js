@@ -1,4 +1,3 @@
-
 import { DataTypes } from "sequelize";
 import sequelize from "../utils/sequelize";
 
@@ -31,7 +30,7 @@ const Class = sequelize.define("class", {
   },
   /**
    * TODO: Would later need to do a JOIN between CLASS and BOOKING and USER
-   * to get the USERs who have made a BOOKING for this CLASS  
+   * to get the USERs who have made a BOOKING for this CLASS
    */
 });
 
