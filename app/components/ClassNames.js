@@ -39,7 +39,7 @@ export const inputClassNames = {
   innerWrapper: ["bg-transparent", "hover:bg-transparent"],
   inputWrapper: [
     "bg-transparent",
-    "rounded-[80px]",
+    "rounded-[30px]",
     "border-[1px]",
     "border-a-black/10",
     "hover:border-a-black/10",
@@ -51,6 +51,10 @@ export const inputClassNames = {
 export const modalClassNames = {
   body: "font-poppins text-a-black", // TODO: Fix because not changing to Poppins font
   backdrop: "bg-a-black/50",
+};
+
+export const switchClassNames = {
+  label: ["text-a-black text-sm"],
 };
 
 export const tableClassNames = {
