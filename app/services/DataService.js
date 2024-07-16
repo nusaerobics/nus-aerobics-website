@@ -1,6 +1,10 @@
 // Start of Class related functions
 export const getClasses = async () => {
-  const res = await fetch("/api/classes");
+  // NOTE: Can't use cache for POST method
+  const res = await fetch("/api/classes", { cache: 'force-cache' });
+  if (!res.ok) {
+    throw new Error(`Unable to get all classes: ${res.status}`);
+  }
   const data = await res.json();
   return data;
 }
