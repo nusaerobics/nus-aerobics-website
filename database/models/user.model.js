@@ -15,12 +15,14 @@ const User = sequelize.define("user", {
     allowNull: false,
   },
   permission: {
-    type: DataTypes.STRING,
+    type: DataTypes.ENUM("normal", "admin"),
     defaultValue: "normal",
+    allowNull: false,
   },
   balance: {
     type: DataTypes.DECIMAL(10, 0),
     defaultValue: 0,
+    allowNull: false,
   }
 });
 

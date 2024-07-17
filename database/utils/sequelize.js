@@ -32,7 +32,7 @@ db.booking = require("../models/booking.model.js");
     await sequelize.authenticate();
     console.log("Connection has been established successfully.");
     db.sequelize.sync();
-    // await sequelize.sync({ alter: true });
+    // await sequelize.sync({ alter: true });  // NOTE: Need to have alter on after editing a Model
   } catch (error) {
     console.error("Unable to establish connection:", error);
   }

@@ -1,4 +1,3 @@
-
 import { DataTypes } from "sequelize";
 import sequelize from "../utils/sequelize";
 
@@ -16,7 +15,7 @@ const Transaction = sequelize.define("transaction", {
     allowNull: false,
   },
   description: {
-    type: DataTypes.ENUM("Deposit", "Refund", "Booking"),
+    type: DataTypes.ENUM("deposit", "refund", "book"),
     allowNull: false,
   },
   booking_id: {
