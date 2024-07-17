@@ -15,7 +15,7 @@ import { tableClassNames } from "../components/ClassNames";
 import { useState } from "react";
 
 export default function Page() {
-  const [isAdmin, setIsAdmin] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(true);
   // TODO: Method which calls backend to retrieve all upcoming class bookings
   return (
     <>

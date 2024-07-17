@@ -10,7 +10,7 @@ const Booking = sequelize.define("booking", {
     type: DataTypes.DECIMAL(10, 0),
     allowNull: false,
   },
-  booking_date: {
+  booking_date: {  // TODO: Later change this to just date
     type: DataTypes.STRING,
     allowNull: false,
   },

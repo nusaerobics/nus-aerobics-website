@@ -45,7 +45,7 @@ const getBookingById = async (req, res) => {
     .catch((error) => {
       res
         .status(500)
-        .json({ message: `Error getting booking with ID ${id}: ${error}` });
+        .json({ message: `Error getting booking ${id}: ${error}` });
     });
 };
 
@@ -58,7 +58,7 @@ const getBookingsByUser = async (req, res) => {
     })
     .catch((error) => {
       res.status(500).json({
-        message: `Error getting bookings for user with ID ${user_id}: ${error}`,
+        message: `Error getting bookings for user ${user_id}: ${error}`,
       });
     });
 };
@@ -72,7 +72,7 @@ const getBookingsByClass = async (req, res) => {
     })
     .catch((error) => {
       res.status(500).json({
-        message: `Error getting bookings for class with ID ${class_id}: ${error}`,
+        message: `Error getting bookings for class ${class_id}: ${error}`,
       });
     });
 };

@@ -7,6 +7,7 @@ import PropTypes from "prop-types";
 import { Input, DateInput, Switch, Textarea } from "@nextui-org/react";
 import { inputClassNames, switchClassNames } from "../ClassNames";
 import { useState } from "react";
+import { SectionTitle } from "../Titles";
 
 export default function AdminClassForm({
   isCreate, // True or False, to determine whether to POST or UPDATE Class
@@ -27,16 +28,21 @@ export default function AdminClassForm({
   function createClass() {
     return;
   }
-  function cancelEdit() {
-    return;
-  }
   function saveEdit() {
     return;
   }
 
   return (
-    // <div className="h-full w-full flex flex-col gap-y-5 p-5 overflow-scroll rounded-[20px] border border-a-black/10 bg-white">
     <>
+      <div className="flex flex-row justify-between">
+        <SectionTitle title="Class details" />
+        <button
+          onClick={isCreate ? createClass : saveEdit}
+          className="h-[36px] rounded-[30px] px-[20px] bg-a-navy text-white text-sm" // PREVIOUSLY: py-[10px]
+        >
+          {isCreate ? "Create class" : "Save changes"}
+        </button>
+      </div>
       <div className="flex flex-col md:flex-row gap-2.5">
         <div className="md:w-1/3 flex flex-col gap-y-[5px]">
           <p className="text-a-black/50 text-sm">Class name *</p>
@@ -124,35 +130,6 @@ export default function AdminClassForm({
       </div>
     </>
   );
-}
-
-{
-  /* <div className="flex flex-row justify-between">
-        <SectionTitle title="Class details" />
-        {isCreate ? (
-          <button
-            onClick={createClass} // TODO: Implement Create class
-            className="h-[36px] rounded-[30px] px-[20px] bg-[#1F4776] text-white text-sm" // PREVIOUSLY: py-[10px]
-          >
-            Create
-          </button>
-        ) : (
-          <div className="flex flex-row gap-x-2.5">
-            <button
-              onClick={cancelEdit} // TODO: Implement Create class
-              className="h-[36px] rounded-[30px] px-[20px] bg-[#1F4776] text-white text-sm" // PREVIOUSLY: py-[10px]
-            >
-              Cancel
-            </button>
-            <button
-              onClick={saveEdit} // TODO: Implement Create class
-              className="h-[36px] rounded-[30px] px-[20px] bg-[#1F4776] text-white text-sm" // PREVIOUSLY: py-[10px]
-            >
-              Save changes
-            </button>
-          </div>
-        )}
-      </div> */
 }
 
 AdminClassForm.propTypes = {

@@ -59,10 +59,7 @@ export default function Page() {
               />
             </div>
             <Checkbox defaultChecked color="default">
-              <p className="text-a-black text-sm">
-                {" "}
-                Get email notifications
-              </p>
+              <p className="text-a-black text-sm"> Get email notifications</p>
             </Checkbox>
           </div>
         </div>

@@ -18,9 +18,9 @@ const Transaction = sequelize.define("transaction", {
     type: DataTypes.ENUM("deposit", "refund", "book"),
     allowNull: false,
   },
-  booking_id: {
+  class_id: {
     type: DataTypes.DECIMAL(10, 0),
-    allowNull: true,
+    allowNull: true,  // Will be null if description = "deposit"
   }
 });
 

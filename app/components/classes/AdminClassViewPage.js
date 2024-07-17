@@ -17,7 +17,11 @@ import AdminClassForm from "./AdminClassForm";
 import { chipClassNames, chipTypes, tableClassNames } from "../ClassNames";
 import { PageTitle, SectionTitle } from "../Titles";
 
-export default function AdminClassViewPage({ selectedClass, closeView }) {
+export default function AdminClassViewPage({
+  selectedClass,
+  closeView,
+  classBookings,
+}) {
   const [isEdit, setIsEdit] = useState(false);
   const toggleIsEdit = () => {
     setTitle("Edit class");
@@ -44,9 +48,7 @@ export default function AdminClassViewPage({ selectedClass, closeView }) {
     setIsManage(false);
   };
 
-  function unbookUser() {
-
-  }
+  function unbookUser() {}
 
   function saveEdit() {
     // TODO: Implement UPDATE Class entry
@@ -77,15 +79,6 @@ export default function AdminClassViewPage({ selectedClass, closeView }) {
 
       {!isManage ? (
         <div className="h-full w-full flex flex-col gap-y-5 p-5 rounded-[20px] border border-a-black/10 bg-white">
-          <div className="flex flex-row justify-between">
-            <SectionTitle title="Class details" />
-            <button
-              onClick={isEdit ? saveEdit : toggleIsEdit}
-              className="h-[36px] rounded-[30px] px-[20px] bg-a-navy text-white text-sm" // PREVIOUSLY: py-[10px]
-            >
-              {editButton}
-            </button>
-          </div>
           {isEdit ? (
             <AdminClassForm
               isCreate={false}
@@ -97,7 +90,12 @@ export default function AdminClassViewPage({ selectedClass, closeView }) {
               inputIsAllowCancel={true}
             />
           ) : (
-            <AdminClassDetails selectedClass={selectedClass} />
+            <>
+              <AdminClassDetails
+                selectedClass={selectedClass}
+                toggleIsEdit={toggleIsEdit}
+              />
+            </>
           )}
         </div>
       ) : (
@@ -124,22 +122,16 @@ export default function AdminClassViewPage({ selectedClass, closeView }) {
               <TableColumn>{isManage ? "" : "Booking date"}</TableColumn>
             </TableHeader>
             <TableBody>
-              <TableRow>
-                {/* <TableCell>{booking.name}</TableCell>
-                <TableCell>{booking.email}</TableCell>
-                <TableCell>
-                  {isManage ? (
-                    <button
-                      onClick={() => unbookUser(booking.userid)}
-                      className="h-[36px] rounded-[30px] px-[20px] bg-a-red text-white text-sm" // PREVIOUSLY: py-[10px]
-                    >
-                      Unbook
-                    </button>
-                  ) : (
-                    "14/02/2024 18:00"
-                  )}
-                </TableCell> */}
-              </TableRow>
+              {classBookings.map((classBooking) => {
+                return (
+                  <TableRow>
+                    <TableCell>{classBooking.user_id}</TableCell>
+                    <TableCell>{classBooking.user_id}</TableCell>
+                    <TableCell>{classBooking.attendance}</TableCell>
+                    <TableCell>{classBooking.booking_date}</TableCell>
+                  </TableRow>
+                );
+              })}
             </TableBody>
           </Table>
         </div>
@@ -153,4 +145,5 @@ export default function AdminClassViewPage({ selectedClass, closeView }) {
 AdminClassViewPage.propTypes = {
   selectedClass: PropTypes.object,
   closeView: PropTypes.func,
+  classBookings: PropTypes.array,
 };
