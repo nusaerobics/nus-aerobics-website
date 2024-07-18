@@ -15,7 +15,7 @@ export default function Page() {
   const [classes, setClasses] = useState([]); // All Classes from DB
   const [selectedClass, setSelectedClass] = useState({});
 
-  const [isAdmin, setIsAdmin] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [isViewClass, setIsViewClass] = useState(false);
   const [isCreateClass, setIsCreateClass] = useState(false);
 

@@ -28,7 +28,7 @@ import { format } from "date-fns";
 
 export default function Page() {
   const [searchInput, setSearchInput] = useState("");
-  const [isAdmin, setIsAdmin] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [transactions, setTransactions] = useState([]);
   const [file, setFile] = useState();
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
@@ -155,8 +155,7 @@ export default function Page() {
         </div>
       ) : (
         // Start of user Wallet page
-        <>
-          {/* <div className="h-full flex flex-col gap-y-5">
+          <div className="h-full flex flex-col gap-y-5">
           <PageTitle title="Wallet" />
           <div className="h-1/4 flex flex-row gap-x-5">
             <div className="w-1/2 rounded-[20px] border border-a-black/10 p-5 bg-white">
@@ -197,7 +196,7 @@ export default function Page() {
                 {transactions.map((transaction) => {
                   return (
                     <TableRow key={transaction.id}>
-                      <TableCell>{transaction.date}</TableCell>
+                      <TableCell>{format(transaction.date, "d/MM/yyy HH:mm")}</TableCell>
                       <TableCell>{transaction.amount}</TableCell>
                       <TableCell>{transaction.user}</TableCell>
                       <TableCell>{transaction.description}</TableCell>
@@ -207,8 +206,7 @@ export default function Page() {
               </TableBody>
             </Table>
           </div>
-        </div> */}
-        </>
+        </div>
         // End of user Wallet page
       )}
     </>

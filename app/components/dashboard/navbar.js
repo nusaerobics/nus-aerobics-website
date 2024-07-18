@@ -20,7 +20,7 @@ const links = [
     href: "/dashboard/classes",
     icon: MdClass,
   },
-  { name: "Users", href: "/dashboard/users", icon: MdGroup },  // TODO: Conditionally show Users only if logged in person is admin access
+  // { name: "Users", href: "/dashboard/users", icon: MdGroup },  // TODO: Conditionally show Users only if logged in person is admin access
   { name: "Wallet", href: "/dashboard/wallet", icon: MdWallet },
   { name: "Profile", href: "/dashboard/profile", icon: MdPerson },
 ];
