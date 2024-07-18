@@ -1,3 +1,5 @@
+"use server";
+
 // Start of Class related functions
 export const getClasses = async () => {
   // NOTE: Can't use cache for POST method
@@ -51,11 +53,11 @@ export const getUserById = async (id) => {
   return data;
 };
 
-export const createUser = async (body) => {
+export const createUser = async (newUser) => {
   const res = await fetch("/api/users", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
+    body: JSON.stringify(newUser),
   });
 
   if (!res.ok) {

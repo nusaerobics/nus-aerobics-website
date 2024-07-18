@@ -1,4 +1,5 @@
 import User from "../../database/models/user.model";
+const bcrypt = require("bcrypt");
 
 /**
  * Functions which handle requests sent to /api/users,
@@ -53,21 +54,26 @@ const getUserById = async (req, res) => {
 };
 
 const createUser = async (req, res) => {
-  const { name, email, password } = req.body;
+  const name = req.body.name;
+  const email = req.body.email;
+  const password = req.body.password;
 
-  const isExistingEmail = await User.findAll({ where: { email: email } });
-  // TODO: Check if email is unique
-  if (isExistingEmail) {
-    return res
-      .status(500)
-      .json({ message: "Error creating user: Email already registered" });
-  }
+  // TODO: Error is occurring here
+  // const isExistingEmail = await User.findAll({ where: { email: email } });
+  // // TODO: Check if email is unique
+  // if (isExistingEmail) {
+  //   return res
+  //     .status(500)
+  //     .json({ message: "Error creating user: Email already registered" });
+  // }
 
-  // TODO: Add in bcrypt for password
+  const saltRounds = 10;
+  const hashedPassword = await bcrypt.hash(password, saltRounds);
+
   await User.create({
     name: name,
     email: email,
-    password: password,
+    password: hashedPassword,
   })
     .then((data) => {
       res.status(200).json({ json: data });
