@@ -1,4 +1,3 @@
-
 import { DataTypes } from "sequelize";
 import sequelize from "../utils/sequelize";
 
@@ -16,12 +15,12 @@ const Transaction = sequelize.define("transaction", {
     allowNull: false,
   },
   description: {
-    type: DataTypes.ENUM("Deposit", "Refund", "Booking"),
+    type: DataTypes.ENUM("deposit", "refund", "book"),
     allowNull: false,
   },
-  booking_id: {
+  class_id: {
     type: DataTypes.DECIMAL(10, 0),
-    allowNull: true,
+    allowNull: true,  // Will be null if description = "deposit"
   }
 });
 

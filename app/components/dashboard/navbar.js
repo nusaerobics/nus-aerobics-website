@@ -8,6 +8,7 @@ import {
   MdLogout,
   MdPerson,
   MdWallet,
+  MdGroup
 } from "react-icons/md";
 import clsx from "clsx";
 import Logo from "../logo";
@@ -19,10 +20,12 @@ const links = [
     href: "/dashboard/classes",
     icon: MdClass,
   },
+  // { name: "Users", href: "/dashboard/users", icon: MdGroup },  // TODO: Conditionally show Users only if logged in person is admin access
   { name: "Wallet", href: "/dashboard/wallet", icon: MdWallet },
   { name: "Profile", href: "/dashboard/profile", icon: MdPerson },
 ];
 
+// TODO: Redo the navbar component so that the file name makes sense and isn't lower case
 export default function NavBar() {
   const pathname = usePathname();
   const handleLogout = () => {
@@ -42,7 +45,7 @@ export default function NavBar() {
                 key={link.name}
                 href={link.href}
                 className={clsx(
-                  // TODO: Fix the MD versions
+                  // TODO: Fix the MD versions - for phones
                   // TODO: It's not keeping focused when selected the tab
                   "flex flex-row justify-center items-center gap-x-2.5 h-[50px] rounded-[10px] text-[#393E46] bg-white p-2.5 hover:bg-[#1F477610] hover:text-[#1F4776] md:flex-none md:justify-start md:p-2 md:px-3",
                   {
@@ -52,7 +55,7 @@ export default function NavBar() {
                 style={{ textDecoration: "none" }}
               >
                 <LinkIcon
-                  className={clsx("w-[30px]", {
+                  className={clsx("w-[24px]", {
                     "text-[#1F4776]": pathname === link.href,
                   })}
                 />
@@ -74,7 +77,7 @@ export default function NavBar() {
           style={{ textDecoration: "none" }}
           onClick={handleLogout}
         >
-          <MdLogout className="w-[30px]" />
+          <MdLogout className="w-[24px]" />
           <p className="hidden md:block">Log out</p>
         </Link>
       </div>

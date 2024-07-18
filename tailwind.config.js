@@ -18,6 +18,7 @@ module.exports = {
         display: ['var(--font-noto-serif-display)'],
       },
       colors: {
+        "primary": "#1F4776",
         "a-navy": "#1F4776",
         "a-black": "#393E46",
         "a-pink": "#FCF0F2",

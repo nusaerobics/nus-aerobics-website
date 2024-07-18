@@ -24,14 +24,10 @@ const Class = sequelize.define("class", {
     allowNull: false,
   },
   status: {
-    type: DataTypes.STRING,
+    type: DataTypes.ENUM("open", "full", "closed", "booked"),
     defaultValue: "open",
     allowNull: false,
   },
-  /**
-   * TODO: Would later need to do a JOIN between CLASS and BOOKING and USER
-   * to get the USERs who have made a BOOKING for this CLASS
-   */
 });
 
 export default Class;

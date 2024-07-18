@@ -1,4 +1,3 @@
-
 import { DataTypes } from "sequelize";
 import sequelize from "../utils/sequelize";
 
@@ -11,8 +10,13 @@ const Booking = sequelize.define("booking", {
     type: DataTypes.DECIMAL(10, 0),
     allowNull: false,
   },
-  bookingDate: {
+  booking_date: {  // TODO: Later change this to just date
     type: DataTypes.STRING,
+    allowNull: false,
+  },
+  attendance: {
+    type: DataTypes.ENUM("present", "absent"),
+    defaultValue: "absent",
     allowNull: false,
   },
 });
