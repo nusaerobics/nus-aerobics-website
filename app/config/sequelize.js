@@ -1,4 +1,4 @@
-import { Sequelize } from "sequelize";
+const { Sequelize } = require('sequelize');
 require("dotenv").config();
 
 const sequelize = new Sequelize(
@@ -22,10 +22,16 @@ const db = {};
 db.Sequelize = Sequelize;
 db.sequelize = sequelize;
 
-db.classes = require("../models/class.model.js");
-db.users = require("../models/user.model.js");
-db.transactions = require("../models/transaction.model.js");
-db.booking = require("../models/booking.model.js");
+// TODO: What does the .user actually relate to?
+// db.user = require("../models/user.model");
+// db.class = require("../models/class.model");
+// db.transaction = require("../models/transaction.model");
+// db.booking = require("../models/booking.model");
+
+// db.classes = require("../models/class.model.js");
+// db.users = require("../models/user.model.js");
+// db.transactions = require("../models/transaction.model.js");
+// db.booking = require("../models/booking.model.js");
 
 (async () => {
   try {

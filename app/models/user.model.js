@@ -1,7 +1,11 @@
+import sequelize from "../config/sequelize";
 import { DataTypes } from "sequelize";
-import sequelize from "../utils/sequelize";
 
 const User = sequelize.define("user", {
+  id: {
+    primaryKey: true,
+    type: DataTypes.INTEGER.UNSIGNED,
+  },
   name: {
     type: DataTypes.STRING,
     allowNull: false,
@@ -20,10 +24,10 @@ const User = sequelize.define("user", {
     allowNull: false,
   },
   balance: {
-    type: DataTypes.DECIMAL(10, 0),
+    type: DataTypes.INTEGER.UNSIGNED,
     defaultValue: 0,
     allowNull: false,
-  }
+  },
 });
 
 export default User;

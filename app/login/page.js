@@ -4,7 +4,6 @@ import { useMemo, useState } from "react";
 import { Input } from "@nextui-org/react";
 import { MdVisibility, MdVisibilityOff } from "react-icons/md";
 import { inputClassNames } from "../components/ClassNames";
-import { createUser } from "../services/DataService";
 
 export default function Page() {
   const [isLogin, setIsLogin] = useState(true);
@@ -34,114 +33,31 @@ export default function Page() {
     setIsCPWVisible(!isCPWVisible);
   };
 
-  const PWEndContent = () => {
-    return (
-      <button
-        className="focus:outline-none"
-        type="button"
-        onClick={togglePWVisible}
-      >
-        {isPWVisible ? (
-          <MdVisibilityOff className="text-2xl text-a-black/50 pointer-events-none" />
-        ) : (
-          <MdVisibility className="text-2xl text-a-black/50 pointer-events-none" />
-        )}
-      </button>
-    );
-  };
-  const CPWEndContent = () => {
-    return (
-      <button
-        className="focus:outline-none"
-        type="button"
-        onClick={toggleCPWVisible}
-      >
-        {isCPWVisible ? (
-          <MdVisibilityOff className="text-2xl text-a-black/50 pointer-events-none" />
-        ) : (
-          <MdVisibility className="text-2xl text-a-black/50 pointer-events-none" />
-        )}
-      </button>
-    );
-  };
-
-  const [isInvalidName, setIsInvalidName] = useState(false);
-  const [isInvalidEmail, setIsInvalidEmail] = useState(false);
-
-  // const isInvalidName = useMemo(() => {
-  //   if (name != "") {
-  //     // TODO: Allow space between
-  //     const isValid = name.match(/^[a-zA-Z]+$/);
-  //     return !isValid;
-  //   } else {
-  //     return false;
-  //   }
-  // });
-
-  // const isInvalidPW = useMemo(() => {
-  //   if (!isLogin && password != "") {
-  //     const isLength = password.length >= 5;
-  //     return !isLength;
-  //   } else {
-  //     return false;
-  //   }
-  // });
-
-  // const isInvalidCPW = useMemo(() => {
-  //   if (confirmPassword != "") {
-  //     return !(password === confirmPassword);
-  //   } else {
-  //     return false;
-  //   }
-  // });
-
-  // function validateName(name) {
-  //   // const isValid = name.test(/^[a-zA-Z\s]+$/);
-  //   setIsInvalidName(false);
-  // }
-
-  function validateEmail(email) {
-    const isValid = email.match(/^[A-Z0-9._%+-]+@[A-Z0-9.-]+.[A-Z]{2,4}$/i);
-    setIsInvalidEmail(!isValid);
-  }
-
-  function validatePassword(password) {
-    const isLength = password.length > 5;
-    // TODO: Other validation for password strengths
-    setIsInvalidEmail(!isLength);
-  }
-
   function handleLogin() {
-    validateEmail(email);
-    validatePassword(password);
-
-    console.log(`Email invalidity: ${isInvalidEmail}`);
-    console.log(`Logging in with: ${email}, ${password}`);
-
     // TODO: Handle incorrect email/password
+    console.log(`Logging in with: ${email}, ${password}`);
   }
 
   async function handleSignUp() {
-    // validateName(name);
-    validateEmail(email);
-    validatePassword(password);
-    validatePassword(confirmPassword);
-
     if (password != confirmPassword) {
       // TODO: Indicate CPW error message as not matching password
     }
 
-    // TODO: Add bcrypt for passwords
+    console.log(
+      `Signing up with: ${name}, ${email}, ${password}, ${confirmPassword}`
+    );
+
     const newUser = {
       name: name,
       email: email,
       password: password,
     };
-    const res = await createUser(newUser);
+    const res = await fetch("/api/users", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(newUser),
+    });
     console.log(res);
-    console.log(
-      `Signing up with: ${name}, ${email}, ${password}, ${confirmPassword}`
-    );
   }
 
   return (
@@ -189,7 +105,17 @@ export default function Page() {
             value={password}
             onValueChange={setPassword}
             type={isPWVisible ? "text" : "password"}
-            endContent={PWEndContent}
+            endContent={<button
+              className="focus:outline-none"
+              type="button"
+              onClick={togglePWVisible}
+            >
+              {isPWVisible ? (
+                <MdVisibilityOff className="text-2xl text-a-black/50 pointer-events-none" />
+              ) : (
+                <MdVisibility className="text-2xl text-a-black/50 pointer-events-none" />
+              )}
+            </button>}
             // isInvalid={isInvalidPW}
             // errorMessage="Password should be at least 5 characters"
             isRequired
@@ -203,7 +129,17 @@ export default function Page() {
               value={confirmPassword}
               onValueChange={setConfirmPassword}
               type={isCPWVisible ? "text" : "password"}
-              endContent={CPWEndContent}
+              endContent={<button
+        className="focus:outline-none"
+        type="button"
+        onClick={toggleCPWVisible}
+      >
+        {isCPWVisible ? (
+          <MdVisibilityOff className="text-2xl text-a-black/50 pointer-events-none" />
+        ) : (
+          <MdVisibility className="text-2xl text-a-black/50 pointer-events-none" />
+        )}
+      </button>}
               // isInvalid={isInvalidCPW}
               // errorMessage="Passwords do not match"
               isRequired

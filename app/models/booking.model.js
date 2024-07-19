@@ -1,17 +1,17 @@
+import sequelize from "../config/sequelize";
 import { DataTypes } from "sequelize";
-import sequelize from "../utils/sequelize";
 
 const Booking = sequelize.define("booking", {
+  id: {
+    primaryKey: true,
+    type: DataTypes.INTEGER.UNSIGNED,
+  },
   user_id: {
-    type: DataTypes.DECIMAL(10, 0),
+    type: DataTypes.INTEGER.UNSIGNED,
     allowNull: false,
   },
   class_id: {
-    type: DataTypes.DECIMAL(10, 0),
-    allowNull: false,
-  },
-  booking_date: {  // TODO: Later change this to just date
-    type: DataTypes.STRING,
+    type: DataTypes.INTEGER.UNSIGNED,
     allowNull: false,
   },
   attendance: {
