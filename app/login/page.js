@@ -4,15 +4,13 @@ import { useState } from "react";
 import { Input } from "@nextui-org/react";
 import { MdVisibility, MdVisibilityOff } from "react-icons/md";
 import { inputClassNames } from "../components/ClassNames";
-import { createUser } from "../services/DataService";
-import { useRouter } from "next/navigation";
 
 export default function Page() {
   // Start of tutorial
   const router = useRouter();
   async function handleLogin() {
     console.log(`Logging in with: ${email}, ${password}`);
-    
+
     const res = await fetch("/api/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -73,6 +71,33 @@ export default function Page() {
   const toggleCPWVisible = () => {
     setIsCPWVisible(!isCPWVisible);
   };
+
+  function handleLogin() {
+    // TODO: Handle incorrect email/password
+    console.log(`Logging in with: ${email}, ${password}`);
+  }
+
+  async function handleSignUp() {
+    if (password != confirmPassword) {
+      // TODO: Indicate CPW error message as not matching password
+    }
+
+    console.log(
+      `Signing up with: ${name}, ${email}, ${password}, ${confirmPassword}`
+    );
+
+    const newUser = {
+      name: name,
+      email: email,
+      password: password,
+    };
+    const res = await fetch("/api/users", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(newUser),
+    });
+    console.log(res);
+  }
 
   return (
     // TODO: Make text unable to be highlighted

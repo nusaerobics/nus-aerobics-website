@@ -1,7 +1,11 @@
+import sequelize from "../config/sequelize";
 import { DataTypes } from "sequelize";
-import sequelize from "../utils/sequelize";
 
 const Class = sequelize.define("class", {
+  id: {
+    primaryKey: true,
+    type: DataTypes.INTEGER.UNSIGNED,
+  },
   name: {
     type: DataTypes.STRING,
     allowNull: false,
@@ -15,16 +19,17 @@ const Class = sequelize.define("class", {
     allowNull: false,
   },
   max_capacity: {
-    type: DataTypes.DECIMAL(10, 0),
+    type: DataTypes.INTEGER.UNSIGNED,
     defaultValue: 19,
     allowNull: false,
   },
   booked_capacity: {
-    type: DataTypes.DECIMAL(10, 0),
+    type: DataTypes.INTEGER.UNSIGNED,
+    defaultValue: 0,
     allowNull: false,
   },
   status: {
-    type: DataTypes.ENUM("open", "full", "closed", "booked"),
+    type: DataTypes.ENUM("open", "closed"),
     defaultValue: "open",
     allowNull: false,
   },

@@ -6,7 +6,6 @@ import Providers from "./providers";
 import { noto_serif_display, poppins } from "./components/fonts";
 
 const name = "NUS Aerobics";
-export const siteTitle = "Next.js Sample Website";
 
 export default function Layout({ children, home }) {
   return (
