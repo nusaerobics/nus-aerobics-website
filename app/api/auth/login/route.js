@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
-import jwt from "jsonwebtoken";
+import { cookies } from "next/headers";
+import { encrypt } from "../../../lib";
 const bcrypt = require("bcrypt");
 
 const db = require("../../../config/sequelize");
@@ -28,22 +29,14 @@ export async function POST(request) {
         { status: 400 }
       );
     }
+    const expires = new Date(Date.now() + 10 * 1000);
+    const session = await encrypt(user.toJSON());
+    cookies().set("session", session, { expires, httpOnly: true });
 
-    const tokenData = {
-      id: user.id,
-      name: user.name,
-      email: user.email,
-      permission: user.permission,
-    };
-
-    const token = await jwt.sign(tokenData, process.env.TOKEN_SECRET, {
-      expiresIn: "1d",
-    });
-    const response = NextResponse.json({
+    const response = await NextResponse.json({
       message: "Successful login",
       success: true,
     });
-    response.cookies.set("token", token, { httpOnly: true });
     return response;
   } catch (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
