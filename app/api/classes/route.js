@@ -1,11 +1,14 @@
-import { NextRequest, NextResponse } from "next/server";
-import Class from "../../models/class.model";
+import { NextResponse } from "next/server";
 import { Op } from "sequelize";
+
+const db = require("../../config/sequelize");
+const Class = db.classes;
 
 export async function GET(request) {
   try {
     const url = new URL(request.url);
     const searchParams = new URLSearchParams(url.searchParams);
+
     // getClassById
     if (searchParams.get("id") != undefined) {
       const id = searchParams.get("id");
@@ -15,6 +18,7 @@ export async function GET(request) {
       }
       return NextResponse.json(targetClass, { status: 200 });
     }
+    
     // getClasses
     // TODO: a) Convert to SGT and b) Test if it filters
     const now = new Date();
@@ -61,22 +65,15 @@ export async function PUT(request) {
   // All values have to be inputted in request - either the unchanged values or updated values
   try {
     const body = await request.json();
-    const {
-      id,
-      name,
-      description,
-      date,
-      max_capacity,
-      booked_capacity,
-      status,
-    } = body;
+    const { id, name, description, date, maxCapacity, bookedCapacity, status } =
+      body;
     const data = await Class.update(
       {
         name: name,
         description: description,
         date: date,
-        max_capacity: max_capacity,
-        booked_capacity: booked_capacity,
+        maxCapacity: maxCapacity,
+        bookedCapacity: bookedCapacity,
         status: status,
       },
       { where: { id: id } }
