@@ -1,31 +1,24 @@
-// SELECT * FROM posts, users WHERE posts.user_id = users.id
-/**
- * Posts.findAll({
-    include: [{
-      model: User,
-      required: true
-    }]
-  }).then(posts => {});
- */
-// require = true when it's an inner join where u're only returning posts which have a linked user
-// https://stackoverflow.com/questions/20460270/how-to-make-join-queries-using-sequelize-on-node-js
-
-import Transaction from "../../models/transaction.model";
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
+const db = require("../../config/sequelize");
+const Transaction = db.transactions;
 
 export async function GET(request) {
   try {
     const url = new URL(request.url);
     const searchParams = new URLSearchParams(url.searchParams);
+
     // getTransactionsByUser
-    if (searchParams.get("user_id") != undefined) {
-      const user_id = searchParams.get("user_id");
-      const transactionsByUser = await Transaction.findAll({ where: { user_id: user_id } });
+    if (searchParams.get("userId") != undefined) {
+      const userId = searchParams.get("userId");
+      const transactionsByUser = await Transaction.findAll({
+        where: { userId: userId },
+      });
       if (!transactionsByUser) {
-        throw new Error(`User ${user_id} has no transactions`);
+        throw new Error(`User ${userId} has no transactions`);
       }
       return NextResponse.json(transactionsByUser, { status: 200 });
     }
+
     // getTransactions
     const transactions = await Transaction.findAll();
     return NextResponse.json(transactions, { status: 200 });
@@ -39,31 +32,13 @@ export async function GET(request) {
 export async function POST(request) {
   try {
     const body = await request.json();
-    const user_id = body.user_id;
-    const date = body.date;
-    const amount = body.amount;
-    const description = body.description;
-
-    let newTransaction;
-    if (description === "deposit") {
-      newTransaction = {
-        user_id: user_id,
-        date: date,
-        amount: amount,
-        description: description,
-      }
-    } else {
-      const class_id = body.class_id;
-      newTransaction = {
-        user_id: user_id,
-        date: date,
-        amount: amount,
-        description: description,
-        class_id: class_id,
-      }
-    }
-
-    const data = await Transaction.create(newTransaction);
+    const { userId, amount, type, description } = body;
+    const data = await Transaction.create({
+      userId: userId,
+      amount: amount,
+      type: type,
+      description: description,
+    });
     return NextResponse.json(data, { status: 200 });
   } catch (error) {
     console.log(error);

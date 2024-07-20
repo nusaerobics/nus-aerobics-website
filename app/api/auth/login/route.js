@@ -1,11 +1,13 @@
-import User from "../../../models/user.model";
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import jwt from "jsonwebtoken";
 const bcrypt = require("bcrypt");
 
-// Followed this tutorial: https://medium.com/@fazalwahab1/how-to-implement-jwt-authentication-in-next-js-14-bb280c2703fe
+const db = require("../../../config/sequelize");
+const User = db.users;
 
+// Followed this tutorial: https://medium.com/@fazalwahab1/how-to-implement-jwt-authentication-in-next-js-14-bb280c2703fe
 // https://stackoverflow.com/questions/74946913/typescript-issue-with-sequelize-that-i-cant-solve
+
 export async function POST(request) {
   try {
     const body = await request.json();

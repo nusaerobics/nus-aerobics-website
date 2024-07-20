@@ -1,5 +1,9 @@
-import { NextRequest, NextResponse } from "next/server";
-import Booking from "../../models/booking.model";
+import { NextResponse } from "next/server";
+
+const db = require("../../config/sequelize");
+const Class = db.classes;
+const Booking = db.bookings;
+const User = db.users;
 
 export async function GET(request) {
   try {
@@ -17,19 +21,33 @@ export async function GET(request) {
     }
 
     // getBookingsByUser
-    if (searchParams.get("user_id") != undefined) {
-      const user_id = searchParams.get("user_id");
+    if (searchParams.get("userId") != undefined) {
+      const userId = searchParams.get("userId");
       const userBookings = await Booking.findAll({
-        where: { user_id: user_id },
+        where: { userId: userId },
+        include: [
+          {
+            model: Class,
+            required: true,
+            as: "class",
+          },
+        ],
       });
       return NextResponse.json(userBookings, { status: 200 });
     }
 
     // getBookingsByClass
-    if (searchParams.get("class_id") != undefined) {
-      const class_id = searchParams.get("class_id");
+    if (searchParams.get("classId") != undefined) {
+      const classId = searchParams.get("classId");
       const classBookings = await Booking.findAll({
-        where: { class_id: class_id },
+        where: { classId: classId },
+        include: [
+          {
+            model: User,
+            required: true,
+            as: "user",
+          },
+        ],
       });
       return NextResponse.json(classBookings, { status: 200 });
     }
@@ -46,6 +64,7 @@ export async function GET(request) {
   }
 }
 
+// createBooking
 // TODO: Should be synchronous? Rather than asynchronous - but does it matter here or rather in component called
 export async function POST(request) {
   /**
@@ -70,11 +89,10 @@ export async function POST(request) {
   try {
     const body = await request.json();
     console.log(body);
-    const { user_id, class_id, date } = body;
+    const { classId, userId } = body;
     const data = await Booking.create({
-      user_id: user_id,
-      class_id: class_id,
-      date: date,
+      userId: userId,
+      classId: classId,
     });
     return NextResponse.json(data, { status: 200 });
   } catch (error) {
@@ -86,6 +104,7 @@ export async function POST(request) {
   }
 }
 
+// updateBooking
 export async function PUT(request) {
   try {
     const body = await request.json();
