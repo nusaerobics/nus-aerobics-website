@@ -12,9 +12,25 @@ import { PageTitle, SectionTitle } from "../components/Titles";
 import ClassCard from "../components/dashboard/ClassCard";
 import { transactions, upcomingClasses } from "../components/Data";
 import { tableClassNames } from "../components/ClassNames";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
-export default function Page() {
+
+// import { redirect } from "next/navigation";
+// import { getSession } from "./lib";
+
+// // export default async function Page() {
+// //   const session = await getSession();
+// //   return <p>{JSON.stringify(session, null, 2)}</p>;
+// // }
+
+export default async function Page() {
+  // const session = await getSession();
+  // useEffect(() => {
+
+
+  // })
+  
+
   const [isAdmin, setIsAdmin] = useState(false);
   // TODO: Method which calls backend to retrieve all upcoming class bookings
   return (

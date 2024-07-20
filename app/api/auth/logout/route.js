@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { cookies } from "next/headers";
 
 export async function POST(request) {
   try {
@@ -6,7 +7,7 @@ export async function POST(request) {
       message: "Successful logout",
       success: true,
     });
-    response.cookies.set("token", "", { httpOnly: true, expires: new Date(0) });
+    cookies().set("session", "", { expires: new Date(0) });
     return response;
   } catch (error) {
     console.log(error);
