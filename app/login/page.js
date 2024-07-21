@@ -40,7 +40,7 @@ export default function Page() {
         body: JSON.stringify({ name: name, email: email, password: password }),
       });
       if (res.ok) {
-        console.log("Created account successfully");
+        console.log("Successfully created account");
         setIsLogin(true);
         setName("");
         setEmail(email);

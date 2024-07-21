@@ -1,52 +1,30 @@
 // TODO: Only accessible from admin access - check if logged in user has admin status
-"use client";
+"use server";
 
-import { useEffect, useState } from "react";
+import { redirect } from "next/navigation";
+import { getSession } from "../../lib";
+import UsersPage from "../../components/pages/UsersPage";
 
-import { getBookingsByUser, getUsers } from "../../services/DataService";
-import AdminUserViewPage from "../../components/users/AdminUserViewPage";
-import AdminUserLandingPage from "../../components/users/AdminUserLandingPage";
-
-export default function Page() {
-  const [users, setUsers] = useState([]);
-  const [selectedUser, setSelectedUser] = useState({});
-  const [isViewUser, setIsViewUser] = useState(false);
-  const [userBookings, setUserBookings] = useState([]);
-
-  const openView = (rowData) => {
-    setSelectedUser(rowData);
-    const fetchUserBookings = async () => {
-      const userBookingsData = await getBookingsByUser(rowData.id);
-      setUserBookings(userBookingsData);
-    };
-    fetchUserBookings();
-    setIsViewUser(true);
-  };
-  const closeView = () => {
-    setSelectedUser({});
-    setUserBookings([]);
-    setIsViewUser(false);
-  };
-
-  useEffect(() => {
-    const fetchData = async () => {
-      const usersData = await getUsers();
-      setUsers(usersData);
-    };
-    fetchData();
-  }, []);
-
-  return (
-    <>
-      {isViewUser ? (
-        <AdminUserViewPage
-          selectedUser={selectedUser}
-          closeView={closeView}
-          userBookings={userBookings}
-        />
-      ) : (
-        <AdminUserLandingPage users={users} openView={openView} />
-      )}
-    </>
-  );
+export default async function Page() {
+  let user;
+  try {
+    const session = await getSession();
+    if (!session) {
+      redirect("/login");
+    }
+    user = {
+      id: session.user.id,
+      name: session.user.name,
+      email: session.user.email,
+      permission: session.user.permission,
+      balance: session.user.balance,
+    }
+    if (user.permission == "normal") {
+      redirect("/dashboard");
+    }
+  } catch (error) {
+    console.log(error);
+    redirect("/login");
+  }
+  return <UsersPage user={user} />;
 }

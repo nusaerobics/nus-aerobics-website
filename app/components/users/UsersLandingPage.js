@@ -14,7 +14,7 @@ import {
   TableCell,
 } from "@nextui-org/table";
 
-export default function AdminUserLandingPage({ users, openView }) {
+export default function UsersLandingPage({ users, openView }) {
   const [searchInput, setSearchInput] = useState("");
 
   return (

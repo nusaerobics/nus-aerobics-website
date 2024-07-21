@@ -16,6 +16,7 @@ import AdminClassDetails from "./AdminClassDetails";
 import AdminClassForm from "./AdminClassForm";
 import { chipClassNames, chipTypes, tableClassNames } from "../ClassNames";
 import { PageTitle, SectionTitle } from "../Titles";
+import { format } from "date-fns";
 
 export default function AdminClassViewPage({
   selectedClass,
@@ -125,10 +126,12 @@ export default function AdminClassViewPage({
               {classBookings.map((classBooking) => {
                 return (
                   <TableRow>
-                    <TableCell>{classBooking.user_id}</TableCell>
-                    <TableCell>{classBooking.user_id}</TableCell>
+                    <TableCell>{classBooking.user.name}</TableCell>
+                    <TableCell>{classBooking.user.email}</TableCell>
                     <TableCell>{classBooking.attendance}</TableCell>
-                    <TableCell>{classBooking.booking_date}</TableCell>
+                    <TableCell>
+                      {format(classBooking.createdAt, "d/MM/y HH:mm")}
+                    </TableCell>
                   </TableRow>
                 );
               })}
