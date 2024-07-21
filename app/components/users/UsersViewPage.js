@@ -1,5 +1,5 @@
-import { PageTitle, SectionTitle } from "../../components/Titles";
-import { inputClassNames, tableClassNames } from "../../components/ClassNames";
+import { PageTitle, SectionTitle } from "../Titles";
+import { inputClassNames, tableClassNames } from "../ClassNames";
 import { useState } from "react";
 import { MdChevronLeft } from "react-icons/md";
 import { Select, SelectItem } from "@nextui-org/select";
@@ -13,7 +13,7 @@ import {
   TableCell,
 } from "@nextui-org/table";
 
-export default function AdminUserViewPage({
+export default function UsersViewPage({
   selectedUser,
   closeView,
   userBookings,

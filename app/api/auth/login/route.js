@@ -29,8 +29,8 @@ export async function POST(request) {
         { status: 400 }
       );
     }
-    const expires = new Date(Date.now() + 10 * 1000);
-    const session = await encrypt(user.toJSON());
+    const expires = new Date(Date.now() + (24 * 60 * 60 * 1000));
+    const session = await encrypt({user: user.toJSON(), expires: expires});
     cookies().set("session", session, { expires, httpOnly: true });
 
     const response = await NextResponse.json({
@@ -39,6 +39,7 @@ export async function POST(request) {
     });
     return response;
   } catch (error) {
+    console.log(error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

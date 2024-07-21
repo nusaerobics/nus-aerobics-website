@@ -1,7 +1,7 @@
 module.exports = (sequelize, DataTypes) => {
   const Transaction = sequelize.define("transaction", {
     amount: {
-      type: DataTypes.INTEGER.UNSIGNED,
+      type: DataTypes.INTEGER,
       allowNull: false,
     },
     type: {

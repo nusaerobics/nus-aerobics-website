@@ -36,17 +36,169 @@ import {
 import { PageTitle, SectionTitle } from "../Titles";
 import { format } from "date-fns";
 
-export default function UserClassLandingPage({ classes, userBookings }) {
+export default function UserClassLandingPage({
+  userId,
+  classes,
+  userBookings,
+}) {
+  console.log(userId, classes, userBookings);
   const [selected, setSelected] = useState("schedule");
   const [searchInput, setSearchInput] = useState("");
   const [selectedClass, setSelectedClass] = useState({});
+  const [selectedBooking, setSelectedBooking] = useState({});
 
   const { isOpen, onOpen, onOpenChange } = useDisclosure(); // NOTE: Might be able to use useState and handlers instead?
 
   const handleClick = (rowData) => {
-    setSelectedClass(rowData);
+    if (selected == "schedule") {
+      setSelectedClass(rowData);
+    } else {
+      console.log(rowData);
+      console.log(rowData.class);
+
+      setSelectedClass(rowData.class);
+      setSelectedBooking(rowData);
+    }
     onOpen();
   };
+
+  const handleModalClick = () => {
+    if (selected == "schedule") {
+      bookClass();
+    } else {
+      unbookClass();
+    }
+  };
+
+  async function bookClass() {
+    /**
+     * When user books class request,
+     * 1. Check if bookedCapacity < maxCapacity
+     * 2. Update class bookedCapapcity += 1
+     * 3. Create new booking
+     * 4. Create new transaction
+     */
+    console.log(selectedClass);
+    if (selectedClass.bookedCapacity < selectedClass.maxCapacity) {
+      try {
+        const newBookedCapacity = selectedClass.bookedCapacity + 1;
+
+        // 2. Update class bookedCapacity
+        const updatedClass = {
+          id: selectedClass.id,
+          name: selectedClass.name,
+          description: selectedClass.description,
+          date: selectedClass.date,
+          maxCapacity: selectedClass.maxCapacity,
+          bookedCapacity: newBookedCapacity,
+          status:
+            newBookedCapacity == selectedClass.maxCapacity
+              ? "full"
+              : selectedClass.status,
+        };
+        const res1 = await fetch("/api/classes", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(updatedClass),
+        });
+        if (!res1.ok) {
+          throw new Error(`Unable to update class ${selectedClass.id}`);
+        }
+
+        // 3. Create new booking
+        const newBooking = { classId: selectedClass.id, userId: userId };
+        const res2 = await fetch("/api/bookings", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(newBooking),
+        });
+        if (!res2.ok) {
+          throw new Error("Unable to create booking");
+        }
+
+        // 4. Create new transaction
+        const newTransaction = {
+          userId: userId,
+          amount: -1,
+          type: "book",
+          description: `Booked '${selectedClass.name}'`,
+        };
+        const res3 = await fetch("/api/transactions", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(newTransaction),
+        });
+        if (!res3.ok) {
+          throw new Error("Unable to create transaction");
+        }
+        onOpenChange();
+      } catch (error) {
+        console.log(error);
+      }
+    } else {
+      console.log("Class is full");
+    }
+  }
+
+  async function unbookClass() {
+    /**
+     * When user unbooks class,
+     * 1. Delete booking
+     * 2. Update class bookedCapacity -= 1
+     * 3. Create new transaction of unbooked - "refund"
+     */
+    try {
+      const newBookedCapacity = selectedBooking.class.bookedCapacity - 1;
+
+      // 1. Delete booking
+      const res1 = await fetch("/api/bookings", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: selectedBooking.id }),
+      });
+      if (!res1.ok) {
+        throw new Error(`Unable to delete booking ${selectedBooking.id}`);
+      }
+
+      // 2. Update class bookedCapacity
+      const updatedClass = {
+        id: selectedClass.id,
+        name: selectedClass.name,
+        description: selectedClass.description,
+        date: selectedClass.date,
+        maxCapacity: selectedClass.maxCapacity,
+        bookedCapacity: newBookedCapacity,
+        status: newBookedCapacity < selectedClass.maxCapacity ? "open" : "full", // NOTE: Don't know when unbooking a class would make it still full?
+      };
+      const res2 = await fetch("/api/classes", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updatedClass),
+      });
+      if (!res2.ok) {
+        throw new Error(`Unable to update class ${selectedClass.id}`);
+      }
+
+      // 3. Create new transaction
+      const newTransaction = {
+        userId: selectedBooking.userId,
+        amount: 1,
+        type: "refund",
+        description: `Refunded '${selectedClass.name}'`,
+      };
+      const res4 = await fetch("/api/transactions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newTransaction),
+      });
+      if (!res4.ok) {
+        throw new Error("Unable to create transaction");
+      }
+      onOpenChange();
+    } catch (error) {
+      console.log(error);
+    }
+  }
 
   return (
     <div className="w-full h-full flex flex-col gap-y-5">
@@ -137,8 +289,7 @@ export default function UserClassLandingPage({ classes, userBookings }) {
               {/* TODO: Later change mapping of table to use COLUMNS and ITEMS */}
               {/* TODO: Add in sort on the date */}
               {/* TODO: Add in paginations */}
-              {/* TODO: Add in Booking logic */}
-              {/* <Table removeWrapper classNames={tableClassNames}>
+              <Table removeWrapper classNames={tableClassNames}>
                 <TableHeader>
                   <TableColumn>Class</TableColumn>
                   <TableColumn></TableColumn>
@@ -150,7 +301,7 @@ export default function UserClassLandingPage({ classes, userBookings }) {
                   {userBookings.map((booking) => {
                     return (
                       <TableRow key={booking.id}>
-                        <TableCell>{booking.name}</TableCell>
+                        <TableCell>{booking.class.name}</TableCell>
                         <TableCell>
                           <button onClick={() => handleClick(booking)}>
                             <MdOpenInNew />
@@ -161,13 +312,19 @@ export default function UserClassLandingPage({ classes, userBookings }) {
                             {chipTypes["booked"].message}
                           </Chip>
                         </TableCell>
-                        <TableCell>{format(c.date, "d/MM/y HH:mm")}</TableCell>
-                        <TableCell>{format(c.date, "d/MM/y HH:mm")}</TableCell>
+                        {/* <TableCell>{booking.class.date}</TableCell>
+                        <TableCell>{booking.createdAt}</TableCell> */}
+                        <TableCell>
+                          {format(booking.class.date, "d/MM/y HH:mm")}
+                        </TableCell>
+                        <TableCell>
+                          {format(booking.createdAt, "d/MM/y HH:mm")}
+                        </TableCell>
                       </TableRow>
                     );
                   })}
                 </TableBody>
-              </Table> */}
+              </Table>
             </div>
           </Tab>
         </Tabs>
@@ -209,9 +366,21 @@ export default function UserClassLandingPage({ classes, userBookings }) {
                   <p>{selectedClass.description}</p>
                 </div>
                 <div className="flex justify-end">
-                  <button className="rounded-[30px] px-[20px] py-[10px] bg-[#1F4776] text-white">
-                    Book class
-                  </button>
+                  {selected == "schedule" ? (
+                    <button
+                      onClick={() => bookClass()}
+                      className="rounded-[30px] px-[20px] py-[10px] bg-a-navy text-white"
+                    >
+                      Book class
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => unbookClass()}
+                      className="rounded-[30px] px-[20px] py-[10px] bg-a-red text-white"
+                    >
+                      Unbook class
+                    </button>
+                  )}
                 </div>
               </ModalBody>
             </>
