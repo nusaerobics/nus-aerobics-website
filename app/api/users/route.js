@@ -20,6 +20,17 @@ export async function GET(request) {
       }
       return NextResponse.json(user, { status: 200 });
     }
+
+    // getUserByEmail
+    if (searchParams.get("email") != undefined) {
+      const email = searchParams.get("email");
+      const user = await User.findOne({ where: { email: email } });
+      if (!user) {
+        throw new Error("User does not exist");
+      }
+      return NextResponse.json(user, { status: 200 });
+    }
+
     // getUsers
     const users = await User.findAll();
     return NextResponse.json(users, { status: 200 });

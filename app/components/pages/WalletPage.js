@@ -84,10 +84,8 @@ export default function WalletPage({ user }) {
           </div>
 
           <div className="h-full flex flex-col rounded-[20px] border border-a-black/10 p-5 bg-white gap-y-2.5">
-            <div className="flex flex-row">
-              <div className="w-3/4">
-                <SectionTitle title="All transactions" />
-              </div>
+            <div className="flex flex-row justify-between items-center">
+              <SectionTitle title="All transactions" />
               <div className="w-1/4">
                 <Input
                   placeholder="Search"
@@ -176,6 +174,7 @@ export default function WalletPage({ user }) {
       ) : (
         // Start of user Wallet page
         <div className="h-full flex flex-col gap-y-5">
+          
           <PageTitle title="Wallet" />
           <div className="h-1/4 flex flex-row gap-x-5">
             <div className="w-1/2 rounded-[20px] border border-a-black/10 p-5 bg-white">

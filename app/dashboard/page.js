@@ -17,9 +17,7 @@ export default async function Page() {
       email: session.user.email,
       permission: session.user.permission,
       balance: session.user.balance,
-    }  
-    console.log("session on dashboard is: ", session);
-    console.log("user on dashboard is: ", user);
+    }
   } catch (error) {
     console.log(error);
     redirect("/login");
