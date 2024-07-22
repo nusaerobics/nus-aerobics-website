@@ -45,7 +45,7 @@ export default function UsersLandingPage({ users, openView }) {
                 <TableRow key={user.id}>
                   <TableCell>{user.name}</TableCell>
                   <TableCell>
-                    <button onClick={() => openView(user)}>
+                    <button className="cursor-pointer" onClick={() => openView(user)}>
                       <MdOpenInNew />
                     </button>
                   </TableCell>

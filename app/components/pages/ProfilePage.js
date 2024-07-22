@@ -76,7 +76,7 @@ export default function ProfilePage({ user }) {
             type={isCurrentPWVisible ? "text" : "password"}
             endContent={
               <button
-                className="focus:outline-none"
+                className="focus:outline-none cursor-pointer"
                 type="button"
                 onClick={toggleCurrentPW}
               >
@@ -101,7 +101,7 @@ export default function ProfilePage({ user }) {
               type={isNewPWVisible ? "text" : "password"}
               endContent={
                 <button
-                  className="focus:outline-none"
+                  className="focus:outline-none cursor-pointer"
                   type="button"
                   onClick={toggleNewPW}
                 >
@@ -125,7 +125,7 @@ export default function ProfilePage({ user }) {
               type={isConfirmPWVisible ? "text" : "password"}
               endContent={
                 <button
-                  className="focus:outline-none"
+                  className="focus:outline-none cursor-pointer"
                   type="button"
                   onClick={toggleConfirmPW}
                 >

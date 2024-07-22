@@ -14,7 +14,7 @@ export default function AdminClassDetails({ selectedClass, toggleIsEdit }) {
         <SectionTitle title="Class details" />
         <button
           onClick={toggleIsEdit}
-          className="h-[36px] rounded-[30px] px-[20px] bg-a-navy text-white text-sm" // PREVIOUSLY: py-[10px]
+          className="h-[36px] rounded-[30px] px-[20px] bg-a-navy text-white text-sm cursor-pointer" // PREVIOUSLY: py-[10px]
         >
           Edit class
         </button>

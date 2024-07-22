@@ -77,7 +77,7 @@ export default function WalletPage({ user }) {
             <PageTitle title="Wallet" />
             <button
               onClick={onOpen}
-              className="h-[36px] rounded-[30px] px-[20px] bg-[#1F4776] text-white text-sm" // PREVIOUSLY: py-[10px]
+              className="h-[36px] rounded-[30px] px-[20px] bg-[#1F4776] text-white text-sm cursor-pointer" // PREVIOUSLY: py-[10px]
             >
               Credit accounts
             </button>
@@ -160,7 +160,7 @@ export default function WalletPage({ user }) {
                     <div className="flex justify-end">
                       <button
                         onClick={creditAccounts}
-                        className="rounded-[30px] px-[20px] py-[10px] bg-[#1F4776] text-white"
+                        className="rounded-[30px] px-[20px] py-[10px] bg-[#1F4776] text-white cursor-pointer"
                       >
                         Credit
                       </button>

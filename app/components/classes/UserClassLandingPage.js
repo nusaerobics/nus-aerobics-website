@@ -242,7 +242,7 @@ export default function UserClassLandingPage({
                       <TableRow key={c.id}>
                         <TableCell>{c.name}</TableCell>
                         <TableCell>
-                          <button onClick={() => handleClick(c)}>
+                          <button className="cursor-pointer" onClick={() => handleClick(c)}>
                             <MdOpenInNew />
                           </button>
                         </TableCell>
@@ -299,7 +299,7 @@ export default function UserClassLandingPage({
                       <TableRow key={booking.id}>
                         <TableCell>{booking.class.name}</TableCell>
                         <TableCell>
-                          <button onClick={() => handleClick(booking)}>
+                          <button className="cursor-pointer"  onClick={() => handleClick(booking)}>
                             <MdOpenInNew />
                           </button>
                         </TableCell>
@@ -368,14 +368,14 @@ export default function UserClassLandingPage({
                   {selected == "schedule" ? (
                     <button
                       onClick={() => bookClass()}
-                      className="rounded-[30px] px-[20px] py-[10px] bg-a-navy text-white"
+                      className="rounded-[30px] px-[20px] py-[10px] bg-a-navy text-white cursor-pointer"
                     >
                       Book class
                     </button>
                   ) : (
                     <button
                       onClick={() => unbookClass()}
-                      className="rounded-[30px] px-[20px] py-[10px] bg-a-red text-white"
+                      className="rounded-[30px] px-[20px] py-[10px] bg-a-red text-white cursor-pointer"
                     >
                       Unbook class
                     </button>

@@ -185,7 +185,7 @@ export default function Page() {
             type={isPWVisible ? "text" : "password"}
             endContent={
               <button
-                className="focus:outline-none"
+                className="focus:outline-none cursor-pointer"
                 type="button"
                 onClick={togglePWVisible}
               >
@@ -211,7 +211,7 @@ export default function Page() {
               type={isCPWVisible ? "text" : "password"}
               endContent={
                 <button
-                  className="focus:outline-none"
+                  className="focus:outline-none cursor-pointer"
                   type="button"
                   onClick={toggleCPWVisible}
                 >
@@ -243,7 +243,7 @@ export default function Page() {
         </div>
         <div className="w-full flex flex-col gap-y-1">
           <button
-            className="rounded-[30px] px-[20px] py-[10px] bg-a-navy text-sm text-white"
+            className="rounded-[30px] px-[20px] py-[10px] bg-a-navy text-sm text-white cursor-pointer"
             onClick={isLogin ? handleLogin : handleSignUp}
           >
             {button}
@@ -252,7 +252,7 @@ export default function Page() {
           <div className="w-full flex flex-row justify-center gap-x-1">
             <p className="text-xs text-a-black">{bottomAction}</p>
             <button
-              className="text-end text-xs text-a-navy font-bold underline"
+              className="text-end text-xs text-a-navy font-bold underline cursor-pointer"
               onClick={toggleIsLogin}
             >
               {bottomButton}

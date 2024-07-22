@@ -211,7 +211,7 @@ export default function AdminClassViewPage({
     <>
       <div className="flex flex-row items-center gap-x-2.5">
         {/* TODO: If isEdit or isManage, go back to Classes. Else, go to not isEdit and not isManage */}
-        <button onClick={isEdit || isManage ? revert : closeView}>
+        <button className="cursor-pointer"  onClick={isEdit || isManage ? revert : closeView}>
           <MdChevronLeft color="#1F4776" size={42} />
         </button>
         <PageTitle title={title} />
@@ -227,15 +227,7 @@ export default function AdminClassViewPage({
       {!isManage ? (
         <div className="h-full w-full flex flex-col gap-y-5 p-5 rounded-[20px] border border-a-black/10 bg-white">
           {isEdit ? (
-            <AdminClassForm
-              isCreate={false}
-              inputName={selectedClass.name}
-              inputTime={selectedClass.date}
-              inputCredit={1}
-              inputDescription={selectedClass.description}
-              inputIsOpenBooking={selectedClass.status != "close"}
-              inputIsAllowCancel={true}
-            />
+            <AdminClassForm isCreate={false} selectedClass={selectedClass} />
           ) : (
             <AdminClassDetails
               selectedClass={selectedClass}
@@ -254,14 +246,14 @@ export default function AdminClassViewPage({
             {isManage ? (
               <button
                 onClick={onOpen}
-                className="h-[36px] rounded-[30px] px-[20px] bg-white border-1 border-a-navy text-a-navy text-sm"
+                className="h-[36px] rounded-[30px] px-[20px] bg-white border-1 border-a-navy text-a-navy text-sm cursor-pointer"
               >
                 Add participant
               </button>
             ) : (
               <button
                 onClick={toggleIsManage}
-                className="h-[36px] rounded-[30px] px-[20px] bg-a-navy text-white text-sm"
+                className="h-[36px] rounded-[30px] px-[20px] bg-a-navy text-white text-sm cursor-pointer"
               >
                 Manage class
               </button>
@@ -287,7 +279,7 @@ export default function AdminClassViewPage({
                           onClick={() => markPresent(classBooking)}
                           disabled={classBooking.attendance == "present"}
                           className={clsx(
-                            "rounded-[30px] px-[20px] py-[10px] text-sm",
+                            "rounded-[30px] px-[20px] py-[10px] text-sm cursor-pointer",
                             {
                               "bg-a-green/10 text-a-green":
                                 classBooking.attendance == "absent",
@@ -302,7 +294,7 @@ export default function AdminClassViewPage({
                       <TableCell>
                         <button
                           onClick={() => unbookUser(classBooking)}
-                          className="rounded-[30px] px-[20px] py-[10px] bg-a-red text-white text-sm"
+                          className="rounded-[30px] px-[20px] py-[10px] bg-a-red text-white text-sm cursor-pointer"
                         >
                           Unbook
                         </button>
@@ -373,7 +365,7 @@ export default function AdminClassViewPage({
               <ModalFooter>
                 <button
                   onClick={bookUser}
-                  className="h-[36px] rounded-[30px] px-[20px] bg-a-navy text-white text-sm"
+                  className="h-[36px] rounded-[30px] px-[20px] bg-a-navy text-white text-sm cursor-pointer"
                 >
                   Book user
                 </button>
