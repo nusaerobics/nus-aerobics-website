@@ -21,8 +21,8 @@ export default function UsersLandingPage({ users, openView }) {
     <div className="h-full flex flex-col gap-y-5">
       <PageTitle title="Users" />
       <div className="h-full flex flex-col rounded-[20px] border border-a-black/10 p-5 bg-white gap-y-2.5">
-        <div className="w-1/4">
-          <Input
+        <div className="self-end w-1/4">
+        <Input
             placeholder="Search"
             value={searchInput}
             onValueChange={setSearchInput}

@@ -30,14 +30,16 @@ export default function AdminClassLandingPage({ classes, openCreate, openView })
       </div>
       <div className="h-full w-full flex flex-col p-5 rounded-[20px] border border-a-black/10 bg-white gap-y-2.5">
         {/* TODO: Move to right of section rather than start */}
-        <Input
-          placeholder="Search"
-          value={searchInput}
-          onValueChange={setSearchInput}
-          variant="bordered"
-          size="xs"
-          classNames={inputClassNames}
-        />
+        <div className="self-end w-1/4">
+          <Input
+            placeholder="Search"
+            value={searchInput}
+            onValueChange={setSearchInput}
+            variant="bordered"
+            size="xs"
+            classNames={inputClassNames}
+          />
+        </div>
         <Table removeWrapper classNames={tableClassNames}>
           <TableHeader>
             <TableColumn>Class</TableColumn>

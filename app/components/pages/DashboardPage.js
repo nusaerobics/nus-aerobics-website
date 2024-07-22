@@ -8,21 +8,60 @@ import {
   TableRow,
   TableCell,
 } from "@nextui-org/table";
-import {PageTitle, SectionTitle} from "../Titles"
+import { PageTitle, SectionTitle } from "../Titles";
 import ClassCard from "../dashboard/ClassCard";
-import { transactions, upcomingClasses } from "../Data";
+import { upcomingClasses } from "../Data";
 import { tableClassNames } from "../ClassNames";
 import { useEffect, useState } from "react";
+import { format } from "date-fns";
 
 export default function DashboardPage({ user }) {
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [userTransactions, setUserTransactions] = useState([]);
+  const [userBookings, setUserBookings] = useState([]);
+
   useEffect(() => {
     const permission = user.permission;
     console.log("permission on dashboard is", permission);
     setIsAdmin(permission == "admin");
   });
-  
-  const [isAdmin, setIsAdmin] = useState(false);
-  // TODO: Method which calls backend to retrieve all upcoming class bookings
+
+  useEffect(() => {
+    if (!isAdmin) {
+      const fetchUserTransactions = async () => {
+        try {
+          const res = await fetch(`/api/transactions?userId=${user.id}`);
+          if (!res.ok) {
+            throw new Error(
+              `Unable to get transactions for user ${user.id}: ${res.status}`
+            );
+          }
+          const data = await res.json();
+          setUserTransactions(data);
+        } catch (error) {
+          console.log(error);
+        }
+      };
+      fetchUserTransactions();
+
+      const fetchUserBookings = async () => {
+        try {
+          const res = await fetch(`/api/bookings?userId=${user.id}`);
+          if (!res.ok) {
+            throw new Error(
+              `Unable to get bookings for user ${user.id}: ${res.status}`
+            );
+          }
+          const data = await res.json();
+          setUserBookings(data);
+        } catch (error) {
+          console.log(error);
+        }
+      };
+      fetchUserBookings();
+    }
+  }, []);
+
   return (
     <>
       {isAdmin ? (
@@ -91,12 +130,12 @@ export default function DashboardPage({ user }) {
           <div className="h-full flex flex-row gap-x-5">
             <div className="h-full w-2/3 flex flex-col p-5 gap-y-2.5 bg-white rounded-[20px] border border-a-black/10">
               <SectionTitle title="Upcoming classes" />
-              {upcomingClasses.map((upcomingClass) => {
+              {userBookings.map((userBooking) => {
                 return (
                   <ClassCard
-                    key={upcomingClass.name}
-                    name={upcomingClass.name}
-                    date={upcomingClass.date}
+                    key={userBooking.id}
+                    name={userBooking.class.name}
+                    date={format(userBooking.class.date, "d/MM/y HH:mm")}
                   />
                 );
               })}
@@ -104,7 +143,7 @@ export default function DashboardPage({ user }) {
             <div className="h-full w-1/3 flex flex-col gap-y-5">
               <div className="h-1/4 flex flex-col justify-center p-5 bg-white rounded-[20px] border border-a-black/10">
                 <p className="font-poppins font-bold text-a-navy text-5xl">
-                  10
+                  {user.balance}
                 </p>
                 <p className="font-poppins text-a-navy text-2xl">
                   credits remaining
@@ -118,11 +157,12 @@ export default function DashboardPage({ user }) {
                     <TableColumn>Amount</TableColumn>
                   </TableHeader>
                   <TableBody>
-                    {transactions.map((transaction) => {
+                    {userTransactions.map((transaction) => {
                       return (
                         <TableRow key={transaction.id}>
                           <TableCell>
-                            {transaction.description.split(" ")[0]}
+                            {transaction.description}
+                            {/* {transaction.description.split(" ")[0]} */}
                           </TableCell>
                           <TableCell>{transaction.amount}</TableCell>
                         </TableRow>

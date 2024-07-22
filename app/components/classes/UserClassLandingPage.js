@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import {
-  MdCalendarMonth,
   MdList,
   MdOpenInNew,
   MdOutlineCalendarMonth,
@@ -22,6 +21,7 @@ import {
   ModalContent,
   ModalHeader,
   ModalBody,
+  ModalFooter,
   useDisclosure,
 } from "@nextui-org/modal";
 import { Chip, Input, Tabs, Tab } from "@nextui-org/react";
@@ -33,7 +33,7 @@ import {
   tableClassNames,
   tabsClassNames,
 } from "../ClassNames";
-import { PageTitle, SectionTitle } from "../Titles";
+import { PageTitle } from "../Titles";
 import { format } from "date-fns";
 
 export default function UserClassLandingPage({
@@ -60,14 +60,6 @@ export default function UserClassLandingPage({
       setSelectedBooking(rowData);
     }
     onOpen();
-  };
-
-  const handleModalClick = () => {
-    if (selected == "schedule") {
-      bookClass();
-    } else {
-      unbookClass();
-    }
   };
 
   async function bookClass() {
@@ -203,7 +195,7 @@ export default function UserClassLandingPage({
   return (
     <div className="w-full h-full flex flex-col gap-y-5">
       <PageTitle title="Classes" />
-      <div className="h-full w-full rounded-[20px] border border-a-black/10 bg-white gap-y-2.5">
+      <div className="w-full h-full rounded-[20px] border border-a-black/10 bg-white gap-y-2.5">
         {/* NOTE: Might be complicated to make calendar view of calsses */}
         <Tabs
           variant={"underlined"}
@@ -215,22 +207,24 @@ export default function UserClassLandingPage({
             key="schedule"
             title={
               <div className="flex flex-row items-center gap-x-2">
-                <MdCalendarMonth />
+                <MdList />
                 <p className="text-base">Class schedule</p>
               </div>
             }
           >
-            <div className="w-full flex flex-col p-5 pt-0 items-end gap-y-5">
-              {/* TODO: Link Search to the Classes array, search based on name */}
-              {/* TODO: Add in filtering for Classes */}
-              <Input
-                placeholder="Search"
-                value={searchInput}
-                onValueChange={setSearchInput}
-                variant="bordered"
-                size="xs"
-                classNames={inputClassNames}
-              />
+            <div className="w-full flex flex-col p-2.5 gap-y-5">
+              {/* TODO: Link Search to the Bookings array, search based on name */}
+              {/* TODO: Add in filtering for Bookings */}
+              <div className="self-end w-1/4">
+                <Input
+                  placeholder="Search"
+                  value={searchInput}
+                  onValueChange={setSearchInput}
+                  variant="bordered"
+                  size="xs"
+                  classNames={inputClassNames}
+                />
+              </div>
               {/* TODO: Later change mapping of table to use COLUMNS and ITEMS */}
               {/* TODO: Add in sort on the date */}
               {/* TODO: Add in paginations */}
@@ -238,8 +232,9 @@ export default function UserClassLandingPage({
                 <TableHeader>
                   <TableColumn>Class</TableColumn>
                   <TableColumn></TableColumn>
-                  <TableColumn allowsSorting>Status</TableColumn>
+                  <TableColumn>Status</TableColumn>
                   <TableColumn allowsSorting>Date</TableColumn>
+                  {/* <TableColumn allowsSorting>Booking date</TableColumn> */}
                 </TableHeader>
                 <TableBody>
                   {classes.map((c) => {
@@ -264,6 +259,7 @@ export default function UserClassLandingPage({
               </Table>
             </div>
           </Tab>
+
           <Tab
             key="booked"
             title={
@@ -273,10 +269,10 @@ export default function UserClassLandingPage({
               </div>
             }
           >
-            <div className="w-full flex flex-col items-end gap-y-5">
+            <div className="w-full flex flex-col p-2.5 gap-y-5">
               {/* TODO: Link Search to the Bookings array, search based on name */}
               {/* TODO: Add in filtering for Bookings */}
-              <div className="w-1/4">
+              <div className="self-end w-1/4">
                 <Input
                   placeholder="Search"
                   value={searchInput}
@@ -343,29 +339,32 @@ export default function UserClassLandingPage({
           ) => (
             <>
               <ModalHeader>
-                <div className="flex flex-row items-center gap-x-2.5">
-                  <SectionTitle title={selectedClass.name} />
-                </div>
+                <p className="text-a-navy">{selectedClass.name}</p>
               </ModalHeader>
               <ModalBody>
                 <div className="flex flex-col gap-y-2.5">
                   <div className="flex flex-row items-center gap-2.5">
-                    <MdOutlineCalendarMonth />
-                    <p>{format(selectedClass.date, "d/MM/y HH:mm")}</p>
+                    <MdOutlineCalendarMonth size={24} color={"#1F4776"} />
+                    <p className="text-a-black">
+                      {format(selectedClass.date, "d/MM/y HH:mm")}
+                    </p>
                   </div>
                   <div className="flex flex-row items-center gap-2.5">
-                    <MdOutlineLocationOn />
-                    <p>UTown Gym Aerobics Studio</p>
+                    <MdOutlineLocationOn size={24} color={"#1F4776"} />
+                    <p className="text-a-black">UTown Gym Aerobics Studio</p>
                   </div>
                   <div className="flex flex-row items-center gap-2.5">
-                    <MdPersonOutline />
-                    <p>Alpha Fitness</p>
+                    <MdPersonOutline size={24} color={"#1F4776"} />
+                    <p className="text-a-black">Alpha Fitness</p>
                   </div>
                 </div>
                 <div>
-                  <p>{selectedClass.description}</p>
+                  <p className="text-a-black">{selectedClass.description}</p>
                 </div>
+              </ModalBody>
+              <ModalFooter>
                 <div className="flex justify-end">
+                  {/* TODO: Should check if the current user has a booking for the current class */}
                   {selected == "schedule" ? (
                     <button
                       onClick={() => bookClass()}
@@ -382,7 +381,7 @@ export default function UserClassLandingPage({
                     </button>
                   )}
                 </div>
-              </ModalBody>
+              </ModalFooter>
             </>
           )}
         </ModalContent>
