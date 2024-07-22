@@ -32,7 +32,7 @@ export default function UsersViewPage({
   return (
     <div className="h-full flex flex-col gap-y-5">
       <div className="flex flex-row items-center gap-x-5">
-        <button onClick={closeView}>
+        <button className="cursor-pointer" onClick={closeView}>
           <MdChevronLeft color="#1F4776" size={42} />
         </button>
         <PageTitle title="View user" />
@@ -44,7 +44,7 @@ export default function UsersViewPage({
             {isEdit ? (
               <button
                 onClick={toggleIsEdit}
-                className="h-[36px] rounded-[30px] px-[20px] bg-a-navy/10 text-a-navy text-sm" // PREVIOUSLY: py-[10px]
+                className="h-[36px] rounded-[30px] px-[20px] bg-a-navy/10 text-a-navy text-sm cursor-pointer" // PREVIOUSLY: py-[10px]
               >
                 Cancel
               </button>
@@ -53,7 +53,7 @@ export default function UsersViewPage({
             )}
             <button
               onClick={isEdit ? saveEdit : toggleIsEdit}
-              className="h-[36px] rounded-[30px] px-[20px] bg-a-navy text-white text-sm" // PREVIOUSLY: py-[10px]
+              className="h-[36px] rounded-[30px] px-[20px] bg-a-navy text-white text-sm cursor-pointer" // PREVIOUSLY: py-[10px]
             >
               {isEdit ? "Save changes" : "Edit user"}
             </button>

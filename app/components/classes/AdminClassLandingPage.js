@@ -23,7 +23,7 @@ export default function AdminClassLandingPage({ classes, openCreate, openView })
         <PageTitle title="Classes" />
         <button
           onClick={openCreate}
-          className="h-[36px] rounded-[30px] px-[20px] bg-[#1F4776] text-white text-sm" // PREVIOUSLY: py-[10px]
+          className="h-[36px] rounded-[30px] px-[20px] bg-[#1F4776] text-white text-sm cursor-pointer" // PREVIOUSLY: py-[10px]
         >
           Create
         </button>
@@ -53,7 +53,10 @@ export default function AdminClassLandingPage({ classes, openCreate, openView })
                 <TableRow key={c.id}>
                   <TableCell>{c.name}</TableCell>
                   <TableCell>
-                    <button onClick={() => openView(c)}>
+                    <button 
+                      className="cursor-pointer"
+                      onClick={() => openView(c)}
+                    >
                       <MdEdit size={24} />
                     </button>
                   </TableCell>

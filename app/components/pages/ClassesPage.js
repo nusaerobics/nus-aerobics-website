@@ -18,7 +18,7 @@ export default function ClassesPage({ user }) {
   const [classBookings, setClassBookings] = useState([]); // (Admin) All Bookings for a given Class
   useEffect(() => {
     const fetchClasses = async () => {
-      const res = await fetch("/api/classes", { cache: "force-cache" });
+      const res = await fetch("/api/classes");
       if (!res.ok) {
         throw new Error(`Unable to get classes: ${res.status}`);
       }
@@ -48,7 +48,6 @@ export default function ClassesPage({ user }) {
   }, []);
 
   const [selectedClass, setSelectedClass] = useState({});
-
   const [isViewClass, setIsViewClass] = useState(false);
   const [isCreateClass, setIsCreateClass] = useState(false);
 

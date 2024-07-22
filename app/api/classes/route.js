@@ -44,11 +44,12 @@ export async function POST(request) {
   try {
     const body = await request.json();
     console.log(body);
-    const { name, description, date } = body;
+    const { name, description, date, status } = body;
     const data = await Class.create({
       name: name,
       description: description,
       date: date,
+      status: status,
     });
     return NextResponse.json(data, { status: 200 });
   } catch (error) {

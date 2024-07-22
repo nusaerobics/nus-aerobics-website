@@ -4,32 +4,76 @@
  */
 import PropTypes from "prop-types";
 
-import { Input, DateInput, Switch, Textarea } from "@nextui-org/react";
+import { Input, Switch, Textarea } from "@nextui-org/react";
 import { inputClassNames, switchClassNames } from "../ClassNames";
 import { useState } from "react";
 import { SectionTitle } from "../Titles";
+import { z } from "zod";
+import { format } from "date-fns";
 
 export default function AdminClassForm({
   isCreate, // True or False, to determine whether to POST or UPDATE Class
-  inputName,
-  inputTime,
-  inputCredit,
-  inputDescription,
-  inputIsOpenBooking,
-  inputIsAllowCancel,
+  selectedClass,
 }) {
-  const [name, setName] = useState(inputName);
-  const [time, setTime] = useState();
-  const [credit, setCredit] = useState(inputCredit);
-  const [description, setDescription] = useState(inputDescription);
-  const [isOpenBooking, setIsOpenBooking] = useState(inputIsOpenBooking);
-  const [isAllowCancel, setIsAllowCancel] = useState(inputIsAllowCancel);
+  const [name, setName] = useState(selectedClass.name);
+  const [date, setDate] = useState(
+    selectedClass.date != "" ? format(selectedClass.date, "yyy-MM-dd") : ""
+  );
+  const [time, setTime] = useState(
+    selectedClass.date != "" ? format(selectedClass.date, "HH:mm") : ""
+  );
+  const [description, setDescription] = useState(selectedClass.description);
+  const [isOpenBooking, setIsOpenBooking] = useState(
+    selectedClass.status == "open"
+  );
 
-  function createClass() {
-    return;
+  async function createClass() {
+    // TODO: Fix timing issue since 19:00 becomes 18:00 - need to add timezone to inputs
+    // TODO: Validate date and time input formats
+    try {
+      const newClass = {
+        name: name,
+        description: description,
+        date: `${date} ${time}:00`,
+        status: isOpenBooking ? "open" : "closed",
+      };
+      const res = await fetch("/api/classes", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newClass),
+      });
+      if (!res.ok) {
+        throw new Error(`Unable to create new class: ${res.status}`);
+      }
+    } catch (error) {
+      console.log(error);
+    }
   }
-  function saveEdit() {
-    return;
+
+  async function saveEdit() {
+    try {
+      const updatedClass = {
+        id: selectedClass.id,
+        name: name,
+        description: description,
+        date: `${date} ${time}:00`,
+        maxCapacity: selectedClass.maxCapacity,
+        bookedCapacity: selectedClass.bookedCapacity,
+        status: isOpenBooking ? "open" : "closed",
+      };
+      const res = await fetch("/api/classes", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updatedClass),
+      });
+      if (!res.ok) {
+        throw new Error(`Unable to update class: ${res.status}`);
+      }
+
+      // TODO: Go back to ClassViewPage
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   return (
@@ -38,7 +82,7 @@ export default function AdminClassForm({
         <SectionTitle title="Class details" />
         <button
           onClick={isCreate ? createClass : saveEdit}
-          className="h-[36px] rounded-[30px] px-[20px] bg-a-navy text-white text-sm" // PREVIOUSLY: py-[10px]
+          className="h-[36px] rounded-[30px] px-[20px] bg-a-navy text-white text-sm cursor-pointer" // PREVIOUSLY: py-[10px]
         >
           {isCreate ? "Create class" : "Save changes"}
         </button>
@@ -56,21 +100,22 @@ export default function AdminClassForm({
           />
         </div>
         <div className="md:w-1/3 flex flex-col gap-y-[5px]">
-          <p className="text-a-black/50 text-sm">Time</p>
-          {/* TODO: Add Time, not just Date */}
-          <DateInput
-            value={time}
-            onValueChange={setTime}
+          <p className="text-a-black/50 text-sm">Date *</p>
+          {/* TODO: Figure out DateInput */}
+          <Input
+            value={date}
+            onValueChange={setDate}
             isRequired
+            variant="bordered"
+            size="xs"
             classNames={inputClassNames}
           />
         </div>
         <div className="md:w-1/3 flex flex-col gap-y-[5px]">
-          {/* TODO: Get rid of this because shouldn't be able to change # credits? All automatically 1 credit */}
-          <p className="text-a-black/50 text-sm">Credit *</p>
+          <p className="text-a-black/50 text-sm">Time *</p>
           <Input
-            value={credit}
-            onValueChange={setCredit}
+            value={time}
+            onValueChange={setTime}
             isRequired
             variant="bordered"
             size="xs"
@@ -87,15 +132,6 @@ export default function AdminClassForm({
           classNames={switchClassNames}
         >
           Open for booking
-        </Switch>
-        {/* TODO: Handle cancellation options */}
-        <Switch
-          isSelected={isAllowCancel}
-          onValueChange={setIsAllowCancel}
-          size="sm"
-          classNames={switchClassNames}
-        >
-          Allow cancellations
         </Switch>
       </div>
       <div className="flex flex-col gap-y-[5px]">
@@ -133,10 +169,6 @@ export default function AdminClassForm({
 }
 
 AdminClassForm.propTypes = {
-  inputName: PropTypes.string,
-  inputTime: PropTypes.any,
-  inputCredit: PropTypes.number,
-  inputDescription: PropTypes.string,
-  inputIsOpenBooking: PropTypes.bool,
-  inputIsAllowCancel: PropTypes.bool,
+  isCreate: PropTypes.bool,
+  selectedClass: PropTypes.object,
 };
