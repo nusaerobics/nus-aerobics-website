@@ -103,6 +103,7 @@ export async function PUT(request) {
       const hashedPassword = await bcrypt.hash(password, saltRounds);
       updates = { password: hashedPassword };
     }
+    // TODO: Should have to handle permission and balance at the same time from admin
     if (body.permission != undefined) {
       // TODO: Add check to verify it's either "admin" or "normal"
       const permission = body.permission;

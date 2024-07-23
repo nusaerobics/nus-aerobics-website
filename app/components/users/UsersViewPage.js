@@ -12,21 +12,60 @@ import {
   TableRow,
   TableCell,
 } from "@nextui-org/table";
+import { format } from "date-fns";
 
 export default function UsersViewPage({
   selectedUser,
   closeView,
   userBookings,
 }) {
-  const [permission, setPermission] = useState(new Set([]));
+  const [balance, setBalance] = useState(selectedUser.balance);
+  const [permission, setPermission] = useState(
+    new Set([selectedUser.permission])
+  );
+  const permissions = [
+    { key: "admin", label: "Admin" },
+    { key: "normal", label: "Normal" },
+  ];
+
   const [isEdit, setIsEdit] = useState(false);
   const toggleIsEdit = () => {
     setIsEdit(!isEdit);
   };
 
-  function saveEdit() {
-    // TODO: Handle saving changes made to user
-    return;
+  async function saveEdit() {
+    try {
+      // 1. Update user's account balance
+      const updatedUser = { id: selectedUser.id, balance: balance };
+      const res1 = await fetch("/api/users", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updatedUser),
+      });
+      if (!res1.ok) {
+        throw new Error(`Unable to update user ${selectedUser.id}`);
+      }
+      
+      // 2. Create new transaction of deposit
+      const newTransaction = {
+        userId: selectedUser.id,
+        amount: balance,
+        type: "deposit",
+        description: `Deposited ${balance} credit(s)`,
+      };
+      const res2 = await fetch("/api/transactions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newTransaction),
+      });
+      if (!res2.ok) {
+        throw new Error("Unable to create transaction");
+      }
+      toggleIsEdit();
+      // TODO: Refresh users list in UsersPage
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   return (
@@ -86,7 +125,8 @@ export default function UsersViewPage({
             <p className="text-a-black/50 text-sm">Balance</p>
             <Input
               type="number"
-              value={selectedUser.balance}
+              value={balance}
+              onValueChange={setBalance}
               isDisabled={!isEdit}
               variant="bordered"
               size="xs"
@@ -97,13 +137,16 @@ export default function UsersViewPage({
             <p className="text-a-black/50 text-sm">Status</p>
             <Select
               isDisabled={!isEdit}
+              // TODO: Fix the default value because it's not registering as it did in /page.js
               selectedKeys={permission}
               onSelectionChange={setPermission}
-              // TODO: Fix the default value because it's not registering as it did in /page.js
-              defaultSelectedKeys={[`${selectedUser.permission}`]}
+              defaultSelectedKeys={[selectedUser.permission]}
             >
-              <SelectItem key="admin">Admin</SelectItem>
-              <SelectItem key="normal">User</SelectItem>
+              {permissions.map((permission) => {
+                <SelectItem key={permission.key}>
+                  {permission.label}
+                </SelectItem>;
+              })}
             </Select>
           </div>
         </div>
@@ -111,8 +154,10 @@ export default function UsersViewPage({
       <div className="h-full flex flex-col rounded-[20px] border border-a-black/10 p-5 bg-white gap-y-2.5">
         <SectionTitle title="Bookings" />
         <Table removeWrapper classNames={tableClassNames}>
+          {/* TODO: Unbook user from class through here - opens up modal, unbook (force i.e. no need to check cancellation) */}
           <TableHeader>
             <TableColumn>Class</TableColumn>
+            <TableColumn>Attendance</TableColumn>
             <TableColumn>Class date</TableColumn>
             <TableColumn>Booking date</TableColumn>
           </TableHeader>
@@ -120,9 +165,14 @@ export default function UsersViewPage({
             {userBookings.map((userBooking) => {
               return (
                 <TableRow>
-                  <TableCell>{userBooking.class_id}</TableCell>
-                  <TableCell>{userBooking.class_id}</TableCell>
-                  <TableCell>{userBooking.booking_date}</TableCell>
+                  <TableCell>{userBooking.class.name}</TableCell>
+                  <TableCell>{userBooking.attendance}</TableCell>
+                  <TableCell>
+                    {format(userBooking.class.date, "d/MM/y HH:mm")}
+                  </TableCell>
+                  <TableCell>
+                    {format(userBooking.createdAt, "d/MM/y HH:mm")}
+                  </TableCell>
                 </TableRow>
               );
             })}

@@ -26,10 +26,35 @@ import { useEffect, useState } from "react";
 import { format } from "date-fns";
 
 export default function WalletPage({ user }) {
+  // TODO: Make sure across all pages, this runs first
   useEffect(() => {
     const permission = user.permission;
     setIsAdmin(permission == "admin");
-  });
+
+    if (isAdmin) {
+      const fetchTransactions = async () => {
+        const res = await fetch("/api/transactions", { cache: "force-cache" }); // TODO: Use cache or not?
+        if (!res.ok) {
+          throw new Error(`Unable to get transactions: ${res.status}`);
+        }
+        const data = await res.json();
+        setTransactions(data);
+      };
+      fetchTransactions();
+    } else {
+      const fetchTransactions = async () => {
+        const res = await fetch(`/api/transactions?userId=${user.id}`);
+        if (!res.ok) {
+          throw new Error(
+            `Unable to get transactions for user ${user.id}: ${res.status}`
+          );
+        }
+        const data = await res.json();
+        setTransactions(data);
+      };
+      fetchTransactions();
+    }
+  }, []);
   const [isAdmin, setIsAdmin] = useState(false);
 
   const [searchInput, setSearchInput] = useState("");
@@ -41,32 +66,6 @@ export default function WalletPage({ user }) {
     // TODO: Implement crediting accounts logic
     return;
   }
-
-  useEffect(() => {
-    let fetchTransactions;
-    if (isAdmin) {
-      fetchTransactions = async () => {
-        const res = await fetch("/api/transactions", { cache: "force-cache" }); // TODO: Use cache or not?
-        if (!res.ok) {
-          throw new Error(`Unable to get transactions: ${res.status}`);
-        }
-        const data = await res.json();
-        setTransactions(data);
-      };
-    } else {
-      fetchTransactions = async () => {
-        const res = await fetch(`/api/transactions?userId=${user.id}`);
-        if (!res.ok) {
-          throw new Error(
-            `Unable to get transactions for user ${user.id}: ${res.status}`
-          );
-        }
-        const data = await res.json();
-        setTransactions(data);
-      };
-    }
-    fetchTransactions();
-  }, []);
 
   // TODO: Abstract out Admin and User version
   return (
@@ -174,7 +173,6 @@ export default function WalletPage({ user }) {
       ) : (
         // Start of user Wallet page
         <div className="h-full flex flex-col gap-y-5">
-          
           <PageTitle title="Wallet" />
           <div className="h-1/4 flex flex-row gap-x-5">
             <div className="w-1/2 rounded-[20px] border border-a-black/10 p-5 bg-white">
