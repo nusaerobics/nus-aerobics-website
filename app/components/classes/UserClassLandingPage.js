@@ -24,7 +24,7 @@ import {
   ModalFooter,
   useDisclosure,
 } from "@nextui-org/modal";
-import { Chip, Input, Tabs, Tab } from "@nextui-org/react";
+import { Chip, Input, Tabs, Tab, Tooltip } from "@nextui-org/react";
 import {
   chipClassNames,
   chipTypes,
@@ -35,6 +35,8 @@ import {
 } from "../ClassNames";
 import { PageTitle } from "../Titles";
 import { format } from "date-fns";
+import { fromZonedTime, toZonedTime } from "date-fns-tz";
+import clsx from "clsx";
 
 export default function UserClassLandingPage({
   userId,
@@ -46,6 +48,7 @@ export default function UserClassLandingPage({
   const [searchInput, setSearchInput] = useState("");
   const [selectedClass, setSelectedClass] = useState({});
   const [selectedBooking, setSelectedBooking] = useState({});
+  const [isCancel, setIsCancel] = useState(true);
 
   const { isOpen, onOpen, onOpenChange } = useDisclosure(); // NOTE: Might be able to use useState and handlers instead?
 
@@ -53,11 +56,10 @@ export default function UserClassLandingPage({
     if (selected == "schedule") {
       setSelectedClass(rowData);
     } else {
-      console.log(rowData);
-      console.log(rowData.class);
-
       setSelectedClass(rowData.class);
       setSelectedBooking(rowData);
+      const result = isAllowedCancel(rowData.class);
+      setIsCancel(result);
     }
     onOpen();
   };
@@ -132,9 +134,18 @@ export default function UserClassLandingPage({
     }
   }
 
+  function isAllowedCancel(selectedClass) {
+    const utcDate = fromZonedTime(selectedClass.date, "Asia/Singapore");
+    const sgDate = toZonedTime(utcDate, "Asia/Singapore");
+    const sgCurrentDate = toZonedTime(new Date(), "Asia/Singapore");
+    const cancelDeadline = new Date(sgDate.getTime() + 12 * 60 * 60 * 1000);
+    return sgCurrentDate < cancelDeadline;
+  }
+
   async function unbookClass() {
     /**
      * When user unbooks class,
+     * 1. Check if current time is more than 12 hours before class
      * 1. Delete booking
      * 2. Update class bookedCapacity -= 1
      * 3. Create new transaction of unbooked - "refund"
@@ -242,7 +253,10 @@ export default function UserClassLandingPage({
                       <TableRow key={c.id}>
                         <TableCell>{c.name}</TableCell>
                         <TableCell>
-                          <button className="cursor-pointer" onClick={() => handleClick(c)}>
+                          <button
+                            className="cursor-pointer"
+                            onClick={() => handleClick(c)}
+                          >
                             <MdOpenInNew />
                           </button>
                         </TableCell>
@@ -299,7 +313,10 @@ export default function UserClassLandingPage({
                       <TableRow key={booking.id}>
                         <TableCell>{booking.class.name}</TableCell>
                         <TableCell>
-                          <button className="cursor-pointer"  onClick={() => handleClick(booking)}>
+                          <button
+                            className="cursor-pointer"
+                            onClick={() => handleClick(booking)}
+                          >
                             <MdOpenInNew />
                           </button>
                         </TableCell>
@@ -373,12 +390,22 @@ export default function UserClassLandingPage({
                       Book class
                     </button>
                   ) : (
-                    <button
-                      onClick={() => unbookClass()}
-                      className="rounded-[30px] px-[20px] py-[10px] bg-a-red text-white cursor-pointer"
+                    <Tooltip
+                      content="Classes can only be cancelled 12 hours before"
+                      isDisabled={isCancel}
                     >
-                      Unbook class
-                    </button>
+                      <button
+                        onClick={() => unbookClass()}
+                        disabled={isCancel}
+                        className={clsx("rounded-[30px] px-[20px] py-[10px]", {
+                          "bg-a-red text-white cursor-pointer": isCancel,
+                          "bg-a-red/10 text-a-red cursor-not-allowed":
+                            !isCancel,
+                        })}
+                      >
+                        Unbook class
+                      </button>
+                    </Tooltip>
                   )}
                 </div>
               </ModalFooter>

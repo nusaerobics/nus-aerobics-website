@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { Op } from "sequelize";
+import { Op, fn } from "sequelize";
 
 const db = require("../../config/sequelize");
 const Class = db.classes;
@@ -19,10 +19,18 @@ export async function GET(request) {
       return NextResponse.json(targetClass, { status: 200 });
     }
     
+    // getUpcomingClasses /api/classes?isUpcoming=true
+    if (searchParams.get("isUpcoming") != undefined) {
+      const nowSgTime = fn('CONVERT_TZ', NOW(), '+08:00');
+      const upcomingClasses = await Class.findAll({ where: { date: { [Op.gte]: nowSgTime } } });
+      if (!upcomingClasses) {
+        throw new Error("No upcoming classes");
+      }
+      return NextResponse.json(upcomingClasses, { status: 200 });
+    }
+
     // getClasses
-    // TODO: a) Convert to SGT and b) Test if it filters
-    const now = new Date();
-    const classes = await Class.findAll({ where: { date: { [Op.gte]: now } } });
+    const classes = await Class.findAll();
     return NextResponse.json(classes, { status: 200 });
   } catch (error) {
     console.log(error);
@@ -32,6 +40,7 @@ export async function GET(request) {
     );
   }
 }
+
 /**
  * TODO: Implement filter, sort, search on localStorage of getClasses
  * rather than calling getClasses repeatedly - when getClasses is called,
