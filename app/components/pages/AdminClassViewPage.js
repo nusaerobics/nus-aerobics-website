@@ -2,6 +2,13 @@ import PropTypes from "prop-types";
 
 import { Chip, Input } from "@nextui-org/react";
 import {
+  Dropdown,
+  DropdownTrigger,
+  DropdownMenu,
+  DropdownItem,
+} from "@nextui-org/dropdown";
+
+import {
   Table,
   TableHeader,
   TableBody,
@@ -19,8 +26,7 @@ import {
 } from "@nextui-org/modal";
 
 import { useMemo, useState } from "react";
-import { MdChevronLeft } from "react-icons/md";
-import clsx from "clsx";
+import { MdChevronLeft, MdMoreVert } from "react-icons/md";
 import { format } from "date-fns";
 
 import ClassDetails from "../classes/ClassDetails";
@@ -34,6 +40,7 @@ import {
 } from "../utils/ClassNames";
 import { PageTitle, SectionTitle } from "../utils/Titles";
 import { z } from "zod";
+import clsx from "clsx";
 
 export default function AdminClassViewPage({
   selectedClass,
@@ -60,6 +67,7 @@ export default function AdminClassViewPage({
 
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const [isNoUser, setIsNoUser] = useState(false);
+
   const [email, setEmail] = useState("");
   const validateEmail = (email) => {
     const emailSchema = z.string().email();
@@ -133,9 +141,7 @@ export default function AdminClassViewPage({
 
   // TODO: Add in a loading indicator
   // TODO: Refresh participants list after change
-  async function unbookUser(rowData) {
-    const classBooking = rowData;
-    console.log(classBooking);
+  async function unbookUser(booking) {
     try {
       console.log(selectedClass);
       const newBookedCapacity = selectedClass.bookedCapacity - 1;
@@ -144,10 +150,10 @@ export default function AdminClassViewPage({
       const res1 = await fetch("/api/bookings", {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: classBooking.id }),
+        body: JSON.stringify({ id: booking.id }),
       });
       if (!res1.ok) {
-        throw new Error(`Unable to delete booking ${classBooking.id}`);
+        throw new Error(`Unable to delete booking ${booking.id}`);
       }
 
       // 2. Update class bookedCapacity
@@ -171,7 +177,7 @@ export default function AdminClassViewPage({
 
       // 3. Create new transaction
       const newTransaction = {
-        userId: classBooking.userId,
+        userId: booking.userId,
         amount: 1,
         type: "refund",
         description: `Refunded '${selectedClass.name}'`,
@@ -189,11 +195,9 @@ export default function AdminClassViewPage({
     }
   }
 
-  async function markPresent(rowData) {
+  async function markPresent(booking) {
     try {
-      const classBooking = rowData;
-      console.log(classBooking);
-      const updatedBooking = { id: classBooking.id, attendance: "present" };
+      const updatedBooking = { id: booking.id, attendance: "present" };
       const res = await fetch("/api/bookings", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
@@ -207,139 +211,116 @@ export default function AdminClassViewPage({
     }
   }
 
+  const [selectedBooking, setSelectedBooking] = useState({});
+  const handleClick = (rowData) => {
+    setSelectedBooking(rowData);
+  };
+  const handleDropdown = (key) => {
+    console.log(selectedBooking);
+    switch (key) {
+      case "mark":
+        // TODO: Fix because it's able to mark it present in DB but not being reflected in list
+        markPresent(selectedBooking);
+        return;
+      case "unbook":
+        console.log("unbook");
+        unbookUser(selectedBooking);
+        return;
+    }
+  };
+
   return (
     <>
       <div className="flex flex-row items-center gap-x-2.5">
         {/* TODO: If isEdit or isManage, go back to Classes. Else, go to not isEdit and not isManage */}
         <button
           className="cursor-pointer"
-          onClick={isEdit || isManage ? revert : closeView}
+          onClick={closeView}
         >
           <MdChevronLeft color="#1F4776" size={42} />
         </button>
-        <PageTitle title={title} />
-        {!isEdit && !isManage ? (
-          <Chip classNames={chipClassNames[selectedClass.status]}>
-            {chipTypes[selectedClass.status].message}
-          </Chip>
-        ) : (
-          <></>
-        )}
+        <PageTitle title={selectedClass.name} />
+        <Chip classNames={chipClassNames[selectedClass.status]}>
+          {chipTypes[selectedClass.status].message}
+        </Chip>
       </div>
 
-      {!isManage ? (
-        <div className="h-full w-full flex flex-col gap-y-5 p-5 rounded-[20px] border border-a-black/10 bg-white">
-          {isEdit ? (
-            <ClassForm isCreate={false} selectedClass={selectedClass} />
-          ) : (
-            <ClassDetails
-              selectedClass={selectedClass}
-              toggleIsEdit={toggleIsEdit}
-            />
-          )}
-        </div>
-      ) : (
-        <></>
-      )}
-
-      {!isEdit ? (
-        <div className="h-full w-full flex flex-col p-5 rounded-[20px] border border-a-black/10 bg-white gap-y-2.5">
-          <div className="flex flex-row justify-between">
-            <SectionTitle title="Participants" />
-            {isManage ? (
-              <button
-                onClick={onOpen}
-                className="h-[36px] rounded-[30px] px-[20px] bg-white border-1 border-a-navy text-a-navy text-sm cursor-pointer"
-              >
-                Add participant
-              </button>
-            ) : (
-              <button
-                onClick={toggleIsManage}
-                className="h-[36px] rounded-[30px] px-[20px] bg-a-navy text-white text-sm cursor-pointer"
-              >
-                Manage class
-              </button>
+      <div className="h-full w-full flex flex-col gap-y-5 p-5 rounded-[20px] border border-a-black/10 bg-white">
+        {isEdit ? (
+          <ClassForm
+            isCreate={false}
+            selectedClass={selectedClass}
+            toggleIsEdit={toggleIsEdit}
+          />
+        ) : (
+          <ClassDetails
+            selectedClass={selectedClass}
+            toggleIsEdit={toggleIsEdit}
+          />
+        )}
+      </div>
+      <div className="h-full w-full flex flex-col p-5 rounded-[20px] border border-a-black/10 bg-white gap-y-2.5">
+        <div className="flex flex-row justify-between">
+          <SectionTitle title="Participants" />
+          <button
+            onClick={onOpen}
+            disabled={isEdit}
+            className={clsx(
+              "h-[36px] rounded-[30px] px-[20px] text-sm",
+              {
+                "bg-a-navy text-white cursor-pointer": !isEdit,
+                "bg-a-navy/20 text-white cursor-not-allowed": isEdit,
+              }
             )}
-          </div>
-          {isManage ? (
-            <Table removeWrapper classNames={tableClassNames}>
-              <TableHeader>
-                <TableColumn>Name</TableColumn>
-                <TableColumn>Email</TableColumn>
-                <TableColumn>Attendance</TableColumn>
-                <TableColumn></TableColumn>
-              </TableHeader>
-              <TableBody>
-                {classBookings.map((classBooking) => {
-                  return (
-                    <TableRow key={classBooking.id}>
-                      <TableCell>{classBooking.user.name}</TableCell>
-                      <TableCell>{classBooking.user.email}</TableCell>
-                      <TableCell>
-                        {/* TODO: Change styling since it looks like the chip not a button */}
-                        <button
-                          onClick={() => markPresent(classBooking)}
-                          disabled={classBooking.attendance == "present"}
-                          className={clsx(
-                            "rounded-[30px] px-[20px] py-[10px] text-sm cursor-pointer",
-                            {
-                              "bg-a-green/10 text-a-green":
-                                classBooking.attendance == "absent",
-                              "bg-a-black/10 text-a-black/50":
-                                classBooking.attendance == "present",
-                            }
-                          )}
-                        >
-                          Mark present
-                        </button>
-                      </TableCell>
-                      <TableCell>
-                        <button
-                          onClick={() => unbookUser(classBooking)}
-                          className="rounded-[30px] px-[20px] py-[10px] bg-a-red text-white text-sm cursor-pointer"
-                        >
-                          Unbook
-                        </button>
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
-          ) : (
-            <Table removeWrapper classNames={tableClassNames}>
-              <TableHeader>
-                <TableColumn>Name</TableColumn>
-                <TableColumn>Email</TableColumn>
-                <TableColumn>Attendance</TableColumn>
-                <TableColumn>Booking date</TableColumn>
-              </TableHeader>
-              <TableBody>
-                {classBookings.map((classBooking) => {
-                  return (
-                    <TableRow key={classBooking.id}>
-                      <TableCell>{classBooking.user.name}</TableCell>
-                      <TableCell>{classBooking.user.email}</TableCell>
-                      <TableCell>{classBooking.attendance}</TableCell>
-                      <TableCell>
-                        {format(classBooking.createdAt, "d/MM/y HH:mm")}
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
-          )}
+          >
+            Add participant
+          </button>
         </div>
-      ) : (
-        <></>
-      )}
+        <Table removeWrapper classNames={tableClassNames}>
+          <TableHeader>
+            <TableColumn>Name</TableColumn>
+            <TableColumn>Email</TableColumn>
+            <TableColumn>Attendance</TableColumn>
+            <TableColumn>Booking date</TableColumn>
+            <TableColumn></TableColumn>
+          </TableHeader>
+          <TableBody>
+            {classBookings.map((classBooking) => {
+              return (
+                <TableRow key={classBooking.id}>
+                  <TableCell>{classBooking.user.name}</TableCell>
+                  <TableCell>{classBooking.user.email}</TableCell>
+                  <TableCell>{classBooking.attendance}</TableCell>
+                  <TableCell>
+                    {format(classBooking.createdAt, "d/MM/y HH:mm")}
+                  </TableCell>
+                  <TableCell>
+                    <Dropdown>
+                      <DropdownTrigger>
+                        <button
+                          className="cursor-pointer"
+                          onClick={() => handleClick(classBooking)}
+                        >
+                          <MdMoreVert size={24} />
+                        </button>
+                      </DropdownTrigger>
+                      <DropdownMenu onAction={(key) => handleDropdown(key)}>
+                        <DropdownItem key="mark">Mark present</DropdownItem>
+                        <DropdownItem key="unbook">Unbook user</DropdownItem>
+                      </DropdownMenu>
+                    </Dropdown>
+                  </TableCell>
+                </TableRow>
+              );
+            })}
+          </TableBody>
+        </Table>
+      </div>
 
       <Modal
         isOpen={isOpen}
         onOpenChange={onOpenChange}
-        size="2xl"
+        size="md"
         backdrop="opaque"
         classNames={modalClassNames}
       >

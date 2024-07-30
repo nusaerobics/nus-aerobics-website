@@ -124,7 +124,7 @@ export default function DashboardPage({ user }) {
   return (
     <>
       {isAdmin ? (
-        <div className="h-full flex flex-col gap-y-5">
+        <div className="w-full h-full flex flex-col gap-y-5 p-10 pt-20 overflow-y-scroll">
           {/* TODO: This page should be under app/page.js probably */}
           <PageTitle title="Dashboard" />
           <div className="h-full flex flex-row gap-x-5">
@@ -229,7 +229,6 @@ export default function DashboardPage({ user }) {
                         <TableRow key={transaction.id}>
                           <TableCell>
                             {transaction.description}
-                            {/* {transaction.description.split(" ")[0]} */}
                           </TableCell>
                           <TableCell>{transaction.amount}</TableCell>
                         </TableRow>

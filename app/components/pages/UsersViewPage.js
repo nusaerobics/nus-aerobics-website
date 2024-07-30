@@ -69,7 +69,7 @@ export default function UsersViewPage({
   }
 
   return (
-    <div className="h-full flex flex-col gap-y-5">
+    <div className="h-full flex flex-col gap-y-5 p-10 pt-20 overflow-y-scroll">
       <div className="flex flex-row items-center gap-x-5">
         <button className="cursor-pointer" onClick={closeView}>
           <MdChevronLeft color="#1F4776" size={42} />

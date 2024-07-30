@@ -71,7 +71,7 @@ export default function WalletPage({ user }) {
   return (
     <>
       {isAdmin ? (
-        <div className="h-full flex flex-col gap-y-5">
+        <div className="h-full flex flex-col gap-y-5 p-10 pt-20 overflow-y-scroll">
           <div className="flex flex-row items-center justify-between">
             <PageTitle title="Wallet" />
             <button
@@ -172,7 +172,7 @@ export default function WalletPage({ user }) {
         </div>
       ) : (
         // Start of user Wallet page
-        <div className="h-full flex flex-col gap-y-5">
+        <div className="h-full flex flex-col gap-y-5 p-10 pt-20 overflow-y-scroll">
           <PageTitle title="Wallet" />
           <div className="h-1/4 flex flex-row gap-x-5">
             <div className="w-1/2 rounded-[20px] border border-a-black/10 p-5 bg-white">

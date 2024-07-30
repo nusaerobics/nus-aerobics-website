@@ -18,7 +18,7 @@ export default function UsersLandingPage({ users, openView }) {
   const [searchInput, setSearchInput] = useState("");
 
   return (
-    <div className="h-full flex flex-col gap-y-5">
+    <div className="h-full flex flex-col gap-y-5 p-10 pt-20 overflow-y-scroll">
       <PageTitle title="Users" />
       <div className="h-full flex flex-col rounded-[20px] border border-a-black/10 p-5 bg-white gap-y-2.5">
         <div className="self-end w-1/4">
