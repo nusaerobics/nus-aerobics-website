@@ -142,7 +142,7 @@ export default function Page() {
 
   return (
     <div className="w-screen h-screen flex flex-row justify-center p-8 bg-a-pink/80">
-      <div className="w-[400px] flex flex-col justify-center overflow-scroll p-5 gap-y-5 rounded-[20px] border border-a-black/10 bg-white">
+      <div className="w-[400px] h-full flex flex-col justify-center p-5 gap-y-5 rounded-[20px] border border-a-black/10 bg-white">
         <div className="w-full flex flex-col items-center gap-y-5">
           <p className="font-display font-bold text-2xl text-a-navy text-center">
             NUS AEROBICS
@@ -151,7 +151,7 @@ export default function Page() {
             {message}
           </p>
         </div>
-        <div className="w-full flex flex-col gap-y-1">
+        <div className="w-full flex flex-col gap-y-2.5">
           {!isLogin ? (
             <Input
               label="Full name"
@@ -196,7 +196,7 @@ export default function Page() {
                 )}
               </button>
             }
-            isInvalid={isInvalidPW}
+            isInvalid={!isLogin && isInvalidPW}
             errorMessage="Password should be at least 5 characters"
             isRequired
             variant="bordered"
@@ -234,25 +234,24 @@ export default function Page() {
           )}
           {/* TODO: Implement handling forgot password */}
           {isLogin ? (
-            <button className="text-end text-xs text-a-navy font-bold underline">
+            <button className="text-end text-sm text-a-navy font-bold underline">
               Forgot password?
             </button>
           ) : (
             <></>
           )}
         </div>
-        <div className="w-full flex flex-col gap-y-1">
+        <div className="w-full flex flex-col gap-y-2.5">
           <button
             className="rounded-[30px] px-[20px] py-[10px] bg-a-navy text-sm text-white cursor-pointer"
             onClick={isLogin ? handleLogin : handleSignUp}
           >
             {button}
           </button>
-
           <div className="w-full flex flex-row justify-center gap-x-1">
-            <p className="text-xs text-a-black">{bottomAction}</p>
+            <p className="text-sm text-a-black">{bottomAction}</p>
             <button
-              className="text-end text-xs text-a-navy font-bold underline cursor-pointer"
+              className="text-end text-sm text-a-navy font-bold underline cursor-pointer"
               onClick={toggleIsLogin}
             >
               {bottomButton}
