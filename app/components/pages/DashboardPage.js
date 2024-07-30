@@ -15,11 +15,15 @@ import { PageTitle, SectionTitle } from "../utils/Titles";
 import { useEffect, useState } from "react";
 import PropTypes from "prop-types";
 import { fromZonedTime, toZonedTime } from "date-fns-tz";
+import { useRouter } from "next/navigation";
 
 export default function DashboardPage({ user }) {
   const [isAdmin, setIsAdmin] = useState(false);
-  const [userTransactions, setUserTransactions] = useState([]);
+  const [transactions, setTransactions] = useState([]);
   const [bookings, setBookings] = useState([]);
+  const [classes, setClasses] = useState([]);
+
+  const router = useRouter();
 
   useEffect(() => {
     const permission = user.permission;
@@ -29,7 +33,7 @@ export default function DashboardPage({ user }) {
 
   useEffect(() => {
     if (!isAdmin) {
-      const fetchUserTransactions = async () => {
+      const fetchTransactions = async () => {
         try {
           const res = await fetch(`/api/transactions?userId=${user.id}`);
           if (!res.ok) {
@@ -39,13 +43,13 @@ export default function DashboardPage({ user }) {
           }
           const data = await res.json();
           const recentTransactions = data.slice(-5);
-          setUserTransactions(recentTransactions);
+          setTransactions(recentTransactions);
         } catch (error) {
           console.log(error);
         }
       };
-      fetchUserTransactions();
-      
+      fetchTransactions();
+
       const fetchBookings = async () => {
         try {
           const res = await fetch(`/api/bookings?userId=${user.id}`);
@@ -73,8 +77,49 @@ export default function DashboardPage({ user }) {
         }
       };
       fetchBookings();
+    } else {
+      const fetchClasses = async () => {
+        try {
+          const res = await fetch("api/classes");
+          if (!res.ok) {
+            throw new Error(
+              `Unable to get bookings for user ${user.id}: ${res.status}`
+            );
+          }
+          const data = await res.json();
+          const todayClasses = data.filter((c) => {
+            const utcClassDate = fromZonedTime(c.date, "Asia/Singapore");
+            const sgClassDate = toZonedTime(utcClassDate, "Asia/Singapore");
+            const sgCurrentDate = toZonedTime(new Date(), "Asia/Singapore");
+
+            const sgClassYear = sgClassDate.getFullYear();
+            const sgClassMonth = sgClassDate.getMonth();
+            const sgClassDay = sgClassDate.getDate();
+
+            const sgCurrentYear = sgCurrentDate.getFullYear();
+            const sgCurrentMonth = sgCurrentDate.getMonth();
+            const sgCurrentDay = sgCurrentDate.getDate();
+
+            return (
+              sgClassYear == sgCurrentYear &&
+              sgClassMonth == sgCurrentMonth &&
+              sgClassDay == sgCurrentDay
+            );
+          });
+          setClasses(todayClasses);
+        } catch (error) {
+          console.log(error);
+        }
+      };
+      fetchClasses();
     }
   }, []);
+
+  const handleClick = (rowData) => {
+    router.push("/dashboard/classes");
+    // TODO: Go to specific page details for that class
+    // router.push(`/dashboard/classes/${rowData.id}`);
+  };
 
   return (
     <>
@@ -85,52 +130,67 @@ export default function DashboardPage({ user }) {
           <div className="h-full flex flex-row gap-x-5">
             <div className="h-full w-2/3 flex flex-col p-5 gap-y-2.5 bg-white rounded-[20px] border border-a-black/10">
               <SectionTitle title="Today's classes" />
-              {/* {upcomingClasses.map((upcomingClass) => {
-                return (
-                  <ClassCard
-                    key={upcomingClass.name}
-                    name={upcomingClass.name}
-                    date={upcomingClass.date}
-                  />
-                );
-              })} */}
+              {classes.length == 0 ? (
+                <p>No classes today</p>
+              ) : (
+                <>
+                  {classes.map((c) => {
+                    return (
+                      <div
+                        key={c.id}
+                        className="flex flex-col gap-y-2.5 p-2.5 rounded-[20px] border-l-[4px] border-l-a-navy bg-a-navy/10"
+                      >
+                        <div className="flex flex-col">
+                          <p className="font-bold text-base">{c.name}</p>
+                          <p>{format(c.date, "d/MM/y HH:mm")}</p>
+                        </div>
+                        <div className="flex justify-end">
+                          <button
+                            onClick={() => handleClick(c)}
+                            className="rounded-[30px] px-[20px] py-[10px] bg-a-navy text-white cursor-pointer"
+                          >
+                            View details
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </>
+              )}
             </div>
             <div className="h-full w-1/3 flex flex-col gap-y-5">
               <div className="h-1/4 flex flex-col justify-center p-5 bg-white rounded-[20px] border border-a-black/10">
-                <div className="flex flex-row gap-x-1">
-                  <p className="font-poppins font-bold text-a-navy text-5xl">
+                <div className="flex flex-row items-end gap-x-1">
+                  {/* TODO: Figure out how to count these values */}
+                  <p className="font-poppins font-bold text-a-navy text-3xl">
                     1500
                   </p>
-                  <p className="font-bold text-a-navy text-2xl">/ 3000</p>
+                  <p className="font-bold text-a-navy text-xl">/ 3000</p>
                 </div>
-                <p className="font-poppins text-a-navy text-2xl">
-                  credits sold
-                </p>
+                <p className="font-poppins text-a-navy text-xl">credits sold</p>
               </div>
               <div className="h-1/4 flex flex-col justify-center p-5 bg-white rounded-[20px] border border-a-black/10">
-                <p className="font-poppins font-bold text-a-navy text-5xl">
+                <p className="font-poppins font-bold text-a-navy text-3xl">
                   10
                 </p>
-                <p className="font-poppins text-a-navy text-2xl">
+                <p className="font-poppins text-a-navy text-xl">
                   credits unused
                 </p>
               </div>
               <div className="h-1/4 flex flex-col justify-center p-5 bg-white rounded-[20px] border border-a-black/10">
-                <div className="flex flex-row gap-x-1">
-                  <p className="font-poppins font-bold text-a-navy text-5xl">
+                <div className="flex flex-row items-end gap-x-1">
+                  <p className="font-poppins font-bold text-a-navy text-3xl">
                     1000
                   </p>
-                  <p className="font-bold text-a-navy text-2xl">/ 2850</p>
+                  <p className="font-bold text-a-navy text-xl">/ 2850</p>
                 </div>
-                <p className="font-poppins text-a-navy text-2xl">
-                  slots booked
-                </p>
+                <p className="font-poppins text-a-navy text-xl">slots booked</p>
               </div>
               <div className="h-1/4 flex flex-col justify-center p-5 bg-white rounded-[20px] border border-a-black/10">
-                <p className="font-poppins font-bold text-a-navy text-5xl">
+                <p className="font-poppins font-bold text-a-navy text-3xl">
                   100
                 </p>
-                <p className="font-poppins text-a-navy text-2xl">
+                <p className="font-poppins text-a-navy text-xl">
                   active members
                 </p>
               </div>
@@ -139,18 +199,12 @@ export default function DashboardPage({ user }) {
         </div>
       ) : (
         <div className="h-full flex flex-col gap-y-5">
-          {/* TODO: This page should be under app/page.js probably */}
           <PageTitle title="Dashboard" />
           <div className="h-full flex flex-row gap-x-5">
             <div className="h-full w-2/3 flex flex-col p-5 gap-y-2.5 bg-white rounded-[20px] border border-a-black/10">
               <SectionTitle title="Upcoming classes" />
               {bookings.map((booking) => {
-                return (
-                  <ClassCard
-                    key={booking.id}
-                    booking={booking}
-                  />
-                );
+                return <ClassCard key={booking.id} booking={booking} />;
               })}
             </div>
             <div className="h-full w-1/3 flex flex-col gap-y-5">
@@ -170,7 +224,7 @@ export default function DashboardPage({ user }) {
                     <TableColumn>Amount</TableColumn>
                   </TableHeader>
                   <TableBody>
-                    {userTransactions.map((transaction) => {
+                    {transactions.map((transaction) => {
                       return (
                         <TableRow key={transaction.id}>
                           <TableCell>

@@ -14,7 +14,6 @@ export default function ClassCard({ booking }) {
           <p>{format(booking.class.date, "d/MM/y HH:mm")}</p>
         </div>
         <div className="flex justify-end">
-          {/* TODO: On clicking button, open modal similar to one in Classes with the details */}
           <button
             onClick={onOpen}
             className="rounded-[30px] px-[20px] py-[10px] bg-a-navy text-white cursor-pointer"
