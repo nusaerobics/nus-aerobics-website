@@ -57,6 +57,7 @@ export default function UsersLandingPage({ users, openView }) {
             })}
           </TableBody>
         </Table>
+        
       </div>
     </div>
   );

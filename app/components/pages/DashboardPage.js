@@ -198,7 +198,7 @@ export default function DashboardPage({ user }) {
           </div>
         </div>
       ) : (
-        <div className="h-full flex flex-col gap-y-5">
+        <div className="h-full flex flex-col gap-y-5 p-10 pt-20 overflow-y-scroll">
           <PageTitle title="Dashboard" />
           <div className="h-full flex flex-row gap-x-5">
             <div className="h-full w-2/3 flex flex-col p-5 gap-y-2.5 bg-white rounded-[20px] border border-a-black/10">
