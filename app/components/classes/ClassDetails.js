@@ -5,7 +5,7 @@ import {
   MdPersonOutline,
 } from "react-icons/md";
 import { format } from "date-fns";
-import { SectionTitle } from "../Titles";
+import { SectionTitle } from "../utils/Titles";
 
 export default function AdminClassDetails({ selectedClass, toggleIsEdit }) {
   return (

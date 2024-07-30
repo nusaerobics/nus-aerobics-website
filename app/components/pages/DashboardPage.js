@@ -8,17 +8,18 @@ import {
   TableRow,
   TableCell,
 } from "@nextui-org/table";
-import { PageTitle, SectionTitle } from "../Titles";
 import ClassCard from "../dashboard/ClassCard";
-import { upcomingClasses } from "../Data";
-import { tableClassNames } from "../ClassNames";
+import { tableClassNames } from "../utils/ClassNames";
+import { PageTitle, SectionTitle } from "../utils/Titles";
+
 import { useEffect, useState } from "react";
-import { format } from "date-fns";
+import PropTypes from "prop-types";
+import { fromZonedTime, toZonedTime } from "date-fns-tz";
 
 export default function DashboardPage({ user }) {
   const [isAdmin, setIsAdmin] = useState(false);
   const [userTransactions, setUserTransactions] = useState([]);
-  const [userBookings, setUserBookings] = useState([]);
+  const [bookings, setBookings] = useState([]);
 
   useEffect(() => {
     const permission = user.permission;
@@ -37,14 +38,15 @@ export default function DashboardPage({ user }) {
             );
           }
           const data = await res.json();
-          setUserTransactions(data);
+          const recentTransactions = data.slice(-5);
+          setUserTransactions(recentTransactions);
         } catch (error) {
           console.log(error);
         }
       };
       fetchUserTransactions();
-
-      const fetchUserBookings = async () => {
+      
+      const fetchBookings = async () => {
         try {
           const res = await fetch(`/api/bookings?userId=${user.id}`);
           if (!res.ok) {
@@ -53,12 +55,24 @@ export default function DashboardPage({ user }) {
             );
           }
           const data = await res.json();
-          setUserBookings(data);
+          // TODO: Move this to be filtered in fetch instead? filter((booking) => booking.date >= now)
+          const upcomingBookings = data
+            .filter((booking) => {
+              const utcClassDate = fromZonedTime(
+                booking.class.date,
+                "Asia/Singapore"
+              );
+              const sgClassDate = toZonedTime(utcClassDate, "Asia/Singapore");
+              const sgCurrentDate = toZonedTime(new Date(), "Asia/Singapore");
+              return sgClassDate >= sgCurrentDate;
+            })
+            .slice(0, 3);
+          setBookings(upcomingBookings);
         } catch (error) {
           console.log(error);
         }
       };
-      fetchUserBookings();
+      fetchBookings();
     }
   }, []);
 
@@ -71,7 +85,7 @@ export default function DashboardPage({ user }) {
           <div className="h-full flex flex-row gap-x-5">
             <div className="h-full w-2/3 flex flex-col p-5 gap-y-2.5 bg-white rounded-[20px] border border-a-black/10">
               <SectionTitle title="Today's classes" />
-              {upcomingClasses.map((upcomingClass) => {
+              {/* {upcomingClasses.map((upcomingClass) => {
                 return (
                   <ClassCard
                     key={upcomingClass.name}
@@ -79,7 +93,7 @@ export default function DashboardPage({ user }) {
                     date={upcomingClass.date}
                   />
                 );
-              })}
+              })} */}
             </div>
             <div className="h-full w-1/3 flex flex-col gap-y-5">
               <div className="h-1/4 flex flex-col justify-center p-5 bg-white rounded-[20px] border border-a-black/10">
@@ -130,12 +144,11 @@ export default function DashboardPage({ user }) {
           <div className="h-full flex flex-row gap-x-5">
             <div className="h-full w-2/3 flex flex-col p-5 gap-y-2.5 bg-white rounded-[20px] border border-a-black/10">
               <SectionTitle title="Upcoming classes" />
-              {userBookings.map((userBooking) => {
+              {bookings.map((booking) => {
                 return (
                   <ClassCard
-                    key={userBooking.id}
-                    name={userBooking.class.name}
-                    date={format(userBooking.class.date, "d/MM/y HH:mm")}
+                    key={booking.id}
+                    booking={booking}
                   />
                 );
               })}
@@ -178,3 +191,7 @@ export default function DashboardPage({ user }) {
     </>
   );
 }
+
+DashboardPage.propTypes = {
+  user: PropTypes.object,
+};

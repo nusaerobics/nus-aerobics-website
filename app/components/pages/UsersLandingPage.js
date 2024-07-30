@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { PageTitle } from "../Titles";
-import { inputClassNames, tableClassNames } from "../ClassNames";
+import { PageTitle } from "../utils/Titles";
+import { inputClassNames, tableClassNames } from "../utils/ClassNames";
 import { MdOpenInNew } from "react-icons/md";
 import { Input } from "@nextui-org/input";
 import {

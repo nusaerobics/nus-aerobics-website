@@ -1,10 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import AdminClassViewPage from "../classes/AdminClassViewPage";
-import AdminClassCreatePage from "../classes/AdminClassCreatePage";
-import AdminClassLandingPage from "../classes/AdminClassLandingPage";
-import UserClassLandingPage from "../classes/UserClassLandingPage";
+import AdminClassViewPage from "./AdminClassViewPage";
+import AdminClassCreatePage from "./AdminClassCreatePage";
+import AdminClassLandingPage from "./AdminClassLandingPage";
+import UserClassLandingPage from "./UserClassLandingPage";
 
 export default function ClassesPage({ user }) {
   useEffect(() => {

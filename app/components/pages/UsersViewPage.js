@@ -1,5 +1,5 @@
-import { PageTitle, SectionTitle } from "../Titles";
-import { inputClassNames, tableClassNames } from "../ClassNames";
+import { PageTitle, SectionTitle } from "../utils/Titles";
+import { inputClassNames, tableClassNames } from "../utils/ClassNames";
 import { useState } from "react";
 import { MdChevronLeft } from "react-icons/md";
 import { Select, SelectItem } from "@nextui-org/select";

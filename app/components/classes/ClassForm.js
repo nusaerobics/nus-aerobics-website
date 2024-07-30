@@ -5,9 +5,9 @@
 import PropTypes from "prop-types";
 
 import { Input, Switch, Textarea } from "@nextui-org/react";
-import { inputClassNames, switchClassNames } from "../ClassNames";
+import { inputClassNames, switchClassNames } from "../utils/ClassNames";
 import { useState } from "react";
-import { SectionTitle } from "../Titles";
+import { SectionTitle } from "../utils/Titles";
 import { z } from "zod";
 import { format } from "date-fns";
 import { fromZonedTime, toZonedTime } from "date-fns-tz";

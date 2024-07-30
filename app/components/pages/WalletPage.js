@@ -16,12 +16,12 @@ import {
   TableCell,
 } from "@nextui-org/table";
 import { Input } from "@nextui-org/react";
-import { PageTitle, SectionTitle } from "../../components/Titles";
+import { PageTitle, SectionTitle } from "../utils/Titles";
 import {
   inputClassNames,
   modalClassNames,
   tableClassNames,
-} from "../../components/ClassNames";
+} from "../utils/ClassNames";
 import { useEffect, useState } from "react";
 import { format } from "date-fns";
 
@@ -217,7 +217,7 @@ export default function WalletPage({ user }) {
                   return (
                     <TableRow key={transaction.id}>
                       <TableCell>
-                        {format(transaction.createdAt, "d/MM/yyy HH:mm")}
+                        {format(transaction.createdAt, "d/MM/y HH:mm")}
                       </TableCell>
                       <TableCell>{transaction.amount}</TableCell>
                       <TableCell>{transaction.userId}</TableCell>

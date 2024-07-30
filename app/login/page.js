@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import { Input } from "@nextui-org/react";
 import { MdVisibility, MdVisibilityOff } from "react-icons/md";
-import { inputClassNames } from "../components/ClassNames";
+import { inputClassNames } from "../components/utils/ClassNames";
 import { useRouter } from "next/navigation";
 import { z } from "zod";
 

@@ -23,16 +23,16 @@ import { MdChevronLeft } from "react-icons/md";
 import clsx from "clsx";
 import { format } from "date-fns";
 
-import AdminClassDetails from "./AdminClassDetails";
-import AdminClassForm from "./AdminClassForm";
+import ClassDetails from "../classes/ClassDetails";
+import ClassForm from "../classes/ClassForm";
 import {
   chipClassNames,
   chipTypes,
   inputClassNames,
   modalClassNames,
   tableClassNames,
-} from "../ClassNames";
-import { PageTitle, SectionTitle } from "../Titles";
+} from "../utils/ClassNames";
+import { PageTitle, SectionTitle } from "../utils/Titles";
 import { z } from "zod";
 
 export default function AdminClassViewPage({
@@ -211,7 +211,10 @@ export default function AdminClassViewPage({
     <>
       <div className="flex flex-row items-center gap-x-2.5">
         {/* TODO: If isEdit or isManage, go back to Classes. Else, go to not isEdit and not isManage */}
-        <button className="cursor-pointer"  onClick={isEdit || isManage ? revert : closeView}>
+        <button
+          className="cursor-pointer"
+          onClick={isEdit || isManage ? revert : closeView}
+        >
           <MdChevronLeft color="#1F4776" size={42} />
         </button>
         <PageTitle title={title} />
@@ -227,9 +230,9 @@ export default function AdminClassViewPage({
       {!isManage ? (
         <div className="h-full w-full flex flex-col gap-y-5 p-5 rounded-[20px] border border-a-black/10 bg-white">
           {isEdit ? (
-            <AdminClassForm isCreate={false} selectedClass={selectedClass} />
+            <ClassForm isCreate={false} selectedClass={selectedClass} />
           ) : (
-            <AdminClassDetails
+            <ClassDetails
               selectedClass={selectedClass}
               toggleIsEdit={toggleIsEdit}
             />

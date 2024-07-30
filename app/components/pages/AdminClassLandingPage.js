@@ -1,6 +1,6 @@
 import PropTypes from "prop-types"
-import { PageTitle } from "../Titles";
-import { chipClassNames, chipTypes, inputClassNames, tableClassNames } from "../ClassNames";
+import { PageTitle } from "../utils/Titles";
+import { chipClassNames, chipTypes, inputClassNames, tableClassNames } from "../utils/ClassNames";
 import { format } from "date-fns";
 import { MdEdit } from "react-icons/md";
 import {
