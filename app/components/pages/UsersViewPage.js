@@ -1,6 +1,6 @@
 import { PageTitle, SectionTitle } from "../utils/Titles";
 import { inputClassNames, tableClassNames } from "../utils/ClassNames";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { MdChevronLeft } from "react-icons/md";
 import { Select, SelectItem } from "@nextui-org/select";
 import { Input } from "@nextui-org/input";
@@ -13,6 +13,7 @@ import {
   TableCell,
 } from "@nextui-org/table";
 import { format } from "date-fns";
+import { Pagination } from "@nextui-org/react";
 
 export default function UsersViewPage({
   selectedUser,
@@ -27,6 +28,16 @@ export default function UsersViewPage({
     { key: "admin", label: "Admin" },
     { key: "normal", label: "Normal" },
   ];
+
+  const [page, setPage] = useState(1);
+  const rowsPerPage = 10;
+
+  const bookingPages = Math.ceil(userBookings.length / rowsPerPage);
+  const bookingItems = useMemo(() => {
+    const start = (page - 1) * rowsPerPage;
+    const end = start + rowsPerPage;
+    return userBookings.slice(start, end);
+  }, [page, userBookings]);
 
   const [isEdit, setIsEdit] = useState(false);
   const toggleIsEdit = () => {
@@ -45,7 +56,7 @@ export default function UsersViewPage({
       if (!res1.ok) {
         throw new Error(`Unable to update user ${selectedUser.id}`);
       }
-      
+
       // 2. Create new transaction of deposit
       const newTransaction = {
         userId: selectedUser.id,
@@ -162,7 +173,7 @@ export default function UsersViewPage({
             <TableColumn>Booking date</TableColumn>
           </TableHeader>
           <TableBody>
-            {userBookings.map((userBooking) => {
+            {bookingItems.map((userBooking) => {
               return (
                 <TableRow>
                   <TableCell>{userBooking.class.name}</TableCell>
@@ -179,6 +190,18 @@ export default function UsersViewPage({
             ;
           </TableBody>
         </Table>
+        <div className="flex flex-row justify-center">
+          <Pagination
+            showControls
+            isCompact
+            color="primary"
+            size="sm"
+            loop={true}
+            page={page}
+            total={bookingPages}
+            onChange={(page) => setPage(page)}
+          />
+        </div>
       </div>
     </div>
   );
