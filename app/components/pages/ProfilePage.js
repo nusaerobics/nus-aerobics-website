@@ -2,9 +2,8 @@
 
 import { MdEdit, MdVisibility, MdVisibilityOff } from "react-icons/md";
 import { Checkbox, Input } from "@nextui-org/react";
-import { PageTitle, SectionTitle } from "../../components/Titles";
-import { PrimaryButton, SecondaryButton } from "../../components/Buttons";
-import { inputClassNames } from "../../components/ClassNames";
+import { PageTitle, SectionTitle } from "../utils/Titles";
+import { inputClassNames } from "../utils/ClassNames";
 import { useState } from "react";
 
 export default function ProfilePage({ user }) {
@@ -29,7 +28,7 @@ export default function ProfilePage({ user }) {
   };
 
   return (
-    <div className="flex flex-col gap-y-5">
+    <div className="flex flex-col gap-y-5 p-10 pt-20 overflow-y-scroll">
       <PageTitle title="Profile" />
       <div className="h-1/2 flex flex-col rounded-[20px] border border-a-black/10 p-5 bg-white gap-y-2.5">
         <div className="flex flex-row items-center gap-x-2.5">
@@ -145,8 +144,6 @@ export default function ProfilePage({ user }) {
         <div className="flex flex-row justify-end gap-x-2.5">
           {/* TODO: Change this because it won't handle the function - unless pass the funciton in ProfilePage 
           as a prop, then call the function inside the button */}
-          <SecondaryButton label="Cancel" />
-          <PrimaryButton label="Save changes" />
         </div>
       </div>
     </div>

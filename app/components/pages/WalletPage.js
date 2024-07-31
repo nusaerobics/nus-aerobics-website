@@ -15,25 +15,28 @@ import {
   TableRow,
   TableCell,
 } from "@nextui-org/table";
-import { Input } from "@nextui-org/react";
-import { PageTitle, SectionTitle } from "../../components/Titles";
+import { Input, Pagination } from "@nextui-org/react";
+import { PageTitle, SectionTitle } from "../utils/Titles";
 import {
   inputClassNames,
   modalClassNames,
   tableClassNames,
-} from "../../components/ClassNames";
-import { useEffect, useState } from "react";
+} from "../utils/ClassNames";
+import { useEffect, useMemo, useState } from "react";
 import { format } from "date-fns";
 
 export default function WalletPage({ user }) {
-  // TODO: Make sure across all pages, this runs first
+  const [isAdmin, setIsAdmin] = useState(false);
+
   useEffect(() => {
     const permission = user.permission;
     setIsAdmin(permission == "admin");
 
-    if (isAdmin) {
+    if (permission == "admin") {
+      console.log("isAdmin here");
       const fetchTransactions = async () => {
-        const res = await fetch("/api/transactions", { cache: "force-cache" }); // TODO: Use cache or not?
+        // TODO: Get transactions with userId associated to get the user's name
+        const res = await fetch("/api/transactions");
         if (!res.ok) {
           throw new Error(`Unable to get transactions: ${res.status}`);
         }
@@ -55,12 +58,20 @@ export default function WalletPage({ user }) {
       fetchTransactions();
     }
   }, []);
-  const [isAdmin, setIsAdmin] = useState(false);
 
   const [searchInput, setSearchInput] = useState("");
   const [transactions, setTransactions] = useState([]);
   const [file, setFile] = useState();
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
+
+  const [page, setPage] = useState(1);
+  const rowsPerPage = 10;
+  const transactionPages = Math.ceil(transactions.length / rowsPerPage);
+  const transactionItems = useMemo(() => {
+    const start = (page - 1) * rowsPerPage;
+    const end = start + rowsPerPage;
+    return transactions.slice(start, end);
+  }, [page, transactions]);
 
   function creditAccounts() {
     // TODO: Implement crediting accounts logic
@@ -71,7 +82,7 @@ export default function WalletPage({ user }) {
   return (
     <>
       {isAdmin ? (
-        <div className="h-full flex flex-col gap-y-5">
+        <div className="h-full flex flex-col gap-y-5 p-10 pt-20 overflow-y-scroll">
           <div className="flex flex-row items-center justify-between">
             <PageTitle title="Wallet" />
             <button
@@ -104,14 +115,7 @@ export default function WalletPage({ user }) {
                 <TableColumn>Description</TableColumn>
               </TableHeader>
               <TableBody>
-                {transactions.map((transaction) => {
-                  // TODO: It's not working on getting it in time - Need to join the tables in useEffect()?
-                  // getClassById(transaction.class_id).then((data) => {
-                  //   const className = data.name;
-                  //   fullDescription = `Booked '${className}' (${formatDate(
-                  //     transaction.date
-                  //   )})`;
-                  // });
+                {transactionItems.map((transaction) => {
                   return (
                     <TableRow key={transaction.id}>
                       <TableCell>
@@ -125,6 +129,18 @@ export default function WalletPage({ user }) {
                 })}
               </TableBody>
             </Table>
+            <div className="flex flex-row justify-center">
+              <Pagination
+                showControls
+                isCompact
+                color="primary"
+                size="sm"
+                loop={true}
+                page={page}
+                total={transactionPages}
+                onChange={(page) => setPage(page)}
+              />
+            </div>
           </div>
           <Modal
             isOpen={isOpen}
@@ -171,8 +187,7 @@ export default function WalletPage({ user }) {
           </Modal>
         </div>
       ) : (
-        // Start of user Wallet page
-        <div className="h-full flex flex-col gap-y-5">
+        <div className="h-full flex flex-col gap-y-5 p-10 pt-20 overflow-y-scroll">
           <PageTitle title="Wallet" />
           <div className="h-1/4 flex flex-row gap-x-5">
             <div className="w-1/2 rounded-[20px] border border-a-black/10 p-5 bg-white">
@@ -213,11 +228,11 @@ export default function WalletPage({ user }) {
                 <TableColumn>Description</TableColumn>
               </TableHeader>
               <TableBody>
-                {transactions.map((transaction) => {
+                {transactionItems.map((transaction) => {
                   return (
                     <TableRow key={transaction.id}>
                       <TableCell>
-                        {format(transaction.createdAt, "d/MM/yyy HH:mm")}
+                        {format(transaction.createdAt, "d/MM/y HH:mm")}
                       </TableCell>
                       <TableCell>{transaction.amount}</TableCell>
                       <TableCell>{transaction.userId}</TableCell>
@@ -227,9 +242,20 @@ export default function WalletPage({ user }) {
                 })}
               </TableBody>
             </Table>
+            <div className="flex flex-row justify-center">
+              <Pagination
+                showControls
+                isCompact
+                color="primary"
+                size="sm"
+                loop={true}
+                page={page}
+                total={transactionPages}
+                onChange={(page) => setPage(page)}
+              />
+            </div>
           </div>
         </div>
-        // End of user Wallet page
       )}
     </>
   );

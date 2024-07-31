@@ -5,9 +5,9 @@
 import PropTypes from "prop-types";
 
 import { Input, Switch, Textarea } from "@nextui-org/react";
-import { inputClassNames, switchClassNames } from "../ClassNames";
+import { inputClassNames, switchClassNames } from "../utils/ClassNames";
 import { useState } from "react";
-import { SectionTitle } from "../Titles";
+import { SectionTitle } from "../utils/Titles";
 import { z } from "zod";
 import { format } from "date-fns";
 import { fromZonedTime, toZonedTime } from "date-fns-tz";
@@ -15,6 +15,7 @@ import { fromZonedTime, toZonedTime } from "date-fns-tz";
 export default function AdminClassForm({
   isCreate, // True or False, to determine whether to POST or UPDATE Class
   selectedClass,
+  toggleIsEdit,
 }) {
   const [name, setName] = useState(selectedClass.name);
   const [date, setDate] = useState(
@@ -79,7 +80,6 @@ export default function AdminClassForm({
       if (!res.ok) {
         throw new Error(`Unable to update class: ${res.status}`);
       }
-
       // TODO: Go back to ClassViewPage
     } catch (error) {
       console.log(error);
@@ -90,12 +90,24 @@ export default function AdminClassForm({
     <>
       <div className="flex flex-row justify-between">
         <SectionTitle title="Class details" />
-        <button
-          onClick={isCreate ? createClass : saveEdit}
-          className="h-[36px] rounded-[30px] px-[20px] bg-a-navy text-white text-sm cursor-pointer" // PREVIOUSLY: py-[10px]
-        >
-          {isCreate ? "Create class" : "Save changes"}
-        </button>
+        <div className="flex flex-row gap-x-2.5">
+          {isCreate ? (
+            <></>
+          ) : (
+            <button
+              onClick={toggleIsEdit}
+              className="h-[36px] rounded-[30px] px-[20px] bg-a-navy/10 text-a-navy text-sm cursor-pointer"
+            >
+              Cancel
+            </button>
+          )}
+          <button
+            onClick={isCreate ? createClass : saveEdit}
+            className="h-[36px] rounded-[30px] px-[20px] bg-a-navy text-white text-sm cursor-pointer"
+          >
+            {isCreate ? "Create class" : "Save changes"}
+          </button>
+        </div>
       </div>
       <div className="flex flex-col md:flex-row gap-2.5">
         <div className="md:w-1/3 flex flex-col gap-y-[5px]">

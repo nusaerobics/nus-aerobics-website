@@ -1,10 +1,12 @@
 "use client";
 
+import PropTypes from "prop-types";
 import { useEffect, useState } from "react";
-import AdminClassViewPage from "../classes/AdminClassViewPage";
-import AdminClassCreatePage from "../classes/AdminClassCreatePage";
-import AdminClassLandingPage from "../classes/AdminClassLandingPage";
-import UserClassLandingPage from "../classes/UserClassLandingPage";
+
+import AdminClassViewPage from "./AdminClassViewPage";
+import AdminClassCreatePage from "./AdminClassCreatePage";
+import AdminClassLandingPage from "./AdminClassLandingPage";
+import UserClassLandingPage from "./UserClassLandingPage";
 
 export default function ClassesPage({ user }) {
   useEffect(() => {
@@ -84,7 +86,7 @@ export default function ClassesPage({ user }) {
   return (
     <>
       {isAdmin ? (
-        <div className="w-full h-full flex flex-col gap-y-5">
+        <div className="w-full h-full flex flex-col gap-y-5 p-10 pt-20 overflow-y-scroll">
           {isViewClass || isCreateClass ? (
             <>
               {isViewClass ? (
@@ -115,3 +117,7 @@ export default function ClassesPage({ user }) {
     </>
   );
 }
+
+ClassesPage.propTypes = {
+  user: PropTypes.object,
+};

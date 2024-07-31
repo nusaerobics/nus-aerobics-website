@@ -11,7 +11,6 @@ import {
   MdGroup,
 } from "react-icons/md";
 import clsx from "clsx";
-import Logo from "../logo";
 import { useEffect, useState } from "react";
 
 const userLinks = [
@@ -32,13 +31,12 @@ const adminLinks = [
     href: "/dashboard/classes",
     icon: MdClass,
   },
-  { name: "Users", href: "/dashboard/users", icon: MdGroup }, // TODO: Conditionally show Users only if logged in person is admin access
+  { name: "Users", href: "/dashboard/users", icon: MdGroup },
   { name: "Wallet", href: "/dashboard/wallet", icon: MdWallet },
   { name: "Profile", href: "/dashboard/profile", icon: MdPerson },
 ];
 
-// TODO: Redo the navbar component so that the file name makes sense and isn't lower case
-export default function NavBar({ user }) {
+export default function SideBar({ user }) {
   const router = useRouter();
 
   useEffect(() => {
@@ -66,10 +64,12 @@ export default function NavBar({ user }) {
 
   return (
     <>
-    {/* TODO: Implement in alternate way since it's just changing Users page Link */}
+      {/* TODO: Implement in alternate way since it's just changing Users page Link */}
       {isAdmin ? (
         <div className="h-full flex flex-col py-10 px-5 gap-y-10 md:px-2">
-          <Logo />
+          <p className="font-display font-bold text-2xl text-a-navy text-center">
+            NUS AEROBICS
+          </p>
           <div className="flex flex-row grow justify-between md:flex-col md:space-x-0 md:space-y-2">
             <div className="flex flex-row md:flex-col gap-y-2.5">
               {adminLinks.map((link) => {
@@ -118,7 +118,9 @@ export default function NavBar({ user }) {
         </div>
       ) : (
         <div className="h-full flex flex-col py-10 px-5 gap-y-10 md:px-2">
-          <Logo />
+          <p className="font-display font-bold text-2xl text-a-navy text-center">
+            NUS AEROBICS
+          </p>
           <div className="flex flex-row grow justify-between md:flex-col md:space-x-0 md:space-y-2">
             <div className="flex flex-row md:flex-col gap-y-2.5">
               {userLinks.map((link) => {

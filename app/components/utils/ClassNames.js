@@ -32,9 +32,10 @@ export const chipTypes = {
   },
 };
 
-// TODO: Style the placeholder
 export const inputClassNames = {
-  label: ["text-a-black/50", "group-data-[filled-within=true]:text-a-black/50"],
+  label: [
+    "text-sm text-a-black/50 group-data-[filled-within=true]:text-a-black/50",
+  ],
   input: "bg-transparent text-sm text-a-black",
   innerWrapper: ["bg-transparent", "hover:bg-transparent"],
   inputWrapper: [

@@ -1,9 +1,8 @@
-// TODO: Only accessible from admin access - check if logged in user has admin status
 "use client";
 
 import { useEffect, useState } from "react";
-import UsersViewPage from "../users/UsersViewPage";
-import UsersLandingPage from "../users/UsersLandingPage";
+import UsersViewPage from "./UsersViewPage"
+import UsersLandingPage from "./UsersLandingPage";
 
 export default function UsersPage({ user }) {
   const [users, setUsers] = useState([]);
