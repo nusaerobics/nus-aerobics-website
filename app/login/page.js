@@ -144,9 +144,13 @@ export default function Page() {
     <div className="w-screen h-screen flex flex-row justify-center p-8 bg-a-pink/80">
       <div className="w-[400px] h-full flex flex-col justify-center p-5 gap-y-5 rounded-[20px] border border-a-black/10 bg-white">
         <div className="w-full flex flex-col items-center gap-y-5">
-          <p className="font-display font-bold text-2xl text-a-navy text-center">
-            NUS AEROBICS
-          </p>
+          <img
+            src="/images/logo.png"
+            alt="NUS Aerobics"
+            width="189"
+            height="81"
+            className="self-center"
+          />
           <p className="font-poppins font-bold text-lg text-a-black">
             {message}
           </p>

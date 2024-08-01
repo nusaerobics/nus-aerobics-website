@@ -67,9 +67,13 @@ export default function SideBar({ user }) {
       {/* TODO: Implement in alternate way since it's just changing Users page Link */}
       {isAdmin ? (
         <div className="h-full flex flex-col py-10 px-5 gap-y-10 md:px-2">
-          <p className="font-display font-bold text-2xl text-a-navy text-center">
-            NUS AEROBICS
-          </p>
+          <img
+            src="/images/logo.png"
+            alt="NUS Aerobics"
+            width="189"
+            height="81"
+            className="self-center"
+          />
           <div className="flex flex-row grow justify-between md:flex-col md:space-x-0 md:space-y-2">
             <div className="flex flex-row md:flex-col gap-y-2.5">
               {adminLinks.map((link) => {
@@ -118,9 +122,13 @@ export default function SideBar({ user }) {
         </div>
       ) : (
         <div className="h-full flex flex-col py-10 px-5 gap-y-10 md:px-2">
-          <p className="font-display font-bold text-2xl text-a-navy text-center">
-            NUS AEROBICS
-          </p>
+          <img
+            src="/images/logo.png"
+            alt="NUS Aerobics"
+            width="189"
+            height="81"
+            className="self-center"
+          />
           <div className="flex flex-row grow justify-between md:flex-col md:space-x-0 md:space-y-2">
             <div className="flex flex-row md:flex-col gap-y-2.5">
               {userLinks.map((link) => {
