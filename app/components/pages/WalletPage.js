@@ -74,7 +74,6 @@ export default function WalletPage({ user }) {
   }, [page, transactions]);
 
   function creditAccounts() {
-    // TODO: Implement crediting accounts logic
     return;
   }
 
@@ -151,7 +150,7 @@ export default function WalletPage({ user }) {
           >
             <ModalContent>
               {(
-                onClose // TODO: What's the onClose?
+                onClose
               ) => (
                 <>
                   <ModalHeader>
@@ -170,7 +169,7 @@ export default function WalletPage({ user }) {
                         size="xs"
                         classNames={inputClassNames}
                       />
-                      {/* TODO: Add in upload icon and handle logic */}
+                      {/* TODO: Implement CSV file logic */}
                     </div>
                     <div className="flex justify-end">
                       <button
@@ -187,76 +186,88 @@ export default function WalletPage({ user }) {
           </Modal>
         </div>
       ) : (
-        <div className="h-full flex flex-col gap-y-5 p-10 pt-20 overflow-y-scroll">
-          <PageTitle title="Wallet" />
-          <div className="h-1/4 flex flex-row gap-x-5">
-            <div className="w-1/2 rounded-[20px] border border-a-black/10 p-5 bg-white">
-              <p className="font-poppins font-bold text-a-navy text-3xl">
-                {user.balance}
-              </p>
-              <p className="font-poppins text-[#393E46] text-lg">
-                credits remaining
-              </p>
-            </div>
-            <div className="w-1/2 rounded-[20px] border border-a-black/10 p-5 bg-white">
-              {/* TODO: Implement logic to count how many credits spent */}
-              <p className="font-poppins font-bold text-a-navy text-3xl">8</p>
-              <p className="font-poppins text-a-black text-lg">credits spent</p>
-            </div>
-          </div>
-          <div className="h-full flex flex-col rounded-[20px] border border-a-black/10 p-5 bg-white gap-y-2.5">
-            <div className="flex flex-row">
-              <div className="w-3/4">
-                <SectionTitle title="All transactions" />
+        <>
+          <div className="h-full flex flex-col gap-y-5 p-10 pt-20 overflow-y-scroll">
+            <PageTitle title="Wallet" />
+            <div className="h-1/4 flex flex-row gap-x-5">
+              <div className="w-1/2 rounded-[20px] border border-a-black/10 p-5 bg-white">
+                <p className="font-poppins font-bold text-a-navy text-3xl">
+                  {user.balance}
+                </p>
+                <p className="font-poppins text-[#393E46] text-lg">
+                  credits remaining
+                </p>
               </div>
-              <div className="w-1/4">
-                <Input
-                  placeholder="Search"
-                  value={searchInput}
-                  onValueChange={setSearchInput}
-                  variant="bordered"
-                  size="xs"
-                  classNames={inputClassNames}
+              <div className="w-1/2 rounded-[20px] border border-a-black/10 p-5 bg-white">
+                {/* TODO: Implement logic to count how many credits spent */}
+                <p className="font-poppins font-bold text-a-navy text-3xl">8</p>
+                <p className="font-poppins text-a-black text-lg">
+                  credits spent
+                </p>
+              </div>
+            </div>
+            <div className="h-full flex flex-col rounded-[20px] border border-a-black/10 p-5 bg-white gap-y-2.5">
+              <div className="flex flex-row">
+                <div className="w-3/4">
+                  <SectionTitle title="All transactions" />
+                </div>
+                <div className="w-1/4">
+                  <Input
+                    placeholder="Search"
+                    value={searchInput}
+                    onValueChange={setSearchInput}
+                    variant="bordered"
+                    size="xs"
+                    classNames={inputClassNames}
+                  />
+                </div>
+              </div>
+              <Table removeWrapper classNames={tableClassNames}>
+                <TableHeader>
+                  <TableColumn>Date</TableColumn>
+                  <TableColumn>Amount</TableColumn>
+                  <TableColumn>User</TableColumn>
+                  <TableColumn>Description</TableColumn>
+                </TableHeader>
+                <TableBody>
+                  {transactionItems.map((transaction) => {
+                    return (
+                      <TableRow key={transaction.id}>
+                        <TableCell>
+                          {format(transaction.createdAt, "d/MM/y HH:mm")}
+                        </TableCell>
+                        <TableCell>{transaction.amount}</TableCell>
+                        <TableCell>{transaction.userId}</TableCell>
+                        <TableCell>{transaction.description}</TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+              <div className="flex flex-row justify-center">
+                <Pagination
+                  showControls
+                  isCompact
+                  color="primary"
+                  size="sm"
+                  loop={true}
+                  page={page}
+                  total={transactionPages}
+                  onChange={(page) => setPage(page)}
                 />
               </div>
             </div>
-            <Table removeWrapper classNames={tableClassNames}>
-              <TableHeader>
-                <TableColumn>Date</TableColumn>
-                <TableColumn>Amount</TableColumn>
-                <TableColumn>User</TableColumn>
-                <TableColumn>Description</TableColumn>
-              </TableHeader>
-              <TableBody>
-                {transactionItems.map((transaction) => {
-                  return (
-                    <TableRow key={transaction.id}>
-                      <TableCell>
-                        {format(transaction.createdAt, "d/MM/y HH:mm")}
-                      </TableCell>
-                      <TableCell>{transaction.amount}</TableCell>
-                      <TableCell>{transaction.userId}</TableCell>
-                      <TableCell>{transaction.description}</TableCell>
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
-            <div className="flex flex-row justify-center">
-              <Pagination
-                showControls
-                isCompact
-                color="primary"
-                size="sm"
-                loop={true}
-                page={page}
-                total={transactionPages}
-                onChange={(page) => setPage(page)}
-              />
-            </div>
           </div>
-        </div>
+        </>
       )}
     </>
   );
+}
+
+{
+  /* <Toast
+    isSuccess={false}
+    header="Credited user"
+    message="Successfully credited Nara Smith's account."
+    /> */
 }

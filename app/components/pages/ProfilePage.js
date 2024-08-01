@@ -142,8 +142,7 @@ export default function ProfilePage({ user }) {
           </div>
         </div>
         <div className="flex flex-row justify-end gap-x-2.5">
-          {/* TODO: Change this because it won't handle the function - unless pass the funciton in ProfilePage 
-          as a prop, then call the function inside the button */}
+          {/* TODO: Add in button to save edits / reset password */}
         </div>
       </div>
     </div>

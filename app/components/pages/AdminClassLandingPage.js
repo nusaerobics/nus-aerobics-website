@@ -1,4 +1,5 @@
 import PropTypes from "prop-types";
+
 import { PageTitle } from "../utils/Titles";
 import {
   chipClassNames,
@@ -28,8 +29,7 @@ import { useRouter } from "next/navigation";
 
 export default function AdminClassLandingPage({
   classes,
-  openCreate,
-  openView,
+  openCreate
 }) {
   const router = useRouter();
   const [searchInput, setSearchInput] = useState("");
@@ -54,7 +54,7 @@ export default function AdminClassLandingPage({
     switch (key) {
       case "view":
         console.log("view");
-        return openView(selectedClass);
+        return router.push(`classes/${selectedClass.id}`)
       case "duplicate":
         // TODO: Implement duplciate class selected
         console.log("duplicate");
@@ -153,5 +153,4 @@ export default function AdminClassLandingPage({
 AdminClassLandingPage.propTypes = {
   classes: PropTypes.array,
   openCreate: PropTypes.func,
-  openView: PropTypes.func,
 };

@@ -50,7 +50,7 @@ export const inputClassNames = {
 };
 
 export const modalClassNames = {
-  body: "font-poppins text-a-black", // TODO: Fix because not changing to Poppins font
+  body: "text-a-black",
   backdrop: "bg-a-black/50",
 };
 

@@ -21,7 +21,6 @@ export default async function Layout({ children }) {
     redirect("/login");
   }
   return (
-    // TODO: Make sure the overflow makes sense here too
     <div className="w-screen h-screen flex flex-col md:flex-row md:overflow-hidden">
       <div className="w-full flex-none md:w-64">
         <SideBar user={user} />
