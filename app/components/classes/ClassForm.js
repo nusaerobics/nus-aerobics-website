@@ -2,15 +2,16 @@
  * Form for creating or editing a Class' details, handles creating the new entry or updating existing entry
  * @returns
  */
+import { format } from "date-fns";
+import { fromZonedTime, toZonedTime } from "date-fns-tz";
 import PropTypes from "prop-types";
+import { useState } from "react";
+import { z } from "zod";
 
 import { Input, Switch, Textarea } from "@nextui-org/react";
 import { inputClassNames, switchClassNames } from "../utils/ClassNames";
-import { useState } from "react";
 import { SectionTitle } from "../utils/Titles";
-import { z } from "zod";
-import { format } from "date-fns";
-import { fromZonedTime, toZonedTime } from "date-fns-tz";
+import Toast from "../Toast";
 
 export default function AdminClassForm({
   isCreate, // True or False, to determine whether to POST or UPDATE Class
@@ -30,10 +31,12 @@ export default function AdminClassForm({
   const [isOpenBooking, setIsOpenBooking] = useState(
     selectedClass.status == "open"
   );
+  const [showToast, setShowToast] = useState(false);
+  const [toast, setToast] = useState({});
 
   async function createClass() {
-    // TODO: Validate date and time input formats
     try {
+      // TODO: Validate date and time input formats
       const concatDate = `${date} ${time}:00`;
       const utcDate = fromZonedTime(concatDate, "Asia/Singapore");
       const newDate = toZonedTime(utcDate, "Asia/Singapore");
@@ -52,7 +55,19 @@ export default function AdminClassForm({
       if (!res.ok) {
         throw new Error(`Unable to create new class: ${res.status}`);
       }
+      setToast({
+        isSuccess: true,
+        header: "Created class",
+        message: `Successfully created ${name}.`,
+      });
+      setShowToast(true);
     } catch (error) {
+      setToast({
+        isSuccess: false,
+        header: "Unable to create class",
+        message: "Unable to create class. Try again later.",
+      });
+      setShowToast(true);
       console.log(error);
     }
   }
@@ -80,8 +95,19 @@ export default function AdminClassForm({
       if (!res.ok) {
         throw new Error(`Unable to update class: ${res.status}`);
       }
-      // TODO: Go back to ClassViewPage
+      setToast({
+        isSuccess: true,
+        header: "Edited class",
+        message: `Successfully edited ${name}.`,
+      });
+      setShowToast(true);
     } catch (error) {
+      setToast({
+        isSuccess: false,
+        header: "Unable to edit class",
+        message: "Unable to edit class. Try again later.",
+      });
+      setShowToast(true);
       console.log(error);
     }
   }
@@ -123,7 +149,6 @@ export default function AdminClassForm({
         </div>
         <div className="md:w-1/3 flex flex-col gap-y-[5px]">
           <p className="text-a-black/50 text-sm">Date *</p>
-          {/* TODO: Figure out DateInput */}
           <Input
             value={date}
             onValueChange={setDate}
@@ -186,6 +211,15 @@ export default function AdminClassForm({
           }}
         />
       </div>
+      {showToast ? (
+        <Toast
+          isSuccess={toast.isSuccess}
+          header={toast.header}
+          message={toast.message}
+        />
+      ) : (
+        <></>
+      )}
     </>
   );
 }
@@ -193,4 +227,5 @@ export default function AdminClassForm({
 AdminClassForm.propTypes = {
   isCreate: PropTypes.bool,
   selectedClass: PropTypes.object,
+  toggleIsEdit: PropTypes.func,
 };

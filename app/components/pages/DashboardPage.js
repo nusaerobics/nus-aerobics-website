@@ -16,6 +16,7 @@ import { useEffect, useState } from "react";
 import PropTypes from "prop-types";
 import { fromZonedTime, toZonedTime } from "date-fns-tz";
 import { useRouter } from "next/navigation";
+import { format } from "date-fns";
 
 export default function DashboardPage({ user }) {
   const [isAdmin, setIsAdmin] = useState(false);
@@ -32,7 +33,43 @@ export default function DashboardPage({ user }) {
   });
 
   useEffect(() => {
-    if (!isAdmin) {
+    if (user.permission == "admin") {
+      const fetchClasses = async () => {
+        try {
+          console.log("in admin fetchClasses");
+          const res = await fetch("api/classes");
+          if (!res.ok) {
+            throw new Error(`Unable to get classes: ${res.status}`);
+          }
+          const data = await res.json();
+          console.log(data);
+          const todayClasses = data.filter((c) => {
+            const utcClassDate = fromZonedTime(c.date, "Asia/Singapore");
+            const sgClassDate = toZonedTime(utcClassDate, "Asia/Singapore");
+            const sgCurrentDate = toZonedTime(new Date(), "Asia/Singapore");
+
+            const sgClassYear = sgClassDate.getFullYear();
+            const sgClassMonth = sgClassDate.getMonth();
+            const sgClassDay = sgClassDate.getDate();
+
+            const sgCurrentYear = sgCurrentDate.getFullYear();
+            const sgCurrentMonth = sgCurrentDate.getMonth();
+            const sgCurrentDay = sgCurrentDate.getDate();
+
+            return (
+              sgClassYear == sgCurrentYear &&
+              sgClassMonth == sgCurrentMonth &&
+              sgClassDay == sgCurrentDay
+            );
+          });
+          console.log(todayClasses);
+          setClasses(todayClasses);
+        } catch (error) {
+          console.log(error);
+        }
+      };
+      fetchClasses();
+    } else {
       const fetchTransactions = async () => {
         try {
           const res = await fetch(`/api/transactions?userId=${user.id}`);
@@ -77,44 +114,11 @@ export default function DashboardPage({ user }) {
         }
       };
       fetchBookings();
-    } else {
-      const fetchClasses = async () => {
-        try {
-          const res = await fetch("api/classes");
-          if (!res.ok) {
-            throw new Error(
-              `Unable to get bookings for user ${user.id}: ${res.status}`
-            );
-          }
-          const data = await res.json();
-          const todayClasses = data.filter((c) => {
-            const utcClassDate = fromZonedTime(c.date, "Asia/Singapore");
-            const sgClassDate = toZonedTime(utcClassDate, "Asia/Singapore");
-            const sgCurrentDate = toZonedTime(new Date(), "Asia/Singapore");
-
-            const sgClassYear = sgClassDate.getFullYear();
-            const sgClassMonth = sgClassDate.getMonth();
-            const sgClassDay = sgClassDate.getDate();
-
-            const sgCurrentYear = sgCurrentDate.getFullYear();
-            const sgCurrentMonth = sgCurrentDate.getMonth();
-            const sgCurrentDay = sgCurrentDate.getDate();
-
-            return (
-              sgClassYear == sgCurrentYear &&
-              sgClassMonth == sgCurrentMonth &&
-              sgClassDay == sgCurrentDay
-            );
-          });
-          setClasses(todayClasses);
-        } catch (error) {
-          console.log(error);
-        }
-      };
-      fetchClasses();
     }
   }, []);
 
+  // For admin ClassCard equivalent - goes to specific class
+  // For user ClassCard - opens modal
   const handleClick = (rowData) => {
     router.push("/dashboard/classes");
     // TODO: Go to specific page details for that class
@@ -134,28 +138,28 @@ export default function DashboardPage({ user }) {
                 <p>No classes today</p>
               ) : (
                 <>
-                  {classes.map((c) => {
-                    return (
-                      <div
-                        key={c.id}
-                        className="flex flex-col gap-y-2.5 p-2.5 rounded-[20px] border-l-[4px] border-l-a-navy bg-a-navy/10"
+              {classes.map((c) => {
+                return (
+                  <div
+                    key={c.id}
+                    className="flex flex-col gap-y-2.5 p-2.5 rounded-[20px] border-l-[4px] border-l-a-navy bg-a-navy/10"
+                  >
+                    <div className="flex flex-col">
+                      <p className="font-bold text-base">{c.name}</p>
+                      <p>{format(c.date, "d/MM/y HH:mm")}</p>
+                    </div>
+                    <div className="flex justify-end">
+                      <button
+                        onClick={() => handleClick(c)}
+                        className="rounded-[30px] px-[20px] py-[10px] bg-a-navy text-white cursor-pointer"
                       >
-                        <div className="flex flex-col">
-                          <p className="font-bold text-base">{c.name}</p>
-                          <p>{format(c.date, "d/MM/y HH:mm")}</p>
-                        </div>
-                        <div className="flex justify-end">
-                          <button
-                            onClick={() => handleClick(c)}
-                            className="rounded-[30px] px-[20px] py-[10px] bg-a-navy text-white cursor-pointer"
-                          >
-                            View details
-                          </button>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </>
+                        View details
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+              </>
               )}
             </div>
             <div className="h-full w-1/3 flex flex-col gap-y-5">
@@ -227,9 +231,7 @@ export default function DashboardPage({ user }) {
                     {transactions.map((transaction) => {
                       return (
                         <TableRow key={transaction.id}>
-                          <TableCell>
-                            {transaction.description}
-                          </TableCell>
+                          <TableCell>{transaction.description}</TableCell>
                           <TableCell>{transaction.amount}</TableCell>
                         </TableRow>
                       );

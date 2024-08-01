@@ -108,7 +108,6 @@ export default function UserClassLandingPage({
                   classNames={inputClassNames}
                 />
               </div>
-              {/* TODO: Later change mapping of table to use COLUMNS and ITEMS */}
               {/* TODO: Add in sort on the date */}
               <Table removeWrapper classNames={tableClassNames}>
                 <TableHeader>
@@ -182,7 +181,6 @@ export default function UserClassLandingPage({
               </div>
               {/* TODO: Later change mapping of table to use COLUMNS and ITEMS */}
               {/* TODO: Add in sort on the date */}
-              {/* TODO: Add in paginations */}
               <Table removeWrapper classNames={tableClassNames}>
                 <TableHeader>
                   <TableColumn>Class</TableColumn>
@@ -237,9 +235,10 @@ export default function UserClassLandingPage({
           </Tab>
         </Tabs>
       </div>
+
       <ClassDetailsModal
         selectedClass={selectedClass}
-        selectedBooking={selectedBooking}
+        selectedBooking={selected == "schedule" ? {} : selectedBooking}
         selected={selected}
         userId={userId}
         isOpen={isOpen}

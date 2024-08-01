@@ -1,4 +1,3 @@
-// TODO: Only accessible from admin access - check if logged in user has admin status
 "use server";
 
 import { redirect } from "next/navigation";
@@ -26,5 +25,5 @@ export default async function Page() {
     console.log(error);
     redirect("/login");
   }
-  return <UsersPage user={user} />;
+  return <UsersPage />;
 }

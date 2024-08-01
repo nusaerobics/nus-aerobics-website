@@ -1,37 +1,52 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import UsersViewPage from "./UsersViewPage"
-import UsersLandingPage from "./UsersLandingPage";
+import { useEffect, useMemo, useState } from "react";
 
-export default function UsersPage({ user }) {
+import { useRouter } from "next/navigation";
+import {
+  Dropdown,
+  DropdownTrigger,
+  DropdownMenu,
+  DropdownItem,
+} from "@nextui-org/dropdown";
+import { Input } from "@nextui-org/input";
+import {
+  Modal,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+  useDisclosure,
+} from "@nextui-org/modal";
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableColumn,
+  TableRow,
+  TableCell,
+} from "@nextui-org/table";
+import { Pagination } from "@nextui-org/react";
+import { MdMoreVert } from "react-icons/md";
+import {
+  inputClassNames,
+  modalClassNames,
+  tableClassNames,
+} from "../utils/ClassNames";
+import { PageTitle, SectionTitle } from "../utils/Titles";
+import Toast from "../Toast";
+
+export default function UsersPage() {
+  const router = useRouter();
+  const { isOpen, onOpen, onOpenChange } = useDisclosure();
+
   const [users, setUsers] = useState([]);
+  const [page, setPage] = useState(1);
   const [selectedUser, setSelectedUser] = useState({});
-  const [isViewUser, setIsViewUser] = useState(false);
-  const [userBookings, setUserBookings] = useState([]);
-
-  const openView = (rowData) => {
-    setSelectedUser(rowData);
-    const fetchUserBookings = async () => {
-      const res = await fetch(`/api/bookings?userId=${rowData.id}`, {
-        cache: "force-cache",
-      });
-      if (!res.ok) {
-        throw new Error(
-          `Unable to get bookings for user ${rowData.id}: ${res.status}`
-        );
-      }
-      const data = await res.json();
-      setUserBookings(data);
-    };
-    fetchUserBookings();
-    setIsViewUser(true);
-  };
-  const closeView = () => {
-    setSelectedUser({});
-    setUserBookings([]);
-    setIsViewUser(false);
-  };
+  const [showToast, setShowToast] = useState(false); // TODO: Add in setInterval to only show Toast for X seconds
+  const [toast, setToast] = useState({});
+  const [credits, setCredits] = useState(0);
+  const [searchInput, setSearchInput] = useState("");
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -45,16 +60,177 @@ export default function UsersPage({ user }) {
     fetchUsers();
   }, []);
 
+  const rowsPerPage = 10;
+  const userPages = Math.ceil(users.length / rowsPerPage);
+  const userItems = useMemo(() => {
+    const start = (page - 1) * rowsPerPage;
+    const end = start + rowsPerPage;
+    return users.slice(start, end);
+  }, [page, users]);
+
+  const selectRow = (rowData) => {
+    setSelectedUser(rowData);
+  };
+  const handleDropdown = (key) => {
+    switch (key) {
+      case "view":
+        console.log("selectedUser:", selectedUser);
+        return router.push(`users/${selectedUser.id}`);
+      case "credit":
+        return onOpen();
+      case "delete":
+        console.log("delete");
+        // TODO: Implement delete user selected
+        return;
+    }
+  };
+
+  async function creditUser() {
+    const newBalance = parseInt(selectedUser.balance) + parseInt(credits);
+    const res = await fetch("/api/users", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: selectedUser.id, balance: newBalance }),
+    });
+    if (!res.ok) {
+      setToast({
+        isSuccess: false,
+        header: "Unable to credit user",
+        message: `Unable to credit ${selectedUser.name}'s account. Try again later.`,
+      });
+      setShowToast(true);
+      throw new Error(`Unable to credit user ${selectedUser.id}`);
+    }
+    setToast({
+      isSuccess: true,
+      header: "Credited user",
+      message: `Successfully credited ${selectedUser.name}'s account.`,
+    });
+    setShowToast(true);
+  }
+
   return (
     <>
-      {isViewUser ? (
-        <UsersViewPage
-          selectedUser={selectedUser}
-          closeView={closeView}
-          userBookings={userBookings}
+      <div className="h-full flex flex-col gap-y-5 p-10 pt-20 overflow-y-scroll">
+        <PageTitle title="Users" />
+        <div className="h-full flex flex-col rounded-[20px] border border-a-black/10 p-5 bg-white gap-y-2.5">
+          <div className="self-end w-1/4">
+            <Input
+              placeholder="Search"
+              value={searchInput}
+              onValueChange={setSearchInput}
+              variant="bordered"
+              size="xs"
+              classNames={inputClassNames}
+            />
+          </div>
+          <Table removeWrapper classNames={tableClassNames}>
+            <TableHeader>
+              <TableColumn>Name</TableColumn>
+              <TableColumn>Status</TableColumn>
+              <TableColumn>Email</TableColumn>
+              <TableColumn>Wallet</TableColumn>
+              <TableColumn></TableColumn>
+            </TableHeader>
+            <TableBody>
+              {userItems.map((user) => {
+                return (
+                  <TableRow key={user.id}>
+                    <TableCell>{user.name}</TableCell>
+                    <TableCell>{user.permission}</TableCell>
+                    <TableCell>{user.email}</TableCell>
+                    <TableCell>{user.balance}</TableCell>
+                    <TableCell>
+                      <Dropdown>
+                        <DropdownTrigger>
+                          <button
+                            className="cursor-pointer"
+                            onClick={() => selectRow(user)}
+                          >
+                            <MdMoreVert size={24} />
+                          </button>
+                        </DropdownTrigger>
+                        <DropdownMenu onAction={(key) => handleDropdown(key)}>
+                          <DropdownItem key="view">View user</DropdownItem>
+                          <DropdownItem key="credit">
+                            Credit account
+                          </DropdownItem>
+                          <DropdownItem key="delete">Delete user</DropdownItem>
+                        </DropdownMenu>
+                      </Dropdown>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
+          <div className="flex flex-row justify-center">
+            <Pagination
+              showControls
+              isCompact
+              color="primary"
+              size="sm"
+              loop={true}
+              page={page}
+              total={userPages}
+              onChange={(page) => setPage(page)}
+            />
+          </div>
+        </div>
+      </div>
+      <Modal
+        isOpen={isOpen}
+        onOpenChange={onOpenChange}
+        size="md"
+        backdrop="opaque"
+        classNames={modalClassNames}
+      >
+        <ModalContent>
+          {(onClose) => (
+            <>
+              <ModalHeader>
+                <div className="flex flex-row items-center gap-x-2.5">
+                  <SectionTitle title="Credit user" />
+                </div>
+              </ModalHeader>
+              <ModalBody>
+                <div className="flex flex-col gap-y-[5px]">
+                  <p className="text-a-black/50 text-sm">
+                    Enter number of credits *
+                  </p>
+                  <div className="md:w-1/3">
+                    <Input
+                      type="number"
+                      value={credits}
+                      onValueChange={setCredits}
+                      isRequired
+                      variant="bordered"
+                      size="xs"
+                      classNames={inputClassNames}
+                    />
+                  </div>
+                </div>
+              </ModalBody>
+              <ModalFooter>
+                <button
+                  onClick={creditUser}
+                  className="rounded-[30px] px-[20px] py-[10px] bg-a-navy text-white cursor-pointer"
+                >
+                  Credit user
+                </button>
+              </ModalFooter>
+            </>
+          )}
+        </ModalContent>
+      </Modal>
+      {showToast ? (
+        <Toast
+          isSuccess={toast.isSuccess}
+          header={toast.header}
+          message={toast.message}
         />
       ) : (
-        <UsersLandingPage users={users} openView={openView} />
+        <></>
       )}
     </>
   );
