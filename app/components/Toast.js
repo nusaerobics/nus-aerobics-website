@@ -5,7 +5,7 @@ export default function Toast({ isSuccess, header, message }) {
   return (
     <div
       className={clsx(
-        "flex flex-row items-center justify-center z-10 bottom-5 right-5 gap-x-5 px-2.5 py-5 absolute rounded-[20px] border-l-[4px]",
+        "flex flex-row items-center justify-center z-50 bottom-5 right-5 gap-x-5 px-2.5 py-5 absolute rounded-[20px] border-l-[4px]",
         {
           "border-l-a-green bg-[#EAF6EB]": isSuccess,
           "border-l-a-red bg-[#F6EAEA]": !isSuccess,

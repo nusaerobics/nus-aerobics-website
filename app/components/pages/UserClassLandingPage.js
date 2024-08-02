@@ -29,22 +29,14 @@ import ClassDetailsModal from "../classes/ClassDetailsModal";
 export default function UserClassLandingPage({
   userId,
   classes,
-  userBookings,
+  bookings,
 }) {
+  const { isOpen, onOpen, onOpenChange } = useDisclosure();
+
   const [selected, setSelected] = useState("schedule");
   const [searchInput, setSearchInput] = useState("");
   const [selectedClass, setSelectedClass] = useState({});
   const [selectedBooking, setSelectedBooking] = useState({});
-
-  const handleTabChange = () => {
-    if (selected == "schedule") {
-      setSelected("booked");
-      setPage(1);
-    } else {
-      setSelected("schedule");
-      setPage(1);
-    }
-  };
 
   const [page, setPage] = useState(1);
   const rowsPerPage = 6;
@@ -56,16 +48,24 @@ export default function UserClassLandingPage({
     return classes.slice(start, end);
   }, [page, classes]);
 
-  const bookingPages = Math.ceil(userBookings.length / rowsPerPage);
+  const bookingPages = Math.ceil(bookings.length / rowsPerPage);
   const bookingItems = useMemo(() => {
     const start = (page - 1) * rowsPerPage;
     const end = start + rowsPerPage;
-    return userBookings.slice(start, end);
-  }, [page, userBookings]);
+    return bookings.slice(start, end);
+  }, [page, bookings]);
 
-  const { isOpen, onOpen, onOpenChange } = useDisclosure();
+  const handleTabChange = () => {
+    if (selected == "schedule") {
+      setSelected("booked");
+      setPage(1);
+    } else {
+      setSelected("schedule");
+      setPage(1);
+    }
+  };
 
-  const handleClick = (rowData) => {
+  const selectRow = (rowData) => {
     if (selected == "schedule") {
       setSelectedClass(rowData);
     } else {
@@ -125,7 +125,7 @@ export default function UserClassLandingPage({
                         <TableCell>
                           <button
                             className="cursor-pointer"
-                            onClick={() => handleClick(item)}
+                            onClick={() => selectRow(item)}
                           >
                             <MdOpenInNew />
                           </button>
@@ -197,7 +197,7 @@ export default function UserClassLandingPage({
                         <TableCell>
                           <button
                             className="cursor-pointer"
-                            onClick={() => handleClick(booking)}
+                            onClick={() => selectRow(booking)}
                           >
                             <MdOpenInNew />
                           </button>
@@ -252,5 +252,5 @@ export default function UserClassLandingPage({
 UserClassLandingPage.propTypes = {
   userId: PropTypes.number,
   classes: PropTypes.array,
-  userBookings: PropTypes.array,
+  bookings: PropTypes.array,
 };

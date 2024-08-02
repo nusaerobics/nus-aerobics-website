@@ -67,9 +67,9 @@ export async function GET(request) {
 // createBooking
 export async function POST(request) {
   /**
-   * TODO: Should be synchronous? Rather than asynchronous - but does it 
+   * TODO: Should be synchronous? Rather than asynchronous - but does it
    * matter here or rather in component called?
-   * 
+   *
    * Handle checking if at moment of createBooking, if class
    * booked_capacity < max_capacity (Have to check especially if multiple
    * people book at the same time) - need to check request timing?
@@ -128,6 +128,27 @@ export async function PUT(request) {
 export async function DELETE(request) {
   try {
     const body = await request.json();
+
+    // deleteBookingsByUser
+    if (body.userId != undefined) {
+      const userId = body.userId;
+      await Booking.destroy({ where: { userId: userId } });
+      return NextResponse.json(
+        { json: `Bookings for user ${userId} deleted successfully` },
+        { status: 200 }
+      );
+    }
+
+    // deleteBookingsByClass
+    if (body.classId != undefined) {
+      const classId = body.classId;
+      await Booking.destroy({ where: { classId: classId } });
+      return NextResponse.json(
+        { json: `Bookings for class ${classId} deleted successfully` },
+        { status: 200 }
+      );
+    }
+    
     const id = body.id;
     await Booking.destroy({ where: { id: id } });
     return NextResponse.json(

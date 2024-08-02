@@ -84,7 +84,10 @@ export default function UsersViewPage({ userId }) {
     { key: "admin", label: "Admin" },
     { key: "normal", label: "Normal" },
   ];
-  
+
+  const toggleShowToast = () => {
+    setShowToast(!showToast);
+  };
   const selectRow = async (rowData) => {
     setSelectedBooking(rowData);
   };
@@ -93,6 +96,7 @@ export default function UsersViewPage({ userId }) {
   };
   const handleDropdown = async (key) => {
     if (key == "unbook") {
+      // TODO: Handle restores after an error occurs
       try {
         const newBookedCapacity = selectedBooking.class.bookedCapacity - 1;
 
@@ -125,11 +129,21 @@ export default function UsersViewPage({ userId }) {
           body: JSON.stringify(updatedClass),
         });
         if (!res2.ok) {
-          // TODO: Handle reverts - Putting back the booking after being deleted
           throw new Error(`Unable to update class ${selectedBooking.class.id}`);
         }
 
-        // 3. Create new transaction
+        // 3. Update user's balance
+        const newBalance = user.balance + 1;
+        const res3 = await fetch("/api/users", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id: userId, balance: newBalance }),
+        });
+        if (!res3.ok) {
+          throw new Error(`Unable to update user ${userId}'s balance`);
+        }
+
+        // 4. Create new transaction
         const newTransaction = {
           userId: selectedBooking.userId,
           amount: 1,
@@ -142,9 +156,17 @@ export default function UsersViewPage({ userId }) {
           body: JSON.stringify(newTransaction),
         });
         if (!res4.ok) {
-          // TODO: Handle reverts - Reverting updates and putting back booking
           throw new Error("Unable to create transaction");
         }
+
+        // Update bookings
+        const updatedBookings = bookings.filter((originalBooking) => {
+          return originalBooking.id != selectedBooking.id;
+        });
+        setBookings(updatedBookings);
+        console.log(selectedBooking);
+        console.log(updatedBookings);
+
         setToast({
           isSuccess: true,
           header: "Unbooked user",
@@ -161,9 +183,6 @@ export default function UsersViewPage({ userId }) {
         console.log(error);
       }
     }
-  };
-  const closeView = () => {
-    router.back();
   };
 
   async function saveEdit() {
@@ -205,7 +224,7 @@ export default function UsersViewPage({ userId }) {
     <>
       <div className="h-full flex flex-col gap-y-5 p-10 pt-20 overflow-y-scroll">
         <div className="flex flex-row items-center gap-x-5">
-          <button onClick={closeView} className="cursor-pointer">
+          <button onClick={() => router.back()} className="cursor-pointer">
             <MdChevronLeft color="#1F4776" size={42} />
           </button>
           <PageTitle title="View user" />
@@ -343,11 +362,13 @@ export default function UsersViewPage({ userId }) {
         </div>
       </div>
       {showToast ? (
-        <Toast
-          isSuccess={toast.isSuccess}
-          header={toast.header}
-          message={toast.message}
-        />
+        <div onClick={toggleShowToast}>
+          <Toast
+            isSuccess={toast.isSuccess}
+            header={toast.header}
+            message={toast.message}
+          />
+        </div>
       ) : (
         <></>
       )}

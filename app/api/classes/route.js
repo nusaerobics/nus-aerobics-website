@@ -104,7 +104,6 @@ export async function DELETE(request) {
     const body = await request.json();
     const id = body.id;
     await Class.destroy({ where: { id: id } });
-    // TODO: Should I also delete bookings/transactions related to class?
     return NextResponse.json(
       { json: `Class ${id} deleted successfully` },
       { status: 200 }
