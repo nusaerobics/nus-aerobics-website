@@ -34,6 +34,7 @@ export default function Page() {
           message: `${res.json}.`,
         });
         setShowToast(true);
+        // TODO: Change this to be an error under password that it's the wrong login
         throw new Error(`Unable to login: ${res.json}.`);
       }
 

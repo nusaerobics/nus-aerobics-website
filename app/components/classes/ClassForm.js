@@ -34,9 +34,45 @@ export default function AdminClassForm({
   const [showToast, setShowToast] = useState(false);
   const [toast, setToast] = useState({});
 
+  const toggleShowToast = () => {
+    setShowToast(!showToast);
+  };
+  const validateDate = () => {
+    const dateSchema = z.string().refine((str) => /^\d{4}-\d{2}-\d{2}$/.test(str));
+    try {
+      dateSchema.parse(date);
+      return true;
+    } catch (error) {
+      console.log(error);
+      return false;
+    }
+  };
+  const validateTime = () => {
+    const timeSchema = z.string().refine((str) => /^\d{2}:\d{2}$/.test(str));
+    try {
+      timeSchema.parse(time);
+      return true;
+    } catch (error) {
+      console.log(error);
+      return false;
+    }
+  };
+
   async function createClass() {
     try {
-      // TODO: Validate date and time input formats
+      const isValidDate = validateDate();
+      const isValidTime = validateTime();
+
+      if (!isValidDate || !isValidTime) {
+        setToast({
+          isSuccess: false,
+          header: "Unable to create class",
+          message: "Incorrect date or time format used. Follow the format YYYY-MM-DD and HH:MM.",
+        });
+        setShowToast(true);
+        return;
+      }
+
       const concatDate = `${date} ${time}:00`;
       const utcDate = fromZonedTime(concatDate, "Asia/Singapore");
       const newDate = toZonedTime(utcDate, "Asia/Singapore");
@@ -212,11 +248,14 @@ export default function AdminClassForm({
         />
       </div>
       {showToast ? (
+                <div onClick={toggleShowToast}>
+
         <Toast
           isSuccess={toast.isSuccess}
           header={toast.header}
           message={toast.message}
         />
+        </div>
       ) : (
         <></>
       )}
