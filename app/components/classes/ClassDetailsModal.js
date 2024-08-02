@@ -56,7 +56,9 @@ export default function ClassDetailsModal({
       }
     };
     fetchUser();
-
+  }, []);
+  
+  useEffect(() => {
     if (selected == "schedule") {
       // Checks if selectedClass has already been booked by user
       checkIsBooked(selectedClass).then((result) => {
@@ -75,7 +77,7 @@ export default function ClassDetailsModal({
       setIsCancel(result);
       setStatus("booked");
     }
-  }, []);
+  });
 
   async function checkIsBooked(selectedClass) {
     // For a user's bookings, check if there's a booking where the classId = selectedClass.id
