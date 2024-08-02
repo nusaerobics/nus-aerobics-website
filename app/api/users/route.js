@@ -83,9 +83,10 @@ export async function PUT(request) {
     let updates; // updates = only fields which were changed
     const id = body.id;
 
+    const user = await User.findOne({ where: { id: id } });
     /** Updates come from:
      * 1) User book/unbook class (balance)
-     * 2) User edits profile (name OR password, NTH: whether gets email notifications)
+     * 2) User edits profile (name AND email OR password, NTH: whether gets email notifications)
      * 3) Admin changes user's permission settings (permission)
      * 4) Admin unbooks user (balance)
      */
@@ -93,16 +94,30 @@ export async function PUT(request) {
       const balance = body.balance;
       updates = { balance: balance };
     }
-    if (body.name != undefined) {
+    if (body.name != undefined && body.email != undefined) {
       const name = body.name;
-      updates = { name: name };
+      const email = body.email;
+      updates = { name: name, email: email };
     }
-    if (body.password != undefined) {
-      const password = body.password;
+    if (body.newPassword != undefined) {
+      const newPassword = body.newPassword;
+      const currentPassword = body.currentPassword;
+      console.log(newPassword, currentPassword);
+      const existingPassword = user.password;
+
+      console.log(existingPassword);
+      const isMatchingPassword = await bcrypt.compare(currentPassword, existingPassword);
+      if (!isMatchingPassword) {
+        return NextResponse.json(
+          { error: "Current password does not match existing" },
+          { status: 400 }
+        );
+      }
       const saltRounds = 10;
-      const hashedPassword = await bcrypt.hash(password, saltRounds);
+      const hashedPassword = await bcrypt.hash(newPassword, saltRounds);
       updates = { password: hashedPassword };
     }
+
     // TODO: Should have to handle permission and balance at the same time from admin
     if (body.permission != undefined) {
       // TODO: Add check to verify it's either "admin" or "normal"
