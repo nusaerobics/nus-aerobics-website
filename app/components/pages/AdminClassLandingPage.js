@@ -1,4 +1,6 @@
 import PropTypes from "prop-types";
+import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 
 import { PageTitle } from "../utils/Titles";
 import {
@@ -24,19 +26,34 @@ import {
   TableCell,
 } from "@nextui-org/table";
 import { Chip, Input, Pagination } from "@nextui-org/react";
-import { useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
+import Toast from "../Toast";
 
 export default function AdminClassLandingPage({
-  classes,
-  openCreate
+  // classes,
+  openCreate,
 }) {
   const router = useRouter();
+
+  const [classes, setClasses] = useState([]);
   const [searchInput, setSearchInput] = useState("");
-
   const [page, setPage] = useState(1);
-  const rowsPerPage = 10;
+  const [selectedClass, setSelectedClass] = useState({});
+  const [showToast, setShowToast] = useState(false);
+  const [toast, setToast] = useState({});
 
+  useEffect(() => {
+    const fetchClasses = async () => {
+      const res = await fetch("/api/classes");
+      if (!res.ok) {
+        throw new Error(`Unable to get classes: ${res.status}`);
+      }
+      const data = await res.json();
+      setClasses(data);
+    };
+    fetchClasses();
+  }, []);
+
+  const rowsPerPage = 10;
   const classPages = Math.ceil(classes.length / rowsPerPage);
   const classItems = useMemo(() => {
     const start = (page - 1) * rowsPerPage;
@@ -44,27 +61,69 @@ export default function AdminClassLandingPage({
     return classes.slice(start, end);
   }, [page, classes]);
 
-  const [selectedClass, setSelectedClass] = useState({});
-  const handleClick = (rowData) => {
+  const toggleShowToast = () => {
+    setShowToast(!showToast);
+  };
+  const selectRow = (rowData) => {
     console.log("selectedClass:", rowData);
     setSelectedClass(rowData);
   };
-
   const handleDropdown = (key) => {
     switch (key) {
       case "view":
         console.log("view");
-        return router.push(`classes/${selectedClass.id}`)
+        return router.push(`classes/${selectedClass.id}`);
       case "duplicate":
         // TODO: Implement duplciate class selected
         console.log("duplicate");
         return;
       case "delete":
-        console.log("delete");
-        // TODO: Implement delete class selected
-        return;
+        return deleteClass(selectedClass);
     }
   };
+
+  async function deleteClass(selectedClass) {
+    try {
+      const originalBookings = await fetch(
+        `/api/bookings?classId=${selectedClass.id}`
+      );
+      if (!originalBookings.ok) {
+        throw new Error(
+          `Unable to get original bookings for class ${selectedClass.id}`
+        );
+      }
+
+      const res1 = await fetch("/api/bookings", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ classId: selectedClass.id }),
+      });
+      if (!res1.ok) {
+        // TODO: Restore bookings for class
+        throw new Error(
+          `Unable to delete bookings for class ${selectedClass.id}`
+        );
+      }
+
+      const updatedClasses = classes.filter((originalClass) => {
+        return originalClass.id != selectedClass.id;
+      });
+      setClasses(updatedClasses);
+      setToast({
+        isSuccess: true,
+        header: "Deleted class",
+        message: `Successfully deleted ${selectedClass.name}.`,
+      });
+      setShowToast(true);
+    } catch (error) {
+      setResult({
+        isSuccess: false,
+        header: "Unable to delete class",
+        message: `An error occurred while deleting ${selectedClass.name}. Try again later.`,
+      });
+      setModalType("result");
+      console.log(error);}
+  }
 
   return (
     <>
@@ -114,7 +173,7 @@ export default function AdminClassLandingPage({
                       <DropdownTrigger>
                         <button
                           className="cursor-pointer"
-                          onClick={() => handleClick(item)}
+                          onClick={() => selectRow(item)}
                         >
                           <MdMoreVert size={24} />
                         </button>
@@ -146,6 +205,17 @@ export default function AdminClassLandingPage({
           />
         </div>
       </div>
+      {showToast ? (
+        <div onClick={toggleShowToast}>
+          <Toast
+            isSuccess={toast.isSuccess}
+            header={toast.header}
+            message={toast.message}
+          />
+        </div>
+      ) : (
+        <></>
+      )}
     </>
   );
 }

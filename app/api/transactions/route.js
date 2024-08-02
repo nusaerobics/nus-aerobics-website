@@ -48,3 +48,22 @@ export async function POST(request) {
     );
   }
 }
+
+export async function DELETE(request) {
+  try {
+    // deleteTransactionsByUser
+    const body = await request.json();
+    const userId = body.userId;
+    await Transaction.destroy({ where: { userId: userId }});
+    return NextResponse.json(
+      { json: `Transactions for user ${userId} deleted successfully` },
+      { status: 200 }
+    );
+  } catch (error) {
+    console.log(error);
+    return NextResponse.json(
+      { message: `Error deleting transactions of user ${userId}: ${error}` },
+      { status: 500 }
+    );
+  }
+}

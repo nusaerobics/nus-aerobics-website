@@ -19,7 +19,7 @@ import {
   ModalFooter,
   useDisclosure,
 } from "@nextui-org/modal";
-import { Chip, Input, Spinner } from "@nextui-org/react";
+import { Chip, Input, Pagination, Spinner } from "@nextui-org/react";
 import {
   Table,
   TableHeader,
@@ -34,7 +34,6 @@ import {
   MdCheckCircleOutline,
   MdOutlineCancel,
 } from "react-icons/md";
-
 import ClassDetails from "../classes/ClassDetails";
 import ClassForm from "../classes/ClassForm";
 import {
@@ -51,11 +50,6 @@ export default function AdminClassViewPage({ classId }) {
   const router = useRouter();
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
 
-  const onCloseModal = () => {
-    setModalType("view");
-    onOpenChange();
-  };
-
   // TODO: Basically have a temporary value for selectedClass before useEffect loads
   const [selectedClass, setSelectedClass] = useState({
     name: "",
@@ -71,6 +65,7 @@ export default function AdminClassViewPage({ classId }) {
   const [result, setResult] = useState({}); // {  isSuccess: boolean, header: string, message: string }
   const [showToast, setShowToast] = useState(false);
   const [toast, setToast] = useState({});
+  const [page, setPage] = useState(1);
   const [isEdit, setIsEdit] = useState(false);
   const [email, setEmail] = useState("");
 
@@ -110,6 +105,37 @@ export default function AdminClassViewPage({ classId }) {
     fetchBookings();
   }, []);
 
+  const rowsPerPage = 10;
+  const bookingPages = Math.ceil(bookings.length / rowsPerPage);
+  const bookingItems = useMemo(() => {
+    const start = (page - 1) * rowsPerPage;
+    const end = start + rowsPerPage;
+    return bookings.slice(start, end);
+  }, [page, bookings]);
+
+  const toggleShowToast = () => {
+    setShowToast(!showToast);
+  };
+  const selectRow = (rowData) => {
+    setSelectedBooking(rowData);
+  };
+  const handleDropdown = (key) => {
+    switch (key) {
+      case "mark":
+        markPresent(selectedBooking);
+        return;
+      case "unbook":
+        unbookUser(selectedBooking);
+        return;
+    }
+  };
+  const onCloseModal = () => {
+    setModalType("view");
+    onOpenChange();
+  };
+  const toggleIsEdit = () => {
+    setIsEdit(!isEdit);
+  };
   const validateEmail = (email) => {
     const emailSchema = z.string().email();
     try {
@@ -127,33 +153,9 @@ export default function AdminClassViewPage({ classId }) {
     return false;
   });
 
-  const toggleIsEdit = () => {
-    setIsEdit(!isEdit);
-  };
-  const selectRow = (rowData) => {
-    setSelectedBooking(rowData);
-  };
-  const handleDropdown = (key) => {
-    console.log(selectedBooking);
-    switch (key) {
-      case "mark":
-        // TODO: Fix because it's able to mark it present in DB but not being reflected in list
-        markPresent(selectedBooking);
-        return;
-      case "unbook":
-        console.log("unbook");
-        unbookUser(selectedBooking);
-        return;
-    }
-  };
-  const closeView = () => {
-    router.back();
-  };
-
   async function bookUser() {
     setModalType("loading");
     try {
-      console.log(email);
       // 1. Find user by email
       const res1 = await fetch(`/api/users?email=${email}`);
       if (!res1.ok) {
@@ -203,6 +205,24 @@ export default function AdminClassViewPage({ classId }) {
       if (!res4.ok) {
         throw new Error("Unable to create transaction");
       }
+
+      // Update bookings
+      const fetchBookings = async () => {
+        try {
+          const res = await fetch(`/api/bookings?classId=${classId}`);
+          if (!res.ok) {
+            throw new Error(
+              `Unable to get updated bookings for class ${classId}: ${res.status}`
+            );
+          }
+          const data = await res.json();
+          setBookings(data);
+        } catch (error) {
+          console.log(error);
+        }
+      };
+      fetchBookings();
+
       setResult({
         isSuccess: true,
         header: "Booking successful",
@@ -220,10 +240,8 @@ export default function AdminClassViewPage({ classId }) {
     }
   }
 
-  // TODO: Refresh participants list after change
   async function unbookUser(booking) {
     try {
-      console.log(selectedClass);
       const newBookedCapacity = selectedClass.bookedCapacity - 1;
 
       // 1. Delete booking
@@ -255,7 +273,23 @@ export default function AdminClassViewPage({ classId }) {
         throw new Error(`Unable to update class ${selectedClass.id}`);
       }
 
-      // 3. Create new transaction
+      // 3. Update user's balance
+      const newBalance = selectedBooking.user.balance + 1;
+      const res3 = await fetch("/api/users", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: selectedBooking.userId,
+          balance: newBalance,
+        }),
+      });
+      if (!res3.ok) {
+        throw new Error(
+          `Unable to update user ${selectedBooking.userId}'s balance`
+        );
+      }
+
+      // 4. Create new transaction
       const newTransaction = {
         userId: booking.userId,
         amount: 1,
@@ -270,6 +304,13 @@ export default function AdminClassViewPage({ classId }) {
       if (!res4.ok) {
         throw new Error("Unable to create transaction");
       }
+
+      // Update bookings
+      const updatedBookings = bookings.filter((originalBooking) => {
+        return originalBooking.id != booking.id;
+      });
+      setBookings(updatedBookings);
+
       setToast({
         isSuccess: true,
         header: "Cancelled booking",
@@ -298,18 +339,38 @@ export default function AdminClassViewPage({ classId }) {
       if (!res.ok) {
         throw new Error("Unable to update booking");
       }
+
+      // Update bookings
+      const updatedBookings = bookings.map((originalBooking) => {
+        if (originalBooking.id == booking.id) {
+          return { ...originalBooking, attendance: "present" };
+        }
+        return originalBooking;
+      });
+      setBookings(updatedBookings);
+
+      setToast({
+        isSuccess: true,
+        header: "Marked present",
+        message: `Successfully marked ${selectedBooking.user.name} as present in ${selectedClass.name}.`,
+      });
+      setShowToast(true);
     } catch (error) {
+      setToast({
+        isSuccess: false,
+        header: "Unable to mark present",
+        message: `Unable to mark ${selectedBooking.user.name} as present in ${selectedClass.name}. Try again later.`,
+      });
+      setShowToast(true);
       console.log(error);
     }
   }
 
-  // TODO: Add in pagination
   return (
     <>
       <div className="w-full h-full flex flex-col gap-y-5 p-10 pt-20 overflow-y-scroll">
         <div className="flex flex-row items-center gap-x-2.5">
-          {/* TODO: If isEdit or isManage, go back to Classes. Else, go to not isEdit and not isManage */}
-          <button onClick={closeView} className="cursor-pointer">
+          <button onClick={() => router.back()} className="cursor-pointer">
             <MdChevronLeft color="#1F4776" size={42} />
           </button>
           <PageTitle title={selectedClass.name} />
@@ -355,7 +416,7 @@ export default function AdminClassViewPage({ classId }) {
               <TableColumn></TableColumn>
             </TableHeader>
             <TableBody>
-              {bookings.map((booking) => {
+              {bookingItems.map((booking) => {
                 return (
                   <TableRow key={booking.id}>
                     <TableCell>{booking.user.name}</TableCell>
@@ -385,6 +446,18 @@ export default function AdminClassViewPage({ classId }) {
               })}
             </TableBody>
           </Table>
+          <div className="flex flex-row justify-center">
+            <Pagination
+              showControls
+              isCompact
+              color="primary"
+              size="sm"
+              loop={true}
+              page={page}
+              total={bookingPages}
+              onChange={(page) => setPage(page)}
+            />
+          </div>
         </div>
       </div>
       <Modal
@@ -457,11 +530,13 @@ export default function AdminClassViewPage({ classId }) {
         </ModalContent>
       </Modal>
       {showToast ? (
-        <Toast
-          isSuccess={toast.isSuccess}
-          header={toast.header}
-          message={toast.message}
-        />
+        <div onClick={toggleShowToast}>
+          <Toast
+            isSuccess={toast.isSuccess}
+            header={toast.header}
+            message={toast.message}
+          />
+        </div>
       ) : (
         <></>
       )}

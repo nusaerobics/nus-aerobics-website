@@ -13,7 +13,6 @@ export default function AdminClassCreatePage({ closeCreate }) {
         </button>
         <PageTitle title="Create new class" />
       </div>
-      {/* TODO: On desktop, overflow should make entire white div longer rather than keep it at that height and scroll */}
       <div className="h-full w-full flex flex-col gap-y-5 p-5 overflow-scroll rounded-[20px] border border-a-black/10 bg-white">
         <ClassForm
           isCreate={true}

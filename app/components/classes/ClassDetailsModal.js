@@ -35,8 +35,28 @@ export default function ClassDetailsModal({
   onOpen,
   onOpenChange,
 }) {
+  const [user, setUser] = useState({});
+  const [isCancel, setIsCancel] = useState(true);
+  const [status, setStatus] = useState();             // "open" || "closed" + "full" || "booked"
+  const [modalType, setModalType] = useState("view"); // Either: "view", "loading", or "result"
+  const [result, setResult] = useState({});           // {  isSuccess: boolean, header: string, message: string }
+
   useEffect(() => {
-    console.log(selectedClass, selectedBooking); // They are undefined from UsersLandingPage
+    // getUser
+    const fetchUser = async () => {
+      try {
+        const res = await fetch(`/api/users?id=${userId}`);
+        if (!res.ok) {
+          throw new Error(`Unable to get user ${userId}: ${res.status}`);
+        }
+        const data = await res.json();
+        setUser(data);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    fetchUser();
+
     if (selected == "schedule") {
       // Checks if selectedClass has already been booked by user
       checkIsBooked(selectedClass).then((result) => {
@@ -55,12 +75,7 @@ export default function ClassDetailsModal({
       setIsCancel(result);
       setStatus("booked");
     }
-  });
-  const [isCancel, setIsCancel] = useState(true);
-  const [status, setStatus] = useState(); // "open" || "closed" + "full" || "booked"
-
-  const [modalType, setModalType] = useState("view"); // Either: "view", "loading", or "result"
-  const [result, setResult] = useState({}); // {  isSuccess: boolean, header: string, message: string }
+  }, []);
 
   async function checkIsBooked(selectedClass) {
     // For a user's bookings, check if there's a booking where the classId = selectedClass.id
@@ -95,105 +110,7 @@ export default function ClassDetailsModal({
      * 4. Create new transaction
      */
     setModalType("loading");
-    if (selectedClass.bookedCapacity < selectedClass.maxCapacity) {
-      try {
-        const newBookedCapacity = selectedClass.bookedCapacity + 1;
-
-        // 2. Update class bookedCapacity
-        const updatedClass = {
-          id: selectedClass.id,
-          name: selectedClass.name,
-          description: selectedClass.description,
-          date: selectedClass.date,
-          maxCapacity: selectedClass.maxCapacity,
-          bookedCapacity: newBookedCapacity,
-          status:
-            newBookedCapacity == selectedClass.maxCapacity
-              ? "full"
-              : selectedClass.status,
-        };
-        const res1 = await fetch("/api/classes", {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(updatedClass),
-        });
-        if (!res1.ok) {
-          throw new Error(`Unable to update class ${selectedClass.id}`);
-        }
-
-        // 3. Create new booking
-        const newBooking = { classId: selectedClass.id, userId: userId };
-        const res2 = await fetch("/api/bookings", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(newBooking),
-        });
-        if (!res2.ok) {
-          // Revert 2. Update class bookedCapacity back to original selectedClass
-          const revert1 = await fetch("/api/classes", {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(selectedClass),
-          });
-          if (!revert1.ok) {
-            throw new Error("Unable to revert previous class update");
-          }
-          throw new Error("Unable to create booking");
-        }
-
-        // 4. Create new transaction
-        const newTransaction = {
-          userId: userId,
-          amount: -1,
-          type: "book",
-          description: `Booked '${selectedClass.name}'`,
-        };
-        const res3 = await fetch("/api/transactions", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(newTransaction),
-        });
-        if (!res3.ok) {
-          // Revert 2. Update class bookedCapacity back to original selectedClass
-          const revert1 = await fetch("/api/classes", {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(selectedClass),
-          });
-          if (!revert1.ok) {
-            throw new Error("Unable to revert previous class update");
-          }
-
-          // Revert 3. Create new booking by deleting created booking
-          const revert2 = await fetch("/api/bookings", {
-            method: "DELETE",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ id: res2.id }),
-          });
-          if (!revert2.ok) {
-            throw new Error("Unable to revert previous created booking");
-          }
-
-          throw new Error("Unable to create transaction");
-        }
-        setResult({
-          isSuccess: true,
-          header: "Booking successful",
-          message:
-            "Your booking has been successful and a confirmation email has been sent.",
-        });
-        setModalType("result");
-      } catch (error) {
-        setResult({
-          isSuccess: false,
-          header: "Booking unsuccessful",
-          message:
-            "An error occurred while trying to book this class. Try again later.",
-        });
-        setModalType("result");
-        console.log(error);
-      }
-    } else {
+    if (selectedClass.bookedCapacity >= selectedClass.maxCapacity) {
       setModalType("result");
       setResult({
         isSuccess: false,
@@ -201,6 +118,116 @@ export default function ClassDetailsModal({
         message:
           "Unable to book class because it is full. Try booking a different class.",
       });
+      return;
+    }
+
+    if (user.balance <= 0) {
+      setModalType("result");
+      setResult({
+        isSuccess: false,
+        header: "Booking unsuccessful",
+        message:
+          "Unable to book class due to insufficient credits. Purchase more credits first.",
+      });
+      return;
+    }
+
+    try {
+      const newBookedCapacity = selectedClass.bookedCapacity + 1;
+
+      // 2. Update class bookedCapacity
+      const updatedClass = {
+        id: selectedClass.id,
+        name: selectedClass.name,
+        description: selectedClass.description,
+        date: selectedClass.date,
+        maxCapacity: selectedClass.maxCapacity,
+        bookedCapacity: newBookedCapacity,
+        status:
+          newBookedCapacity == selectedClass.maxCapacity
+            ? "full"
+            : selectedClass.status,
+      };
+      const res1 = await fetch("/api/classes", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updatedClass),
+      });
+      if (!res1.ok) {
+        throw new Error(`Unable to update class ${selectedClass.id}`);
+      }
+
+      // 3. Create new booking
+      const newBooking = { classId: selectedClass.id, userId: userId };
+      const res2 = await fetch("/api/bookings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newBooking),
+      });
+      if (!res2.ok) {
+        // Revert 2. Update class bookedCapacity back to original selectedClass
+        const revert1 = await fetch("/api/classes", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(selectedClass),
+        });
+        if (!revert1.ok) {
+          throw new Error("Unable to revert previous class update");
+        }
+        throw new Error("Unable to create booking");
+      }
+
+      // 4. Create new transaction
+      const newTransaction = {
+        userId: userId,
+        amount: -1,
+        type: "book",
+        description: `Booked '${selectedClass.name}'`,
+      };
+      const res3 = await fetch("/api/transactions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newTransaction),
+      });
+      if (!res3.ok) {
+        // Revert 2. Update class bookedCapacity back to original selectedClass
+        const revert1 = await fetch("/api/classes", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(selectedClass),
+        });
+        if (!revert1.ok) {
+          throw new Error("Unable to revert previous class update");
+        }
+
+        // Revert 3. Create new booking by deleting created booking
+        const revert2 = await fetch("/api/bookings", {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id: res2.id }),
+        });
+        if (!revert2.ok) {
+          throw new Error("Unable to revert previous created booking");
+        }
+
+        throw new Error("Unable to create transaction");
+      }
+      setResult({
+        isSuccess: true,
+        header: "Booking successful",
+        message:
+          "Your booking has been successful and a confirmation email has been sent.",
+      });
+      setModalType("result");
+    } catch (error) {
+      setResult({
+        isSuccess: false,
+        header: "Booking unsuccessful",
+        message:
+          "An error occurred while trying to book this class. Try again later.",
+      });
+      setModalType("result");
+      console.log(error);
     }
   }
 

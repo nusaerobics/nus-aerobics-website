@@ -68,45 +68,135 @@ export default function UsersPage() {
     return users.slice(start, end);
   }, [page, users]);
 
+  const toggleShowToast = () => {
+    setShowToast(!showToast);
+  };
   const selectRow = (rowData) => {
     setSelectedUser(rowData);
   };
   const handleDropdown = (key) => {
     switch (key) {
       case "view":
-        console.log("selectedUser:", selectedUser);
         return router.push(`users/${selectedUser.id}`);
       case "credit":
         return onOpen();
       case "delete":
-        console.log("delete");
-        // TODO: Implement delete user selected
-        return;
+        return deleteUser(selectedUser);
     }
   };
 
   async function creditUser() {
-    const newBalance = parseInt(selectedUser.balance) + parseInt(credits);
-    const res = await fetch("/api/users", {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id: selectedUser.id, balance: newBalance }),
-    });
-    if (!res.ok) {
+    try {
+      const newBalance = parseInt(selectedUser.balance) + parseInt(credits);
+      const res = await fetch("/api/users", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: selectedUser.id, balance: newBalance }),
+      });
+      if (!res.ok) {
+        setToast({
+          isSuccess: false,
+          header: "Unable to credit user",
+          message: `Unable to credit ${selectedUser.name}'s account. Try again later.`,
+        });
+        setShowToast(true);
+        throw new Error(`Unable to credit user ${selectedUser.id}`);
+      }
+      // Update users
+      const updatedUsers = users.map((originalUser) => {
+        if (originalUser.id == selectedUser.id) {
+          return { ...originalUser, balance: newBalance };
+        }
+        return originalUser;
+      });
+      setUsers(updatedUsers);
+
+      onOpenChange();
       setToast({
-        isSuccess: false,
-        header: "Unable to credit user",
-        message: `Unable to credit ${selectedUser.name}'s account. Try again later.`,
+        isSuccess: true,
+        header: "Credited user",
+        message: `Successfully credited ${selectedUser.name}'s account.`,
       });
       setShowToast(true);
-      throw new Error(`Unable to credit user ${selectedUser.id}`);
+    } catch (error) {
+      setResult({
+        isSuccess: false,
+        header: "Unable to credit user",
+        message: `An error occurred while credit ${selectedUser.name}'s account. Try again later.`,
+      });
+      setModalType("result");
+      console.log(error);
     }
-    setToast({
-      isSuccess: true,
-      header: "Credited user",
-      message: `Successfully credited ${selectedUser.name}'s account.`,
-    });
-    setShowToast(true);
+  }
+
+  async function deleteUser(selectedUser) {
+    try {
+      const originalTransactions = await fetch(
+        `/api/transactions?userId=${selectedUser.id}`
+      );
+      if (!originalTransactions.ok) {
+        throw new Error(
+          `Unable to get original transactions for user ${selectedUser.id}`
+        );
+      }
+      const originalBookings = await fetch(
+        `/api/bookings?userId=${selectedUser.id}`
+      );
+      if (!originalBookings.ok) {
+        throw new Error(
+          `Unable to get original bookings for user ${selectedUser.id}`
+        );
+      }
+
+      const res1 = await fetch("/api/transactions", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId: selectedUser.id }),
+      });
+      if (!res1.ok) {
+        // TODO: Restore transactions for user
+        throw new Error(`Unable to delete transactions for user ${selectedUser.id}`);
+      }
+
+      const res2 = await fetch("/api/bookings", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId: selectedUser.id }),
+      });
+      if (!res2.ok) {
+        // TODO: Restore transactions and bookings for user
+        throw new Error(`Unable to delete bookings for ${selectedUser.id}`);
+      }
+
+      const res3 = await fetch("/api/users", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: selectedUser.id }),
+      });
+      if (!res3.ok) {
+        // TODO: Restore transactions and bookings for user
+        throw new Error(`Unable to delete user ${selectedUser.id}`);
+      }
+
+      const updatedUsers = users.filter((originalUser) => {
+        return originalUser.id != selectedUser.id;
+      });
+      setUsers(updatedUsers);
+      setToast({
+        isSuccess: true,
+        header: "Deleted user",
+        message: `Successfully deleted ${selectedUser.name}'s account.`,
+      });
+      setShowToast(true);
+    } catch (error) {
+      setToast({
+        isSuccess: false,
+        header: "Unable to delete user",
+        message: `Unable to delete ${selectedUser.name}'s account. Try again later.`,
+      });
+      setShowToast(true);
+      console.log(error);
+    }
   }
 
   return (
@@ -224,11 +314,13 @@ export default function UsersPage() {
         </ModalContent>
       </Modal>
       {showToast ? (
-        <Toast
-          isSuccess={toast.isSuccess}
-          header={toast.header}
-          message={toast.message}
-        />
+        <div onClick={toggleShowToast}>
+          <Toast
+            isSuccess={toast.isSuccess}
+            header={toast.header}
+            message={toast.message}
+          />
+        </div>
       ) : (
         <></>
       )}

@@ -10,7 +10,7 @@ import UserClassLandingPage from "./UserClassLandingPage";
 export default function ClassesPage({ user }) {
   const [isAdmin, setIsAdmin] = useState(false);
   const [classes, setClasses] = useState([]); // (User, Admin) All Classes
-  const [userBookings, setUserBookings] = useState([]); // (User) All Bookings of a given User
+  const [bookings, setBookings] = useState([]); // (User) All Bookings of a given User
   const [isCreateClass, setIsCreateClass] = useState(false);
 
   const openCreate = () => {
@@ -38,7 +38,7 @@ export default function ClassesPage({ user }) {
 
     if (!isAdmin) {
       // (User) All Bookings of a given User
-      const fetchUserBookings = async () => {
+      const fetchBookings = async () => {
         try {
           const res = await fetch(`/api/bookings?userId=${user.id}`);
           if (!res.ok) {
@@ -47,12 +47,12 @@ export default function ClassesPage({ user }) {
             );
           }
           const data = await res.json();
-          setUserBookings(data);
+          setBookings(data);
         } catch (error) {
           console.log(error);
         }
       };
-      fetchUserBookings();
+      fetchBookings();
     }
   }, []);
 
@@ -64,7 +64,7 @@ export default function ClassesPage({ user }) {
             <AdminClassCreatePage closeCreate={closeCreate} />
           ) : (
             <AdminClassLandingPage
-              classes={classes}
+              // classes={classes}
               openCreate={openCreate}
             />
           )}
@@ -73,7 +73,7 @@ export default function ClassesPage({ user }) {
         <UserClassLandingPage
           userId={user.id}
           classes={classes}
-          userBookings={userBookings}  // TODO: Change name to bookings
+          bookings={bookings}
         />
       )}
     </>
