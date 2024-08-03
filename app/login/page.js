@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { Input } from "@nextui-org/react";
 import { MdVisibility, MdVisibilityOff } from "react-icons/md";
 import { inputClassNames } from "../components/utils/ClassNames";
@@ -98,6 +98,16 @@ export default function Page() {
   const toggleShowToast = () => {
     setShowToast(!showToast);
   };
+
+  useEffect(() => {
+    let timer;
+    if (showToast) {
+      timer = setTimeout(() => {
+        setShowToast(false);
+      }, 3000);
+    }
+    return () => clearTimeout(timer);
+  }, [showToast]);
 
   const message = isLogin ? "Welcome back" : "Create an account";
   const button = isLogin ? "Login" : "Sign-up";
@@ -274,9 +284,11 @@ export default function Page() {
               {button}
             </button>
             <div className="w-full flex flex-row justify-center gap-x-1">
-              <p className="text-sm text-a-black">{bottomAction}</p>
+              <p className="text-sm text-a-black bottom-action">
+                {bottomAction}
+              </p>
               <button
-                className="text-end text-sm text-a-navy font-bold underline cursor-pointer"
+                className="text-end text-sm text-a-navy font-bold underline cursor-pointer bottom-button"
                 onClick={toggleIsLogin}
               >
                 {bottomButton}
