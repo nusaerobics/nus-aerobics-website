@@ -1,3 +1,4 @@
+import { fromZonedTime, toZonedTime } from "date-fns-tz";
 import { NextResponse } from "next/server";
 import { Op, fn } from "sequelize";
 
@@ -19,18 +20,33 @@ export async function GET(request) {
       return NextResponse.json(targetClass, { status: 200 });
     }
     
-    // getUpcomingClasses /api/classes?isUpcoming=true
-    if (searchParams.get("isUpcoming") != undefined) {
-      const nowSgTime = fn('CONVERT_TZ', NOW(), '+08:00');
-      const upcomingClasses = await Class.findAll({ where: { date: { [Op.gte]: nowSgTime } } });
-      if (!upcomingClasses) {
-        throw new Error("No upcoming classes");
-      }
-      return NextResponse.json(upcomingClasses, { status: 200 });
+    const classes = await Class.findAll();
+
+    // getTodayClasses /api/classes?isToday=true
+    if (searchParams.get("isToday") != undefined) {
+      const todayClasses = classes.filter((c) => {
+        const utcClassDate = fromZonedTime(c.date, "Asia/Singapore");
+        const sgClassDate = toZonedTime(utcClassDate, "Asia/Singapore");
+        const sgCurrentDate = toZonedTime(new Date(), "Asia/Singapore");
+
+        const sgClassYear = sgClassDate.getFullYear();
+        const sgClassMonth = sgClassDate.getMonth();
+        const sgClassDay = sgClassDate.getDate();
+
+        const sgCurrentYear = sgCurrentDate.getFullYear();
+        const sgCurrentMonth = sgCurrentDate.getMonth();
+        const sgCurrentDay = sgCurrentDate.getDate();
+
+        return (
+          sgClassYear == sgCurrentYear &&
+          sgClassMonth == sgCurrentMonth &&
+          sgClassDay == sgCurrentDay
+        );
+      });
+      return NextResponse.json(todayClasses, { status: 200 });
     }
 
     // getClasses
-    const classes = await Class.findAll();
     return NextResponse.json(classes, { status: 200 });
   } catch (error) {
     console.log(error);

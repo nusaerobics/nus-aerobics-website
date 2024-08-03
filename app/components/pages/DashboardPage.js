@@ -37,33 +37,12 @@ export default function DashboardPage({ user }) {
       const fetchClasses = async () => {
         try {
           console.log("in admin fetchClasses");
-          const res = await fetch("api/classes");
+          const res = await fetch("api/classes?isToday=true");
           if (!res.ok) {
             throw new Error(`Unable to get classes: ${res.status}`);
           }
           const data = await res.json();
-          console.log(data);
-          const todayClasses = data.filter((c) => {
-            const utcClassDate = fromZonedTime(c.date, "Asia/Singapore");
-            const sgClassDate = toZonedTime(utcClassDate, "Asia/Singapore");
-            const sgCurrentDate = toZonedTime(new Date(), "Asia/Singapore");
-
-            const sgClassYear = sgClassDate.getFullYear();
-            const sgClassMonth = sgClassDate.getMonth();
-            const sgClassDay = sgClassDate.getDate();
-
-            const sgCurrentYear = sgCurrentDate.getFullYear();
-            const sgCurrentMonth = sgCurrentDate.getMonth();
-            const sgCurrentDay = sgCurrentDate.getDate();
-
-            return (
-              sgClassYear == sgCurrentYear &&
-              sgClassMonth == sgCurrentMonth &&
-              sgClassDay == sgCurrentDay
-            );
-          });
-          console.log(todayClasses);
-          setClasses(todayClasses);
+          setClasses(data);
         } catch (error) {
           console.log(error);
         }
@@ -96,7 +75,6 @@ export default function DashboardPage({ user }) {
             );
           }
           const data = await res.json();
-          // TODO: Move this to be filtered in fetch instead? filter((booking) => booking.date >= now)
           const upcomingBookings = data
             .filter((booking) => {
               const utcClassDate = fromZonedTime(

@@ -1,5 +1,13 @@
 "use client";
 
+import { MdOutlineFilterAlt } from "react-icons/md";
+import {
+  Dropdown,
+  DropdownItem,
+  DropdownMenu,
+  DropdownSection,
+  DropdownTrigger,
+} from "@nextui-org/dropdown";
 import {
   Modal,
   ModalContent,
@@ -22,11 +30,20 @@ import {
   modalClassNames,
   tableClassNames,
 } from "../utils/ClassNames";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { format } from "date-fns";
 
 export default function WalletPage({ user }) {
   const [isAdmin, setIsAdmin] = useState(false);
+  const [searchInput, setSearchInput] = useState("");
+  const [transactions, setTransactions] = useState([]);
+  const [file, setFile] = useState();
+  const { isOpen, onOpen, onOpenChange } = useDisclosure();
+  const [sortDescriptor, setSortDescriptor] = useState({
+    column: "createdAt",
+    direction: "ascending",
+  });
+  const [filters, setFilters] = useState(new Set([]));
 
   useEffect(() => {
     const permission = user.permission;
@@ -35,7 +52,6 @@ export default function WalletPage({ user }) {
     if (permission == "admin") {
       console.log("isAdmin here");
       const fetchTransactions = async () => {
-        // TODO: Get transactions with userId associated to get the user's name
         const res = await fetch("/api/transactions");
         if (!res.ok) {
           throw new Error(`Unable to get transactions: ${res.status}`);
@@ -59,29 +75,91 @@ export default function WalletPage({ user }) {
     }
   }, []);
 
-  const [searchInput, setSearchInput] = useState("");
-  const [transactions, setTransactions] = useState([]);
-  const [file, setFile] = useState();
-  const { isOpen, onOpen, onOpenChange } = useDisclosure();
-
   const [page, setPage] = useState(1);
   const rowsPerPage = 10;
-  const transactionPages = Math.ceil(transactions.length / rowsPerPage);
+
+  const onSearchInputChange = useCallback((value) => {
+    setSearchInput(value);
+    setPage(1);
+  });
+
+  const sortedTransactions = useMemo(() => {
+    return [...transactions].sort((a, b) => {
+      const first = a[sortDescriptor.column];
+      const second = b[sortDescriptor.column];
+      const compare = first < second ? -1 : first > second ? 1 : 0;
+      return sortDescriptor.direction == "descending" ? -compare : compare;
+    });
+  }, [sortDescriptor, transactions]);
+
+  const transactionPages = useMemo(() => {
+    if (searchInput != "") {
+      const transactionsSearch = sortedTransactions.filter((transaction) => {
+        const transactionUser = transaction.user.name.toLowerCase();
+        const searchValue = searchInput.toLowerCase();
+        return transactionUser.includes(searchValue);
+      })
+      .filter((transaction) => {
+        if (filters.size > 0) {
+          const transactionType = transaction.type;
+          return filters.has(transactionType);
+        }
+      });
+      setPage(1);
+      return Math.ceil(transactionsSearch.length / rowsPerPage);
+    }
+    const filteredTransactions = sortedTransactions.filter((transaction) => {
+      if (filters.size > 0) {
+        const transactionType = transaction.type;
+        return filters.has(transactionType);
+      }
+      return true;
+    })
+    setPage(1);
+    return Math.ceil(filteredTransactions.length / rowsPerPage);
+  }, [sortedTransactions, searchInput, filters]);
+
   const transactionItems = useMemo(() => {
     const start = (page - 1) * rowsPerPage;
     const end = start + rowsPerPage;
-    return transactions.slice(start, end);
-  }, [page, transactions]);
+
+    if (searchInput != "") {
+      const filteredTransactions = sortedTransactions
+        .filter((transaction) => {
+          const transactionUser = transaction.user.name.toLowerCase();
+          const searchValue = searchInput.toLowerCase();
+          return transactionUser.includes(searchValue);
+        })
+        .filter((transaction) => {
+          if (filters.size > 0) {
+            console.log(filters.size);
+            const transactionType = transaction.type;
+            console.log(transactionType);
+            return filters.has(transactionType);
+          }
+        });
+      return filteredTransactions.slice(start, end);
+    }
+
+    const filteredTransactions = sortedTransactions.filter((transaction) => {
+      if (filters.size > 0) {
+        const transactionType = transaction.type;
+        return filters.has(transactionType);
+      }
+      return true;
+    });
+    return filteredTransactions.slice(start, end);
+  }, [page, sortedTransactions, searchInput, filters]);
 
   function creditAccounts() {
+    // TODO: Implement CSV function
     return;
   }
 
-  // TODO: Abstract out Admin and User version
   return (
     <>
       {isAdmin ? (
-        <div className="h-full flex flex-col gap-y-5 p-10 pt-20 overflow-y-scroll">
+        <div className="w-full h-full flex flex-col gap-y-5 p-10 pt-20 overflow-y-scroll">
           <div className="flex flex-row items-center justify-between">
             <PageTitle title="Wallet" />
             <button
@@ -91,24 +169,51 @@ export default function WalletPage({ user }) {
               Credit accounts
             </button>
           </div>
-
-          <div className="h-full flex flex-col rounded-[20px] border border-a-black/10 p-5 bg-white gap-y-2.5">
-            <div className="flex flex-row justify-between items-center">
-              <SectionTitle title="All transactions" />
+          <div className="w-full flex flex-col rounded-[20px] border border-a-black/10 p-5 bg-white gap-y-2.5">
+            <div className="flex flex-row justify-end items-center gap-x-2.5">
+              <p>{filters}</p>
+              <Dropdown>
+                <DropdownTrigger>
+                  <button className="cursor-pointer">
+                    <MdOutlineFilterAlt color="#393E46" size={24} />
+                  </button>
+                </DropdownTrigger>
+                <DropdownMenu
+                  aria-label="Filter transactions"
+                  variant="flat"
+                  closeOnSelect={false}
+                  selectionMode="multiple"
+                  selectedKeys={filters}
+                  onSelectionChange={setFilters}
+                >
+                  <DropdownSection title="Filter classes">
+                    <DropdownItem key="refund">Refund</DropdownItem>
+                    <DropdownItem key="deposit">Deposit</DropdownItem>
+                    <DropdownItem key="book">Booking</DropdownItem>
+                  </DropdownSection>
+                </DropdownMenu>
+              </Dropdown>
               <div className="w-1/4">
                 <Input
                   placeholder="Search"
                   value={searchInput}
-                  onValueChange={setSearchInput}
+                  onValueChange={onSearchInputChange}
                   variant="bordered"
                   size="xs"
                   classNames={inputClassNames}
                 />
               </div>
             </div>
-            <Table removeWrapper classNames={tableClassNames}>
+            <Table
+              removeWrapper
+              classNames={tableClassNames}
+              sortDescriptor={sortDescriptor}
+              onSortChange={setSortDescriptor}
+            >
               <TableHeader>
-                <TableColumn>Date</TableColumn>
+                <TableColumn key="createdAt" allowsSorting>
+                  Date
+                </TableColumn>
                 <TableColumn>Amount</TableColumn>
                 <TableColumn>User</TableColumn>
                 <TableColumn>Description</TableColumn>
@@ -121,7 +226,7 @@ export default function WalletPage({ user }) {
                         {format(transaction.createdAt, "d/MM/y HH:mm")}
                       </TableCell>
                       <TableCell>{transaction.amount}</TableCell>
-                      <TableCell>{transaction.userId}</TableCell>
+                      <TableCell>{transaction.user.name}</TableCell>
                       <TableCell>{transaction.description}</TableCell>
                     </TableRow>
                   );
@@ -149,9 +254,7 @@ export default function WalletPage({ user }) {
             classNames={modalClassNames}
           >
             <ModalContent>
-              {(
-                onClose
-              ) => (
+              {(onClose) => (
                 <>
                   <ModalHeader>
                     <div className="flex flex-row items-center gap-x-2.5">
@@ -169,7 +272,6 @@ export default function WalletPage({ user }) {
                         size="xs"
                         classNames={inputClassNames}
                       />
-                      {/* TODO: Implement CSV file logic */}
                     </div>
                     <div className="flex justify-end">
                       <button
@@ -206,27 +308,23 @@ export default function WalletPage({ user }) {
                 </p>
               </div>
             </div>
-            <div className="h-full flex flex-col rounded-[20px] border border-a-black/10 p-5 bg-white gap-y-2.5">
+            <div className="w-full flex flex-col rounded-[20px] border border-a-black/10 p-5 bg-white gap-y-2.5">
               <div className="flex flex-row">
                 <div className="w-3/4">
                   <SectionTitle title="All transactions" />
                 </div>
-                <div className="w-1/4">
-                  <Input
-                    placeholder="Search"
-                    value={searchInput}
-                    onValueChange={setSearchInput}
-                    variant="bordered"
-                    size="xs"
-                    classNames={inputClassNames}
-                  />
-                </div>
               </div>
-              <Table removeWrapper classNames={tableClassNames}>
+              <Table
+                removeWrapper
+                classNames={tableClassNames}
+                sortDescriptor={sortDescriptor}
+                onSortChange={setSortDescriptor}
+              >
                 <TableHeader>
-                  <TableColumn>Date</TableColumn>
+                  <TableColumn key="createdAt" allowsSorting>
+                    Date
+                  </TableColumn>
                   <TableColumn>Amount</TableColumn>
-                  <TableColumn>User</TableColumn>
                   <TableColumn>Description</TableColumn>
                 </TableHeader>
                 <TableBody>
@@ -237,7 +335,6 @@ export default function WalletPage({ user }) {
                           {format(transaction.createdAt, "d/MM/y HH:mm")}
                         </TableCell>
                         <TableCell>{transaction.amount}</TableCell>
-                        <TableCell>{transaction.userId}</TableCell>
                         <TableCell>{transaction.description}</TableCell>
                       </TableRow>
                     );
@@ -262,12 +359,4 @@ export default function WalletPage({ user }) {
       )}
     </>
   );
-}
-
-{
-  /* <Toast
-    isSuccess={false}
-    header="Credited user"
-    message="Successfully credited Nara Smith's account."
-    /> */
 }

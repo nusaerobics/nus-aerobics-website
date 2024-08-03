@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 const db = require("../../config/sequelize");
+
 const Transaction = db.transactions;
+const User = db.users;
 
 export async function GET(request) {
   try {
@@ -20,7 +22,16 @@ export async function GET(request) {
     }
 
     // getTransactions
-    const transactions = await Transaction.findAll();
+    const transactions = await Transaction.findAll({
+      include: [
+        {
+          model: User,
+          required: true,
+          as: "user",
+        },
+      ],
+    });
+
     return NextResponse.json(transactions, { status: 200 });
   } catch (error) {
     console.log(error);
@@ -54,7 +65,7 @@ export async function DELETE(request) {
     // deleteTransactionsByUser
     const body = await request.json();
     const userId = body.userId;
-    await Transaction.destroy({ where: { userId: userId }});
+    await Transaction.destroy({ where: { userId: userId } });
     return NextResponse.json(
       { json: `Transactions for user ${userId} deleted successfully` },
       { status: 200 }
