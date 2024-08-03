@@ -28,7 +28,7 @@ import ClassDetailsModal from "../classes/ClassDetailsModal";
 
 export default function UserClassLandingPage({ userId }) {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
-
+  
   const [tab, setTab] = useState("schedule");
   const [classes, setClasses] = useState([]);
   const [bookings, setBookings] = useState([]);
@@ -36,6 +36,14 @@ export default function UserClassLandingPage({ userId }) {
   const [bookingQ, setBookingQ] = useState("");
   const [selectedClass, setSelectedClass] = useState({});
   const [selectedBooking, setSelectedBooking] = useState({});
+  const [sortDescriptor, setSortDescriptor] = useState(
+    tab == "schedule"
+      ? {
+          column: "date",
+          direction: "ascending",
+        }
+      : { column: "bookingDate", direction: "ascending" }
+  );
 
   useEffect(() => {
     const fetchClasses = async () => {
@@ -74,59 +82,86 @@ export default function UserClassLandingPage({ userId }) {
   const [page, setPage] = useState(1);
   const rowsPerPage = 10;
 
+  const sortedClasses = useMemo(() => {
+    return [...classes].sort((a, b) => {
+      const first = a[sortDescriptor.column];
+      const second = b[sortDescriptor.column];
+      const compare = first < second ? -1 : first > second ? 1 : 0;
+      return sortDescriptor.direction == "descending" ? -compare : compare;
+    });
+  }, [sortDescriptor, classes]);
+
   const classPages = useMemo(() => {
     if (classQ != "") {
-      const classesSearch = classes.filter((c) => {
+      const classesSearch = sortedClasses.filter((c) => {
         const className = c.name.toLowerCase();
         const searchName = classQ.toLowerCase();
         return className.includes(searchName);
       });
       return Math.ceil(classesSearch.length / rowsPerPage);
     }
-    return Math.ceil(classes.length / rowsPerPage);
-  }, [classes, classQ]);
+    return Math.ceil(sortedClasses.length / rowsPerPage);
+  }, [sortedClasses, classQ]);
 
   const classItems = useMemo(() => {
     const start = (page - 1) * rowsPerPage;
     const end = start + rowsPerPage;
 
     if (classQ != "") {
-      const classesSearch = classes.filter((c) => {
+      const classesSearch = sortedClasses.filter((c) => {
         const className = c.name.toLowerCase();
         const searchName = classQ.toLowerCase();
         return className.includes(searchName);
       });
       return classesSearch.slice(start, end);
     }
-    return classes.slice(start, end);
-  }, [page, classes, classQ]);
+    return sortedClasses.slice(start, end);
+  }, [page, sortedClasses, classQ]);
+
+  const sortedBookings = useMemo(() => {
+    return [...bookings].sort((a, b) => {
+      let first;
+      let second;
+      if (sortDescriptor.column == "bookingDate") {
+        first = a["createdAt"];
+        second = b["createdAt"];
+      } else if (sortDescriptor.column == "classDate") {
+        first = a.class["date"];
+        second = b.class["date"];
+      }
+      console.log(a, b);
+      console.log(first, second);
+      const compare = first < second ? -1 : first > second ? 1 : 0;
+      return sortDescriptor.direction == "descending" ? -compare : compare;
+    });
+  }, [sortDescriptor, bookings]);
 
   const bookingPages = useMemo(() => {
     if (bookingQ != "") {
-      const bookingsSearch = bookings.filter((booking) => {
+      const bookingsSearch = sortedBookings.filter((booking) => {
         const bookingName = booking.class.name.toLowerCase();
         const searchName = bookingQ.toLowerCase();
         return bookingName.includes(searchName);
       });
       return Math.ceil(bookingsSearch.length / rowsPerPage);
     }
-    return Math.ceil(bookings.length / rowsPerPage);
-  }, [bookings, bookingQ]);
+    return Math.ceil(sortedBookings.length / rowsPerPage);
+  }, [sortedBookings, bookingQ]);
 
   const bookingItems = useMemo(() => {
     const start = (page - 1) * rowsPerPage;
     const end = start + rowsPerPage;
 
     if (bookingQ != "") {
-      const bookingsSearch = bookings.filter((booking) => {
+      const bookingsSearch = sortedBookings.filter((booking) => {
         const bookingName = booking.class.name.toLowerCase();
         const searchName = bookingQ.toLowerCase();
         return bookingName.includes(searchName);
       });
       return bookingsSearch.slice(start, end);
     }
-    return bookings.slice(start, end);
-  }, [page, bookings, bookingQ]);
+    return sortedBookings.slice(start, end);
+  }, [page, sortedBookings, bookingQ]);
 
   const handleTabChange = () => {
     if (tab == "schedule") {
@@ -179,13 +214,19 @@ export default function UserClassLandingPage({ userId }) {
                   classNames={inputClassNames}
                 />
               </div>
-              {/* TODO: Add in sort on the date */}
-              <Table removeWrapper classNames={tableClassNames}>
+              <Table
+                removeWrapper
+                classNames={tableClassNames}
+                sortDescriptor={sortDescriptor}
+                onSortChange={setSortDescriptor}
+              >
                 <TableHeader>
                   <TableColumn>Class</TableColumn>
                   <TableColumn></TableColumn>
                   <TableColumn>Status</TableColumn>
-                  <TableColumn allowsSorting>Date</TableColumn>
+                  <TableColumn key="date" allowsSorting>
+                    Date
+                  </TableColumn>
                 </TableHeader>
                 <TableBody>
                   {classItems.map((c) => {
@@ -246,14 +287,22 @@ export default function UserClassLandingPage({ userId }) {
                   classNames={inputClassNames}
                 />
               </div>
-              {/* TODO: Add in sort on the date */}
-              <Table removeWrapper classNames={tableClassNames}>
+              <Table
+                removeWrapper
+                classNames={tableClassNames}
+                sortDescriptor={sortDescriptor}
+                onSortChange={setSortDescriptor}
+              >
                 <TableHeader>
                   <TableColumn>Class</TableColumn>
                   <TableColumn></TableColumn>
                   <TableColumn>Status</TableColumn>
-                  <TableColumn allowsSorting>Class date</TableColumn>
-                  <TableColumn allowsSorting>Booking date</TableColumn>
+                  <TableColumn key="classDate" allowsSorting>
+                    Class date
+                  </TableColumn>
+                  <TableColumn key="bookingDate" allowsSorting>
+                    Booking date
+                  </TableColumn>
                 </TableHeader>
                 <TableBody>
                   {bookingItems.map((booking) => {

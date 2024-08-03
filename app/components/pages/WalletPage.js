@@ -31,7 +31,10 @@ export default function WalletPage({ user }) {
   const [transactions, setTransactions] = useState([]);
   const [file, setFile] = useState();
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
-  const [page, setPage] = useState(1);
+  const [sortDescriptor, setSortDescriptor] = useState({
+    column: "createdAt",
+    direction: "ascending",
+  });
 
   useEffect(() => {
     const permission = user.permission;
@@ -63,25 +66,36 @@ export default function WalletPage({ user }) {
     }
   }, []);
 
+  const [page, setPage] = useState(1);
   const rowsPerPage = 10;
+
+  const sortedTransactions = useMemo(() => {
+    return [...transactions].sort((a, b) => {
+      const first = a[sortDescriptor.column];
+      const second = b[sortDescriptor.column];
+      const compare = first < second ? -1 : first > second ? 1 : 0;
+      return sortDescriptor.direction == "descending" ? -compare : compare;
+    });
+  }, [sortDescriptor, transactions]);
+
   const transactionPages = useMemo(() => {
     if (searchInput != "") {
-      const transactionsSearch = transactions.filter((transaction) => {
+      const transactionsSearch = sortedTransactions.filter((transaction) => {
         const transactionUser = transaction.user.name.toLowerCase();
         const searchValue = searchInput.toLowerCase();
         return transactionUser.includes(searchValue);
       });
       return Math.ceil(transactionsSearch.length / rowsPerPage);
     }
-    return Math.ceil(transactions.length / rowsPerPage);
-  }, [transactions, searchInput]);
+    return Math.ceil(sortedTransactions.length / rowsPerPage);
+  }, [sortedTransactions, searchInput]);
 
   const transactionItems = useMemo(() => {
     const start = (page - 1) * rowsPerPage;
     const end = start + rowsPerPage;
 
     if (searchInput != "") {
-      const transactionsSearch = transactions.filter((transaction) => {
+      const transactionsSearch = sortedTransactions.filter((transaction) => {
         const transactionUser = transaction.user.name.toLowerCase();
         const searchValue = searchInput.toLowerCase();
         return transactionUser.includes(searchValue);
@@ -89,14 +103,14 @@ export default function WalletPage({ user }) {
       return transactionsSearch.slice(start, end);
     }
 
-    return transactions.slice(start, end);
-  }, [page, transactions, searchInput]);
+    return sortedTransactions.slice(start, end);
+  }, [page, sortedTransactions, searchInput]);
 
   function creditAccounts() {
+    // TODO: Implement CSV function
     return;
   }
 
-  // TODO: Abstract out Admin and User version
   return (
     <>
       {isAdmin ? (
@@ -124,9 +138,16 @@ export default function WalletPage({ user }) {
                 />
               </div>
             </div>
-            <Table removeWrapper classNames={tableClassNames}>
+            <Table
+              removeWrapper
+              classNames={tableClassNames}
+              sortDescriptor={sortDescriptor}
+              onSortChange={setSortDescriptor}
+            >
               <TableHeader>
-                <TableColumn>Date</TableColumn>
+                <TableColumn key="createdAt" allowsSorting>
+                  Date
+                </TableColumn>
                 <TableColumn>Amount</TableColumn>
                 <TableColumn>User</TableColumn>
                 <TableColumn>Description</TableColumn>
@@ -139,7 +160,7 @@ export default function WalletPage({ user }) {
                         {format(transaction.createdAt, "d/MM/y HH:mm")}
                       </TableCell>
                       <TableCell>{transaction.amount}</TableCell>
-                      <TableCell>{user.name}</TableCell>
+                      <TableCell>{transaction.user.name}</TableCell>
                       <TableCell>{transaction.description}</TableCell>
                     </TableRow>
                   );
@@ -185,7 +206,6 @@ export default function WalletPage({ user }) {
                         size="xs"
                         classNames={inputClassNames}
                       />
-                      {/* TODO: Implement CSV file logic */}
                     </div>
                     <div className="flex justify-end">
                       <button
@@ -228,9 +248,16 @@ export default function WalletPage({ user }) {
                   <SectionTitle title="All transactions" />
                 </div>
               </div>
-              <Table removeWrapper classNames={tableClassNames}>
+              <Table
+                removeWrapper
+                classNames={tableClassNames}
+                sortDescriptor={sortDescriptor}
+                onSortChange={setSortDescriptor}
+              >
                 <TableHeader>
-                  <TableColumn>Date</TableColumn>
+                  <TableColumn key="createdAt" allowsSorting>
+                    Date
+                  </TableColumn>
                   <TableColumn>Amount</TableColumn>
                   <TableColumn>Description</TableColumn>
                 </TableHeader>

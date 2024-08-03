@@ -40,6 +40,10 @@ export default function AdminClassLandingPage({
   const [selectedClass, setSelectedClass] = useState({});
   const [showToast, setShowToast] = useState(false);
   const [toast, setToast] = useState({});
+  const [sortDescriptor, setSortDescriptor] = useState({
+    column: "date",
+    direction: "ascending",
+  });
 
   useEffect(() => {
     const fetchClasses = async () => {
@@ -54,33 +58,43 @@ export default function AdminClassLandingPage({
   }, []);
 
   const rowsPerPage = 10;
+
+  const sortedClasses = useMemo(() => {
+    return [...classes].sort((a, b) => {
+      const first = a[sortDescriptor.column];
+      const second = b[sortDescriptor.column];
+      const compare = first < second ? -1 : first > second ? 1 : 0;
+      return sortDescriptor.direction == "descending" ? -compare : compare;
+    });
+  }, [sortDescriptor, classes]);
+
   const classPages = useMemo(() => {
     if (searchInput != "") {
-      const classesSearch = classes.filter((c) => {
+      const classesSearch = sortedClasses.filter((c) => {
         const className = c.name.toLowerCase();
         const searchValue = searchInput.toLowerCase();
         return className.includes(searchValue);
       });
       return Math.ceil(classesSearch.length / rowsPerPage);
     }
-    return Math.ceil(classes.length / rowsPerPage);
-  }, [classes, searchInput]);
-  
+    return Math.ceil(sortedClasses.length / rowsPerPage);
+  }, [sortedClasses, searchInput]);
+
   const classItems = useMemo(() => {
     const start = (page - 1) * rowsPerPage;
     const end = start + rowsPerPage;
 
     if (searchInput != "") {
-      const classesSearch = classes.filter((c) => {
+      const classesSearch = sortedClasses.filter((c) => {
         const className = c.name.toLowerCase();
         const searchValue = searchInput.toLowerCase();
         return className.includes(searchValue);
       });
       return classesSearch.slice(start, end);
     }
-    return classes.slice(start, end);
-  }, [page, classes, searchInput]);
-  
+    return sortedClasses.slice(start, end);
+  }, [page, sortedClasses, searchInput]);
+
   const toggleShowToast = () => {
     setShowToast(!showToast);
   };
@@ -142,7 +156,8 @@ export default function AdminClassLandingPage({
         message: `An error occurred while deleting ${selectedClass.name}. Try again later.`,
       });
       setModalType("result");
-      console.log(error);}
+      console.log(error);
+    }
   }
 
   return (
@@ -162,38 +177,45 @@ export default function AdminClassLandingPage({
           <Input
             placeholder="Search"
             value={searchInput}
-            onValueChange={searchInput}
+            onValueChange={setSearchInput}
             variant="bordered"
             size="xs"
             classNames={inputClassNames}
           />
         </div>
-        <Table removeWrapper classNames={tableClassNames}>
+        <Table
+          removeWrapper
+          classNames={tableClassNames}
+          sortDescriptor={sortDescriptor}
+          onSortChange={setSortDescriptor}
+        >
           <TableHeader>
             <TableColumn>Class</TableColumn>
             <TableColumn>Status</TableColumn>
             <TableColumn>Booked capacity</TableColumn>
-            <TableColumn allowsSorting>Date</TableColumn>
+            <TableColumn key="date" allowsSorting>
+              Date
+            </TableColumn>
             <TableColumn></TableColumn>
           </TableHeader>
           <TableBody>
-            {classItems.map((item) => {
+            {classItems.map((c) => {
               return (
-                <TableRow key={item.id}>
-                  <TableCell>{item.name}</TableCell>
+                <TableRow key={c.id}>
+                  <TableCell>{c.name}</TableCell>
                   <TableCell>
-                    <Chip classNames={chipClassNames[item.status]}>
-                      {chipTypes[item.status].message}
+                    <Chip classNames={chipClassNames[c.status]}>
+                      {chipTypes[c.status].message}
                     </Chip>
                   </TableCell>
-                  <TableCell>{`${item.bookedCapacity}/${item.maxCapacity}`}</TableCell>
-                  <TableCell>{format(item.date, "d/MM/y HH:mm")}</TableCell>
+                  <TableCell>{`${c.bookedCapacity}/${c.maxCapacity}`}</TableCell>
+                  <TableCell>{format(c.date, "d/MM/y HH:mm")}</TableCell>
                   <TableCell>
                     <Dropdown>
                       <DropdownTrigger>
                         <button
                           className="cursor-pointer"
-                          onClick={() => selectRow(item)}
+                          onClick={() => selectRow(c)}
                         >
                           <MdMoreVert size={24} />
                         </button>
