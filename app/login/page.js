@@ -274,9 +274,11 @@ export default function Page() {
               {button}
             </button>
             <div className="w-full flex flex-row justify-center gap-x-1">
-              <p className="text-sm text-a-black">{bottomAction}</p>
+              <p className="text-sm text-a-black bottom-action">
+                {bottomAction}
+              </p>
               <button
-                className="text-end text-sm text-a-navy font-bold underline cursor-pointer"
+                className="text-end text-sm text-a-navy font-bold underline cursor-pointer bottom-button"
                 onClick={toggleIsLogin}
               >
                 {bottomButton}
