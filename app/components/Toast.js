@@ -13,9 +13,9 @@ export default function Toast({ isSuccess, header, message }) {
       )}
     >
       {isSuccess ? (
-        <MdCheckCircleOutline size={36} color={"#2A9E2F"} />
+        <MdCheckCircleOutline size={36} color={"#2A9E2F"} cursor={"pointer"} />
       ) : (
-        <MdOutlineCancel size={36} color={"#9E2A2A"} />
+        <MdOutlineCancel size={36} color={"#9E2A2A"} cursor={"pointer"} />
       )}
       <div className="flex flex-col gap-y-0">
         <p
