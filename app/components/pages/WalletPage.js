@@ -27,6 +27,11 @@ import { format } from "date-fns";
 
 export default function WalletPage({ user }) {
   const [isAdmin, setIsAdmin] = useState(false);
+  const [searchInput, setSearchInput] = useState("");
+  const [transactions, setTransactions] = useState([]);
+  const [file, setFile] = useState();
+  const { isOpen, onOpen, onOpenChange } = useDisclosure();
+  const [page, setPage] = useState(1);
 
   useEffect(() => {
     const permission = user.permission;
@@ -35,7 +40,6 @@ export default function WalletPage({ user }) {
     if (permission == "admin") {
       console.log("isAdmin here");
       const fetchTransactions = async () => {
-        // TODO: Get transactions with userId associated to get the user's name
         const res = await fetch("/api/transactions");
         if (!res.ok) {
           throw new Error(`Unable to get transactions: ${res.status}`);
@@ -59,19 +63,34 @@ export default function WalletPage({ user }) {
     }
   }, []);
 
-  const [searchInput, setSearchInput] = useState("");
-  const [transactions, setTransactions] = useState([]);
-  const [file, setFile] = useState();
-  const { isOpen, onOpen, onOpenChange } = useDisclosure();
-
-  const [page, setPage] = useState(1);
   const rowsPerPage = 10;
-  const transactionPages = Math.ceil(transactions.length / rowsPerPage);
+  const transactionPages = useMemo(() => {
+    if (searchInput != "") {
+      const transactionsSearch = transactions.filter((transaction) => {
+        const transactionUser = transaction.user.name.toLowerCase();
+        const searchValue = searchInput.toLowerCase();
+        return transactionUser.includes(searchValue);
+      });
+      return Math.ceil(transactionsSearch.length / rowsPerPage);
+    }
+    return Math.ceil(transactions.length / rowsPerPage);
+  }, [transactions, searchInput]);
+
   const transactionItems = useMemo(() => {
     const start = (page - 1) * rowsPerPage;
     const end = start + rowsPerPage;
+
+    if (searchInput != "") {
+      const transactionsSearch = transactions.filter((transaction) => {
+        const transactionUser = transaction.user.name.toLowerCase();
+        const searchValue = searchInput.toLowerCase();
+        return transactionUser.includes(searchValue);
+      });
+      return transactionsSearch.slice(start, end);
+    }
+
     return transactions.slice(start, end);
-  }, [page, transactions]);
+  }, [page, transactions, searchInput]);
 
   function creditAccounts() {
     return;
@@ -81,7 +100,7 @@ export default function WalletPage({ user }) {
   return (
     <>
       {isAdmin ? (
-        <div className="h-full flex flex-col gap-y-5 p-10 pt-20 overflow-y-scroll">
+        <div className="w-full h-full flex flex-col gap-y-5 p-10 pt-20 overflow-y-scroll">
           <div className="flex flex-row items-center justify-between">
             <PageTitle title="Wallet" />
             <button
@@ -91,8 +110,7 @@ export default function WalletPage({ user }) {
               Credit accounts
             </button>
           </div>
-
-          <div className="h-full flex flex-col rounded-[20px] border border-a-black/10 p-5 bg-white gap-y-2.5">
+          <div className="w-full flex flex-col rounded-[20px] border border-a-black/10 p-5 bg-white gap-y-2.5">
             <div className="flex flex-row justify-between items-center">
               <SectionTitle title="All transactions" />
               <div className="w-1/4">
@@ -121,7 +139,7 @@ export default function WalletPage({ user }) {
                         {format(transaction.createdAt, "d/MM/y HH:mm")}
                       </TableCell>
                       <TableCell>{transaction.amount}</TableCell>
-                      <TableCell>{transaction.userId}</TableCell>
+                      <TableCell>{user.name}</TableCell>
                       <TableCell>{transaction.description}</TableCell>
                     </TableRow>
                   );
@@ -149,9 +167,7 @@ export default function WalletPage({ user }) {
             classNames={modalClassNames}
           >
             <ModalContent>
-              {(
-                onClose
-              ) => (
+              {(onClose) => (
                 <>
                   <ModalHeader>
                     <div className="flex flex-row items-center gap-x-2.5">
@@ -206,27 +222,16 @@ export default function WalletPage({ user }) {
                 </p>
               </div>
             </div>
-            <div className="h-full flex flex-col rounded-[20px] border border-a-black/10 p-5 bg-white gap-y-2.5">
+            <div className="w-full flex flex-col rounded-[20px] border border-a-black/10 p-5 bg-white gap-y-2.5">
               <div className="flex flex-row">
                 <div className="w-3/4">
                   <SectionTitle title="All transactions" />
-                </div>
-                <div className="w-1/4">
-                  <Input
-                    placeholder="Search"
-                    value={searchInput}
-                    onValueChange={setSearchInput}
-                    variant="bordered"
-                    size="xs"
-                    classNames={inputClassNames}
-                  />
                 </div>
               </div>
               <Table removeWrapper classNames={tableClassNames}>
                 <TableHeader>
                   <TableColumn>Date</TableColumn>
                   <TableColumn>Amount</TableColumn>
-                  <TableColumn>User</TableColumn>
                   <TableColumn>Description</TableColumn>
                 </TableHeader>
                 <TableBody>
@@ -237,7 +242,6 @@ export default function WalletPage({ user }) {
                           {format(transaction.createdAt, "d/MM/y HH:mm")}
                         </TableCell>
                         <TableCell>{transaction.amount}</TableCell>
-                        <TableCell>{transaction.userId}</TableCell>
                         <TableCell>{transaction.description}</TableCell>
                       </TableRow>
                     );
@@ -262,12 +266,4 @@ export default function WalletPage({ user }) {
       )}
     </>
   );
-}
-
-{
-  /* <Toast
-    isSuccess={false}
-    header="Credited user"
-    message="Successfully credited Nara Smith's account."
-    /> */
 }

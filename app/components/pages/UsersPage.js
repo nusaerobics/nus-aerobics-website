@@ -61,12 +61,32 @@ export default function UsersPage() {
   }, []);
 
   const rowsPerPage = 10;
-  const userPages = Math.ceil(users.length / rowsPerPage);
+  const userPages = useMemo(() => {
+    if (searchInput != "") {
+      const usersSearch = users.filter((user) => {
+        const userName = user.name.toLowerCase();
+        const searchValue = searchInput.toLowerCase();
+        return userName.includes(searchValue);
+      });
+      return Math.ceil(usersSearch.length / rowsPerPage);
+    }
+    return Math.ceil(users.length / rowsPerPage);
+  }, [users, searchInput]);
+
   const userItems = useMemo(() => {
     const start = (page - 1) * rowsPerPage;
     const end = start + rowsPerPage;
+    if (searchInput != "") {
+      const usersSearch = users.filter((user) => {
+        const userName = user.name.toLowerCase();
+        const userEmail = user.email.toLowerCase();
+        const searchValue = searchInput.toLowerCase();
+        return userName.includes(searchValue) || userEmail.includes(searchValue);
+      });
+      return usersSearch.slice(start, end);
+    }
     return users.slice(start, end);
-  }, [page, users]);
+  }, [page, users, searchInput]);
 
   const toggleShowToast = () => {
     setShowToast(!showToast);

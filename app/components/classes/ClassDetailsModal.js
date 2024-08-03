@@ -29,7 +29,7 @@ import { SectionTitle } from "../utils/Titles";
 export default function ClassDetailsModal({
   selectedClass,
   selectedBooking,
-  selected,
+  tab,
   userId,
   isOpen,
   onOpen,
@@ -59,7 +59,7 @@ export default function ClassDetailsModal({
   }, []);
   
   useEffect(() => {
-    if (selected == "schedule") {
+    if (tab == "schedule") {
       // Checks if selectedClass has already been booked by user
       checkIsBooked(selectedClass).then((result) => {
         if (result) {
@@ -360,7 +360,7 @@ export default function ClassDetailsModal({
                   </ModalBody>
                   <ModalFooter>
                     <div className="flex justify-end">
-                      {selected == "schedule" ? (
+                      {tab == "schedule" ? (
                         <>
                           {status == "open" ? (
                             <button
@@ -405,7 +405,7 @@ export default function ClassDetailsModal({
                   <div className="flex flex-col items-center justify-center gap-y-5 p-20">
                     <Spinner color="primary" size="lg" />
                     <p className="text-a-black">
-                      {selected == "schedule"
+                      {tab == "schedule"
                         ? "Booking your class..."
                         : "Cancelling your booking..."}
                     </p>
@@ -440,7 +440,7 @@ export default function ClassDetailsModal({
 ClassDetailsModal.propTypes = {
   selectedClass: PropTypes.object,
   selectedBooking: PropTypes.oneOfType([PropTypes.object, PropTypes.any]),
-  selected: PropTypes.string,
+  tab: PropTypes.string,
   userId: PropTypes.number,
   isOpen: PropTypes.bool,
   onOpen: PropTypes.func,

@@ -54,13 +54,33 @@ export default function AdminClassLandingPage({
   }, []);
 
   const rowsPerPage = 10;
-  const classPages = Math.ceil(classes.length / rowsPerPage);
+  const classPages = useMemo(() => {
+    if (searchInput != "") {
+      const classesSearch = classes.filter((c) => {
+        const className = c.name.toLowerCase();
+        const searchValue = searchInput.toLowerCase();
+        return className.includes(searchValue);
+      });
+      return Math.ceil(classesSearch.length / rowsPerPage);
+    }
+    return Math.ceil(classes.length / rowsPerPage);
+  }, [classes, searchInput]);
+  
   const classItems = useMemo(() => {
     const start = (page - 1) * rowsPerPage;
     const end = start + rowsPerPage;
-    return classes.slice(start, end);
-  }, [page, classes]);
 
+    if (searchInput != "") {
+      const classesSearch = classes.filter((c) => {
+        const className = c.name.toLowerCase();
+        const searchValue = searchInput.toLowerCase();
+        return className.includes(searchValue);
+      });
+      return classesSearch.slice(start, end);
+    }
+    return classes.slice(start, end);
+  }, [page, classes, searchInput]);
+  
   const toggleShowToast = () => {
     setShowToast(!showToast);
   };
@@ -142,7 +162,7 @@ export default function AdminClassLandingPage({
           <Input
             placeholder="Search"
             value={searchInput}
-            onValueChange={setSearchInput}
+            onValueChange={searchInput}
             variant="bordered"
             size="xs"
             classNames={inputClassNames}
