@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { Input } from "@nextui-org/react";
 import { MdVisibility, MdVisibilityOff } from "react-icons/md";
 import { inputClassNames } from "../components/utils/ClassNames";
@@ -98,6 +98,16 @@ export default function Page() {
   const toggleShowToast = () => {
     setShowToast(!showToast);
   };
+
+  useEffect(() => {
+    let timer;
+    if (showToast) {
+      timer = setTimeout(() => {
+        setShowToast(false);
+      }, 3000);
+    }
+    return () => clearTimeout(timer);
+  }, [showToast]);
 
   const message = isLogin ? "Welcome back" : "Create an account";
   const button = isLogin ? "Login" : "Sign-up";
