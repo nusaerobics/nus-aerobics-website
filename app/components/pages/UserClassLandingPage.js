@@ -1,10 +1,20 @@
 "use client";
 
 import { format } from "date-fns";
+import { fromZonedTime, toZonedTime } from "date-fns-tz";
 import PropTypes from "prop-types";
-import { useEffect, useMemo, useState } from "react";
-import { MdList, MdOpenInNew } from "react-icons/md";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
+import { MdList, MdOpenInNew, MdOutlineFilterAlt } from "react-icons/md";
+import {
+  Dropdown,
+  DropdownItem,
+  DropdownMenu,
+  DropdownSection,
+  DropdownTrigger,
+} from "@nextui-org/dropdown";
+import { useDisclosure } from "@nextui-org/modal";
+import { Chip, Input, Tabs, Tab, Pagination } from "@nextui-org/react";
 import {
   Table,
   TableHeader,
@@ -13,8 +23,6 @@ import {
   TableRow,
   TableCell,
 } from "@nextui-org/table";
-import { useDisclosure } from "@nextui-org/modal";
-import { Chip, Input, Tabs, Tab, Pagination } from "@nextui-org/react";
 
 import {
   chipClassNames,
@@ -28,14 +36,15 @@ import ClassDetailsModal from "../classes/ClassDetailsModal";
 
 export default function UserClassLandingPage({ userId }) {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
-  
+
   const [tab, setTab] = useState("schedule");
   const [classes, setClasses] = useState([]);
   const [bookings, setBookings] = useState([]);
-  const [classQ, setClassQ] = useState("");
-  const [bookingQ, setBookingQ] = useState("");
   const [selectedClass, setSelectedClass] = useState({});
   const [selectedBooking, setSelectedBooking] = useState({});
+
+  const [classQ, setClassQ] = useState("");
+  const [bookingQ, setBookingQ] = useState("");
   const [sortDescriptor, setSortDescriptor] = useState(
     tab == "schedule"
       ? {
@@ -44,6 +53,7 @@ export default function UserClassLandingPage({ userId }) {
         }
       : { column: "bookingDate", direction: "ascending" }
   );
+  const [filters, setFilters] = useState(new Set(["open", "upcoming"]));
 
   useEffect(() => {
     const fetchClasses = async () => {
@@ -82,6 +92,15 @@ export default function UserClassLandingPage({ userId }) {
   const [page, setPage] = useState(1);
   const rowsPerPage = 10;
 
+  const onClassQChange = useCallback((value) => {
+    setClassQ(value);
+    setPage(1);
+  });
+  const onBookingQChange = useCallback((value) => {
+    setBookingQ(value);
+    setPage(1);
+  });
+
   const sortedClasses = useMemo(() => {
     return [...classes].sort((a, b) => {
       const first = a[sortDescriptor.column];
@@ -92,31 +111,62 @@ export default function UserClassLandingPage({ userId }) {
   }, [sortDescriptor, classes]);
 
   const classPages = useMemo(() => {
-    if (classQ != "") {
-      const classesSearch = sortedClasses.filter((c) => {
+    const filteredClasses = sortedClasses
+      .filter((c) => {
         const className = c.name.toLowerCase();
         const searchName = classQ.toLowerCase();
         return className.includes(searchName);
+      })
+      .filter((c) => {
+        if (filters.has("open")) {
+          const classStatus = c.status.toLowerCase();
+          return classStatus == "open";
+        }
+        return true;
+      })
+      .filter((c) => {
+        if (filters.has("upcoming")) {
+          const utcClassDate = fromZonedTime(c.date, "Asia/Singapore");
+          const sgClassDate = toZonedTime(utcClassDate, "Asia/Singapore");
+          const sgCurrentDate = toZonedTime(new Date(), "Asia/Singapore");
+
+          return sgClassDate > sgCurrentDate;
+        }
+        return true;
       });
-      return Math.ceil(classesSearch.length / rowsPerPage);
-    }
-    return Math.ceil(sortedClasses.length / rowsPerPage);
-  }, [sortedClasses, classQ]);
+    setPage(1);
+    return Math.ceil(filteredClasses.length / rowsPerPage);
+  }, [sortedClasses, classQ, filters]);
 
   const classItems = useMemo(() => {
     const start = (page - 1) * rowsPerPage;
     const end = start + rowsPerPage;
 
-    if (classQ != "") {
-      const classesSearch = sortedClasses.filter((c) => {
+    const filteredClasses = sortedClasses
+      .filter((c) => {
         const className = c.name.toLowerCase();
         const searchName = classQ.toLowerCase();
         return className.includes(searchName);
+      })
+      .filter((c) => {
+        if (filters.has("open")) {
+          const classStatus = c.status.toLowerCase();
+          return classStatus == "open";
+        }
+        return true;
+      })
+      .filter((c) => {
+        if (filters.has("upcoming")) {
+          const utcClassDate = fromZonedTime(c.date, "Asia/Singapore");
+          const sgClassDate = toZonedTime(utcClassDate, "Asia/Singapore");
+          const sgCurrentDate = toZonedTime(new Date(), "Asia/Singapore");
+
+          return sgClassDate > sgCurrentDate;
+        }
+        return true;
       });
-      return classesSearch.slice(start, end);
-    }
-    return sortedClasses.slice(start, end);
-  }, [page, sortedClasses, classQ]);
+    return filteredClasses.slice(start, end);
+  }, [page, sortedClasses, classQ, filters]);
 
   const sortedBookings = useMemo(() => {
     return [...bookings].sort((a, b) => {
@@ -203,16 +253,37 @@ export default function UserClassLandingPage({ userId }) {
             }
           >
             <div className="h-full w-full flex flex-col p-2.5 gap-y-5">
-              {/* TODO: Add in filtering for Bookings */}
-              <div className="self-end w-1/4">
-                <Input
-                  placeholder="Search"
-                  value={classQ}
-                  onValueChange={setClassQ}
-                  variant="bordered"
-                  size="xs"
-                  classNames={inputClassNames}
-                />
+              <div className="flex flex-row justify-end items-center gap-x-2.5">
+                <Dropdown>
+                  <DropdownTrigger>
+                    <button className="cursor-pointer">
+                      <MdOutlineFilterAlt color="#393E46" size={24} />
+                    </button>
+                  </DropdownTrigger>
+                  <DropdownMenu
+                    aria-label="Filter classes"
+                    variant="flat"
+                    closeOnSelect={false}
+                    selectionMode="multiple"
+                    selectedKeys={filters}
+                    onSelectionChange={setFilters}
+                  >
+                    <DropdownSection title="Filter classes">
+                      <DropdownItem key="open">Open for booking</DropdownItem>
+                      <DropdownItem key="upcoming">Upcoming</DropdownItem>
+                    </DropdownSection>
+                  </DropdownMenu>
+                </Dropdown>
+                <div className="self-end w-1/4">
+                  <Input
+                    placeholder="Search"
+                    value={classQ}
+                    onValueChange={onClassQChange}
+                    variant="bordered"
+                    size="xs"
+                    classNames={inputClassNames}
+                  />
+                </div>
               </div>
               <Table
                 removeWrapper
@@ -276,12 +347,11 @@ export default function UserClassLandingPage({ userId }) {
             }
           >
             <div className="w-full flex flex-col p-2.5 gap-y-5">
-              {/* TODO: Add in filtering for Bookings */}
               <div className="self-end w-1/4">
                 <Input
                   placeholder="Search"
                   value={bookingQ}
-                  onValueChange={setBookingQ}
+                  onValueChange={onBookingQChange}
                   variant="bordered"
                   size="xs"
                   classNames={inputClassNames}

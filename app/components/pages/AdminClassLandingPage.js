@@ -1,5 +1,6 @@
+import { fromZonedTime, toZonedTime } from "date-fns-tz";
 import PropTypes from "prop-types";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { PageTitle } from "../utils/Titles";
@@ -10,12 +11,13 @@ import {
   tableClassNames,
 } from "../utils/ClassNames";
 import { format } from "date-fns";
-import { MdMoreVert } from "react-icons/md";
+import { MdMoreVert, MdOutlineFilterAlt } from "react-icons/md";
 import {
   Dropdown,
-  DropdownTrigger,
-  DropdownMenu,
   DropdownItem,
+  DropdownMenu,
+  DropdownSection,
+  DropdownTrigger,
 } from "@nextui-org/dropdown";
 import {
   Table,
@@ -28,15 +30,11 @@ import {
 import { Chip, Input, Pagination } from "@nextui-org/react";
 import Toast from "../Toast";
 
-export default function AdminClassLandingPage({
-  // classes,
-  openCreate,
-}) {
+export default function AdminClassLandingPage({ openCreate }) {
   const router = useRouter();
 
   const [classes, setClasses] = useState([]);
   const [searchInput, setSearchInput] = useState("");
-  const [page, setPage] = useState(1);
   const [selectedClass, setSelectedClass] = useState({});
   const [showToast, setShowToast] = useState(false);
   const [toast, setToast] = useState({});
@@ -44,6 +42,7 @@ export default function AdminClassLandingPage({
     column: "date",
     direction: "ascending",
   });
+  const [filters, setFilters] = useState(new Set(["open", "upcoming"]));
 
   useEffect(() => {
     const fetchClasses = async () => {
@@ -57,7 +56,13 @@ export default function AdminClassLandingPage({
     fetchClasses();
   }, []);
 
+  const [page, setPage] = useState(1);
   const rowsPerPage = 10;
+
+  const onSearchInputChange = useCallback((value) => {
+    setSearchInput(value);
+    setPage(1);
+  });
 
   const sortedClasses = useMemo(() => {
     return [...classes].sort((a, b) => {
@@ -69,31 +74,71 @@ export default function AdminClassLandingPage({
   }, [sortDescriptor, classes]);
 
   const classPages = useMemo(() => {
-    if (searchInput != "") {
-      const classesSearch = sortedClasses.filter((c) => {
+    const filteredClasses = sortedClasses
+      .filter((c) => {
         const className = c.name.toLowerCase();
         const searchValue = searchInput.toLowerCase();
         return className.includes(searchValue);
+      })
+      .filter((c) => {
+        if (filters.has("open")) {
+          const classStatus = c.status.toLowerCase();
+          return classStatus == "open";
+        }
+        return true;
+      })
+      .filter((c) => {
+        if (filters.has("upcoming")) {
+          const utcClassDate = fromZonedTime(c.date, "Asia/Singapore");
+          const sgClassDate = toZonedTime(utcClassDate, "Asia/Singapore");
+          const sgCurrentDate = toZonedTime(new Date(), "Asia/Singapore");
+
+          return sgClassDate > sgCurrentDate;
+        }
+        return true;
       });
-      return Math.ceil(classesSearch.length / rowsPerPage);
-    }
-    return Math.ceil(sortedClasses.length / rowsPerPage);
-  }, [sortedClasses, searchInput]);
+    setPage(1);
+    return Math.ceil(filteredClasses.length / rowsPerPage);
+    // if (searchInput != "") {
+    //   const classesSearch = sortedClasses.filter((c) => {
+    //     const className = c.name.toLowerCase();
+    //     const searchValue = searchInput.toLowerCase();
+    //     return className.includes(searchValue);
+    //   });
+    //   return Math.ceil(classesSearch.length / rowsPerPage);
+    // }
+    // return Math.ceil(sortedClasses.length / rowsPerPage);
+  }, [sortedClasses, searchInput, filters]);
 
   const classItems = useMemo(() => {
     const start = (page - 1) * rowsPerPage;
     const end = start + rowsPerPage;
 
-    if (searchInput != "") {
-      const classesSearch = sortedClasses.filter((c) => {
+    const filteredClasses = sortedClasses
+      .filter((c) => {
         const className = c.name.toLowerCase();
         const searchValue = searchInput.toLowerCase();
         return className.includes(searchValue);
+      })
+      .filter((c) => {
+        if (filters.has("open")) {
+          const classStatus = c.status.toLowerCase();
+          return classStatus == "open";
+        }
+        return true;
+      })
+      .filter((c) => {
+        if (filters.has("upcoming")) {
+          const utcClassDate = fromZonedTime(c.date, "Asia/Singapore");
+          const sgClassDate = toZonedTime(utcClassDate, "Asia/Singapore");
+          const sgCurrentDate = toZonedTime(new Date(), "Asia/Singapore");
+
+          return sgClassDate > sgCurrentDate;
+        }
+        return true;
       });
-      return classesSearch.slice(start, end);
-    }
-    return sortedClasses.slice(start, end);
-  }, [page, sortedClasses, searchInput]);
+    return filteredClasses.slice(start, end);
+  }, [page, sortedClasses, searchInput, filters]);
 
   const toggleShowToast = () => {
     setShowToast(!showToast);
@@ -173,15 +218,37 @@ export default function AdminClassLandingPage({
       </div>
       {/* STARRED: This is how to do the pagination with overflow for 10 rows */}
       <div className="w-full flex flex-col p-5 rounded-[20px] border border-a-black/10 bg-white gap-y-2.5">
-        <div className="self-end w-1/4">
-          <Input
-            placeholder="Search"
-            value={searchInput}
-            onValueChange={setSearchInput}
-            variant="bordered"
-            size="xs"
-            classNames={inputClassNames}
-          />
+        <div className="flex flex-row justify-end items-center gap-x-2.5">
+          <Dropdown>
+            <DropdownTrigger>
+              <button className="cursor-pointer">
+                <MdOutlineFilterAlt color="#393E46" size={24} />
+              </button>
+            </DropdownTrigger>
+            <DropdownMenu
+              aria-label="Filter classes"
+              variant="flat"
+              closeOnSelect={false}
+              selectionMode="multiple"
+              selectedKeys={filters}
+              onSelectionChange={setFilters}
+            >
+              <DropdownSection title="Filter classes">
+                <DropdownItem key="open">Open for booking</DropdownItem>
+                <DropdownItem key="upcoming">Upcoming</DropdownItem>
+              </DropdownSection>
+            </DropdownMenu>
+          </Dropdown>
+          <div className="self-end w-1/4">
+            <Input
+              placeholder="Search"
+              value={searchInput}
+              onValueChange={onSearchInputChange}
+              variant="bordered"
+              size="xs"
+              classNames={inputClassNames}
+            />
+          </div>
         </div>
         <Table
           removeWrapper

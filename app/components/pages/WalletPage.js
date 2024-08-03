@@ -1,5 +1,13 @@
 "use client";
 
+import { MdOutlineFilterAlt } from "react-icons/md";
+import {
+  Dropdown,
+  DropdownItem,
+  DropdownMenu,
+  DropdownSection,
+  DropdownTrigger,
+} from "@nextui-org/dropdown";
 import {
   Modal,
   ModalContent,
@@ -22,7 +30,7 @@ import {
   modalClassNames,
   tableClassNames,
 } from "../utils/ClassNames";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { format } from "date-fns";
 
 export default function WalletPage({ user }) {
@@ -35,6 +43,7 @@ export default function WalletPage({ user }) {
     column: "createdAt",
     direction: "ascending",
   });
+  const [filters, setFilters] = useState(new Set([]));
 
   useEffect(() => {
     const permission = user.permission;
@@ -69,6 +78,11 @@ export default function WalletPage({ user }) {
   const [page, setPage] = useState(1);
   const rowsPerPage = 10;
 
+  const onSearchInputChange = useCallback((value) => {
+    setSearchInput(value);
+    setPage(1);
+  });
+
   const sortedTransactions = useMemo(() => {
     return [...transactions].sort((a, b) => {
       const first = a[sortDescriptor.column];
@@ -84,27 +98,58 @@ export default function WalletPage({ user }) {
         const transactionUser = transaction.user.name.toLowerCase();
         const searchValue = searchInput.toLowerCase();
         return transactionUser.includes(searchValue);
+      })
+      .filter((transaction) => {
+        if (filters.size > 0) {
+          const transactionType = transaction.type;
+          return filters.has(transactionType);
+        }
       });
+      setPage(1);
       return Math.ceil(transactionsSearch.length / rowsPerPage);
     }
-    return Math.ceil(sortedTransactions.length / rowsPerPage);
-  }, [sortedTransactions, searchInput]);
+    const filteredTransactions = sortedTransactions.filter((transaction) => {
+      if (filters.size > 0) {
+        const transactionType = transaction.type;
+        return filters.has(transactionType);
+      }
+      return true;
+    })
+    setPage(1);
+    return Math.ceil(filteredTransactions.length / rowsPerPage);
+  }, [sortedTransactions, searchInput, filters]);
 
   const transactionItems = useMemo(() => {
     const start = (page - 1) * rowsPerPage;
     const end = start + rowsPerPage;
 
     if (searchInput != "") {
-      const transactionsSearch = sortedTransactions.filter((transaction) => {
-        const transactionUser = transaction.user.name.toLowerCase();
-        const searchValue = searchInput.toLowerCase();
-        return transactionUser.includes(searchValue);
-      });
-      return transactionsSearch.slice(start, end);
+      const filteredTransactions = sortedTransactions
+        .filter((transaction) => {
+          const transactionUser = transaction.user.name.toLowerCase();
+          const searchValue = searchInput.toLowerCase();
+          return transactionUser.includes(searchValue);
+        })
+        .filter((transaction) => {
+          if (filters.size > 0) {
+            console.log(filters.size);
+            const transactionType = transaction.type;
+            console.log(transactionType);
+            return filters.has(transactionType);
+          }
+        });
+      return filteredTransactions.slice(start, end);
     }
 
-    return sortedTransactions.slice(start, end);
-  }, [page, sortedTransactions, searchInput]);
+    const filteredTransactions = sortedTransactions.filter((transaction) => {
+      if (filters.size > 0) {
+        const transactionType = transaction.type;
+        return filters.has(transactionType);
+      }
+      return true;
+    });
+    return filteredTransactions.slice(start, end);
+  }, [page, sortedTransactions, searchInput, filters]);
 
   function creditAccounts() {
     // TODO: Implement CSV function
@@ -125,13 +170,34 @@ export default function WalletPage({ user }) {
             </button>
           </div>
           <div className="w-full flex flex-col rounded-[20px] border border-a-black/10 p-5 bg-white gap-y-2.5">
-            <div className="flex flex-row justify-between items-center">
-              <SectionTitle title="All transactions" />
+            <div className="flex flex-row justify-end items-center gap-x-2.5">
+              <p>{filters}</p>
+              <Dropdown>
+                <DropdownTrigger>
+                  <button className="cursor-pointer">
+                    <MdOutlineFilterAlt color="#393E46" size={24} />
+                  </button>
+                </DropdownTrigger>
+                <DropdownMenu
+                  aria-label="Filter transactions"
+                  variant="flat"
+                  closeOnSelect={false}
+                  selectionMode="multiple"
+                  selectedKeys={filters}
+                  onSelectionChange={setFilters}
+                >
+                  <DropdownSection title="Filter classes">
+                    <DropdownItem key="refund">Refund</DropdownItem>
+                    <DropdownItem key="deposit">Deposit</DropdownItem>
+                    <DropdownItem key="book">Booking</DropdownItem>
+                  </DropdownSection>
+                </DropdownMenu>
+              </Dropdown>
               <div className="w-1/4">
                 <Input
                   placeholder="Search"
                   value={searchInput}
-                  onValueChange={setSearchInput}
+                  onValueChange={onSearchInputChange}
                   variant="bordered"
                   size="xs"
                   classNames={inputClassNames}
