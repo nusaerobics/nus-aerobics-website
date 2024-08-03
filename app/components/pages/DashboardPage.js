@@ -95,12 +95,8 @@ export default function DashboardPage({ user }) {
     }
   }, []);
 
-  // For admin ClassCard equivalent - goes to specific class
-  // For user ClassCard - opens modal
   const handleClick = (rowData) => {
-    router.push("/dashboard/classes");
-    // TODO: Go to specific page details for that class
-    // router.push(`/dashboard/classes/${rowData.id}`);
+    router.push(`/dashboard/classes/${rowData.id}`);
   };
 
   return (
