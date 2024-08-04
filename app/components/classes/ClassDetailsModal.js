@@ -64,8 +64,8 @@ export default function ClassDetailsModal({
       checkIsBooked(selectedClass).then((result) => {
         if (result) {
           setStatus("booked");
-        } else if (selectedClass.bookedCapacity == selectedClass.maxCapacity) {
-          setStatus("full");
+        // } else if (selectedClass.bookedCapacity == selectedClass.maxCapacity) {
+        //   setStatus("full");
         } else {
           setStatus(selectedClass.status);
         }

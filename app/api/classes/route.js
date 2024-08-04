@@ -5,6 +5,28 @@ import { Op, fn } from "sequelize";
 const db = require("../../config/sequelize");
 const Class = db.classes;
 
+
+function getStatus(c) {
+  // const hasBooking = bookings.filter((booking) => {
+  //   return booking.class.id == selectedClass.id;
+  // });
+  // if (hasBooking.length > 0) {
+  //   return "booked";
+  // }
+
+  if (c.bookedCapacity == c.maxCapacity) {
+    return "full";
+  }
+
+  const utcClassDate = fromZonedTime(c.date, "Asia/Singapore");
+  const sgClassDate = toZonedTime(utcClassDate, "Asia/Singapore");
+  const sgCurrentDate = toZonedTime(new Date(), "Asia/Singapore");
+  if (sgClassDate < sgCurrentDate) {
+    return "closed";
+  }
+  return "open";
+};
+
 export async function GET(request) {
   try {
     const url = new URL(request.url);
@@ -17,6 +39,7 @@ export async function GET(request) {
       if (!targetClass) {
         throw new Error(`Class ${id} does not exist`);
       }
+      targetClass.status = getStatus(targetClass);
       return NextResponse.json(targetClass, { status: 200 });
     }
     
@@ -43,10 +66,16 @@ export async function GET(request) {
           sgClassDay == sgCurrentDay
         );
       });
+      todayClasses.forEach(c => {
+        c.status = getStatus(c);
+      });
       return NextResponse.json(todayClasses, { status: 200 });
     }
 
     // getClasses
+    classes.forEach(c => {
+      c.status = getStatus(c);
+    });
     return NextResponse.json(classes, { status: 200 });
   } catch (error) {
     console.log(error);
