@@ -149,6 +149,8 @@ export default function DashboardPage({ session }) {
             );
           }
           const data = await res.json();
+          console.log(data);
+
           const upcomingBookings = data
             .filter((booking) => {
               const utcClassDate = fromZonedTime(
