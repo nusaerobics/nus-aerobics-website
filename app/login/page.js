@@ -25,17 +25,16 @@ export default function Page() {
         body: JSON.stringify({ email: email, password: password }),
       });
 
-      if (!res.ok) {
+      if (res.status == 400) {
         setEmail("");
         setPassword("");
         setToast({
           isSuccess: false,
           header: "Unable to login",
-          message: `${res.json}.`,
+          message: "Incorrect email or password. Try again.",
         });
         setShowToast(true);
-        // TODO: Change this to be an error under password that it's the wrong login
-        throw new Error(`Unable to login: ${res.json}.`);
+        return;
       }
 
       router.push("/dashboard");
@@ -86,15 +85,57 @@ export default function Page() {
     }
   }
 
-  const [isLogin, setIsLogin] = useState(true);
-  const toggleIsLogin = () => {
-    setIsSubmit(false);
-    setName("");
-    setEmail("");
-    setPassword("");
-    setConfirmPassword("");
-    setIsLogin(!isLogin);
+  // async function handleForgotPassword() {
+  //   try {
+  //   } catch (error) {
+  //     console.log(error);
+  //   }
+  // }
+
+  const [view, setView] = useState("login");              // login || signup || forgot
+  const [message, setMessage] = useState("Welcome back"); // Welcome back || Create an account || Forgot password
+  const [button, setButton] = useState("Login");          // Login || Sign-up || Continue
+
+  const [bottomAction, setBottomAction] = useState("Don't have an account?"); // Don't have an account? || Already have an account? || Back to
+  const [bottomButton, setBottomButton] = useState("Sign-up");                // Sign-up || Login || login
+
+  const handleChangeView = (currentView) => {
+    if (currentView == "login") {
+      changeView("signup");
+    } else {
+      changeView("login");
+    }
   };
+  const changeView = (view) => {
+    if (view == "login") {
+      setMessage("Welcome back");
+      setButton("Login");
+      setBottomAction("Don't have an account?");
+      setBottomButton("Sign-up");
+    } else if (view == "signup") {
+      setMessage("Create an account");
+      setButton("Sign-up");
+      setBottomAction("Already have an account?");
+      setBottomButton("Login");
+    } else if (view == "forgot") {
+      setMessage("Forgot password");
+      setButton("Continue");
+      setBottomAction("Back to");
+      setBottomButton("login");
+    }
+    setView(view);
+  };
+  const handleClick = () => {
+    switch (view) {
+      case "login":
+        return handleLogin();
+      case "signup":
+        return handleSignUp();
+      case "forgot":
+        return;
+    }
+  };
+
   const toggleShowToast = () => {
     setShowToast(!showToast);
   };
@@ -108,13 +149,6 @@ export default function Page() {
     }
     return () => clearTimeout(timer);
   }, [showToast]);
-
-  const message = isLogin ? "Welcome back" : "Create an account";
-  const button = isLogin ? "Login" : "Sign-up";
-  const bottomAction = isLogin
-    ? "Don't have an account?"
-    : "Already have an account?";
-  const bottomButton = isLogin ? "Sign-up" : "Login";
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -187,7 +221,7 @@ export default function Page() {
             </p>
           </div>
           <div className="w-full flex flex-col gap-y-2.5">
-            {!isLogin ? (
+            {view == "signup" ? (
               <Input
                 label="Full name"
                 value={name}
@@ -213,32 +247,36 @@ export default function Page() {
               size="sm"
               classNames={inputClassNames}
             />
-            <Input
-              label="Password"
-              value={password}
-              onValueChange={setPassword}
-              type={isPWVisible ? "text" : "password"}
-              endContent={
-                <button
-                  className="focus:outline-none cursor-pointer"
-                  type="button"
-                  onClick={togglePWVisible}
-                >
-                  {isPWVisible ? (
-                    <MdVisibilityOff className="text-2xl text-a-black/50 pointer-events-none" />
-                  ) : (
-                    <MdVisibility className="text-2xl text-a-black/50 pointer-events-none" />
-                  )}
-                </button>
-              }
-              isInvalid={!isLogin && isSubmit && isInvalidPW}
-              errorMessage="Password should be at least 5 characters"
-              isRequired
-              variant="bordered"
-              size="sm"
-              classNames={inputClassNames}
-            />
-            {!isLogin ? (
+            {view != "forgot" ? (
+              <Input
+                label="Password"
+                value={password}
+                onValueChange={setPassword}
+                type={isPWVisible ? "text" : "password"}
+                endContent={
+                  <button
+                    className="focus:outline-none cursor-pointer"
+                    type="button"
+                    onClick={togglePWVisible}
+                  >
+                    {isPWVisible ? (
+                      <MdVisibilityOff className="text-2xl text-a-black/50 pointer-events-none" />
+                    ) : (
+                      <MdVisibility className="text-2xl text-a-black/50 pointer-events-none" />
+                    )}
+                  </button>
+                }
+                isInvalid={view != "login" && isSubmit && isInvalidPW}
+                errorMessage="Password should be at least 5 characters"
+                isRequired
+                variant="bordered"
+                size="sm"
+                classNames={inputClassNames}
+              />
+            ) : (
+              <></>
+            )}
+            {view == "signup" ? (
               <Input
                 label="Confirm password"
                 value={confirmPassword}
@@ -268,18 +306,22 @@ export default function Page() {
               <></>
             )}
             {/* TODO: Implement handling forgot password */}
-            {isLogin ? (
-              <button className="text-end text-sm text-a-navy font-bold underline">
+            {view == "login" ? (
+              <button
+                className="text-end text-sm text-a-navy font-bold underline cursor-pointer"
+                onClick={() => changeView("forgot")}
+              >
                 Forgot password?
               </button>
             ) : (
               <></>
             )}
           </div>
+
           <div className="w-full flex flex-col gap-y-2.5">
             <button
               className="rounded-[30px] px-[20px] py-[10px] bg-a-navy text-sm text-white cursor-pointer"
-              onClick={isLogin ? handleLogin : handleSignUp}
+              onClick={handleClick}
             >
               {button}
             </button>
@@ -289,7 +331,7 @@ export default function Page() {
               </p>
               <button
                 className="text-end text-sm text-a-navy font-bold underline cursor-pointer bottom-button"
-                onClick={toggleIsLogin}
+                onClick={() => handleChangeView(view)}
               >
                 {bottomButton}
               </button>
