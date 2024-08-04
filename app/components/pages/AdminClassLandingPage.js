@@ -150,12 +150,7 @@ export default function AdminClassLandingPage({ openCreate }) {
   const handleDropdown = (key) => {
     switch (key) {
       case "view":
-        console.log("view");
         return router.push(`classes/${selectedClass.id}`);
-      case "duplicate":
-        // TODO: Implement duplciate class selected
-        console.log("duplicate");
-        return;
       case "delete":
         return deleteClass(selectedClass);
     }
@@ -289,9 +284,6 @@ export default function AdminClassLandingPage({ openCreate }) {
                       </DropdownTrigger>
                       <DropdownMenu onAction={(key) => handleDropdown(key)}>
                         <DropdownItem key="view">View class</DropdownItem>
-                        <DropdownItem key="duplicate">
-                          Duplicate class
-                        </DropdownItem>
                         <DropdownItem key="delete">Delete class</DropdownItem>
                       </DropdownMenu>
                     </Dropdown>

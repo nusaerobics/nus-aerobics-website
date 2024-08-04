@@ -53,7 +53,8 @@ export default function SideBar({ user }) {
         headers: { "Content-Type": "application/json" },
       });
       if (res.ok) {
-        router.push("/login");
+        router.push("/");
+        // router.push("/login");
         return;
       }
       throw new Error("Unable to logout");
@@ -64,7 +65,6 @@ export default function SideBar({ user }) {
 
   return (
     <>
-      {/* TODO: Implement in alternate way since it's just changing Users page Link */}
       {isAdmin ? (
         <div className="h-full flex flex-col py-10 px-5 gap-y-10 md:px-2">
           <img
@@ -84,7 +84,6 @@ export default function SideBar({ user }) {
                     href={link.href}
                     className={clsx(
                       // TODO: Fix the MD versions - for phones
-                      // TODO: It's not keeping focused when selected the tab
                       "flex flex-row justify-center items-center gap-x-2.5 h-[50px] rounded-[10px] text-[#393E46] bg-white p-2.5 hover:bg-[#1F477610] hover:text-[#1F4776] md:flex-none md:justify-start md:p-2 md:px-3",
                       {
                         "bg-[#1F477620] text-[#1F4776]": pathname === link.href,
@@ -110,7 +109,8 @@ export default function SideBar({ user }) {
               })}
             </div>
             <Link
-              href="/login"
+              href="/"
+              // href="/login"
               className="flex flex-row justify-center items-center gap-x-2.5 h-[50px] rounded-[10px] text-[#393E46] bg-white p-2.5 hover:bg-red-200 hover:text-red-500 md:flex-none md:justify-start md:p-2 md:px-3"
               style={{ textDecoration: "none" }}
               onClick={handleLogout}
@@ -139,7 +139,6 @@ export default function SideBar({ user }) {
                     href={link.href}
                     className={clsx(
                       // TODO: Fix the MD versions - for phones
-                      // TODO: It's not keeping focused when selected the tab
                       "flex flex-row justify-center items-center gap-x-2.5 h-[50px] rounded-[10px] text-[#393E46] bg-white p-2.5 hover:bg-[#1F477610] hover:text-[#1F4776] md:flex-none md:justify-start md:p-2 md:px-3",
                       {
                         "bg-[#1F477620] text-[#1F4776]": pathname === link.href,
@@ -165,7 +164,8 @@ export default function SideBar({ user }) {
               })}
             </div>
             <Link
-              href="/login"
+              href="/"
+              // href="/login"
               className="flex flex-row justify-center items-center gap-x-2.5 h-[50px] rounded-[10px] text-[#393E46] bg-white p-2.5 hover:bg-red-200 hover:text-red-500 md:flex-none md:justify-start md:p-2 md:px-3"
               style={{ textDecoration: "none" }}
               onClick={handleLogout}

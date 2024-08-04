@@ -7,7 +7,7 @@ export default async function Layout({ children }) {
   try {
     const session = await getSession();
     if (!session) {
-      redirect("/login");
+      redirect("/");
     }
     user = {
       id: session.user.id,
@@ -18,7 +18,7 @@ export default async function Layout({ children }) {
     };
   } catch (error) {
     console.log(error);
-    redirect("/login");
+    redirect("/");
   }
   return (
     <div className="w-screen h-screen flex flex-col md:flex-row md:overflow-hidden">

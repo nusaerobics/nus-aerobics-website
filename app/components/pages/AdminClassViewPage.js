@@ -50,7 +50,6 @@ export default function AdminClassViewPage({ classId }) {
   const router = useRouter();
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
 
-  // TODO: Basically have a temporary value for selectedClass before useEffect loads
   const [selectedClass, setSelectedClass] = useState({
     name: "",
     description: "",

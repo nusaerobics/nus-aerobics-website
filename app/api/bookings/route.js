@@ -88,9 +88,6 @@ export async function GET(request) {
 // createBooking
 export async function POST(request) {
   /**
-   * TODO: Should be synchronous? Rather than asynchronous - but does it
-   * matter here or rather in component called?
-   *
    * Handle checking if at moment of createBooking, if class
    * booked_capacity < max_capacity (Have to check especially if multiple
    * people book at the same time) - need to check request timing?

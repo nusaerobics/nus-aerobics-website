@@ -79,6 +79,10 @@ export default function ClassDetailsModal({
     }
   });
 
+  useEffect(() => {
+    setModalType("view");
+  }, [isOpen]);
+
   async function checkIsBooked(selectedClass) {
     // For a user's bookings, check if there's a booking where the classId = selectedClass.id
     const res = await fetch(`/api/bookings?userId=${userId}`);
@@ -218,7 +222,7 @@ export default function ClassDetailsModal({
         isSuccess: true,
         header: "Booking successful",
         message:
-          "Your booking has been successful and a confirmation email has been sent.",
+          "Your booking has been successful.",
       });
       setModalType("result");
     } catch (error) {
@@ -297,7 +301,7 @@ export default function ClassDetailsModal({
         isSuccess: true,
         header: "Cancellation successful",
         message:
-          "Your booking has been successfully cancelled and a confirmation email has been sent.",
+          "Your booking has been successfully cancelled.",
       });
     } catch (error) {
       setModalType("result");

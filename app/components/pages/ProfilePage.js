@@ -172,10 +172,9 @@ export default function ProfilePage({ user }) {
                   classNames={inputClassNames}
                 />
               </div>
-              {/* TODO: (NTH) Implement logic for email notifcations */}
-              <Checkbox defaultChecked color="primary">
+              {/* <Checkbox defaultChecked color="primary">
                 <p className="text-a-black text-sm"> Get email notifications</p>
-              </Checkbox>
+              </Checkbox> */}
             </div>
           </div>
         </div>
