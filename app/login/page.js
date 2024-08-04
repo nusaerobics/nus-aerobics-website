@@ -353,7 +353,6 @@ export default function Page() {
             ) : (
               <></>
             )}
-            {/* TODO: Implement handling forgot password */}
             {view == "login" ? (
               <button
                 className="text-end text-sm text-a-navy font-bold underline cursor-pointer"

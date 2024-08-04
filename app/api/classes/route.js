@@ -57,13 +57,6 @@ export async function GET(request) {
   }
 }
 
-/**
- * TODO: Implement filter, sort, search on localStorage of getClasses
- * rather than calling getClasses repeatedly - when getClasses is called,
- * store it in localStorage
- * serverside in dataservices? "use server"
- */
-
 // createClass
 export async function POST(request) {
   try {
