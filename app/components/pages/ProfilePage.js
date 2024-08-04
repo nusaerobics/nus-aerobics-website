@@ -98,6 +98,9 @@ export default function ProfilePage({ user }) {
         throw new Error(`Unable to reset password for user ${user.id}.`);
       }
       toggleIsReset();
+      setCurrentPW("");
+      setNewPW("");
+      setConfirmPW("");
       setToast({
         isSuccess: true,
         header: "Changed password",

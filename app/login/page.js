@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 import { z } from "zod";
 import Toast from "../components/Toast";
 
+var random = require("random-string-generator");
 export default function Page() {
   const router = useRouter();
   const [isSubmit, setIsSubmit] = useState(false);
@@ -18,25 +19,16 @@ export default function Page() {
     try {
       setIsSubmit(true);
       validateEmail();
-
       const res = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: email, password: password }),
       });
-
-      if (res.status == 400) {
+      if (!res.ok) {
         setEmail("");
         setPassword("");
-        setToast({
-          isSuccess: false,
-          header: "Unable to login",
-          message: "Incorrect email or password. Try again.",
-        });
-        setShowToast(true);
-        return;
+        throw new Error("Incorrect email or password. Try again.");
       }
-
       router.push("/dashboard");
       setIsSubmit(false);
     } catch (error) {
@@ -45,7 +37,7 @@ export default function Page() {
       setToast({
         isSuccess: false,
         header: "Unable to login",
-        message: `An error occurred while logging in. Try again later.`,
+        message: `${error.message}`,
       });
       setShowToast(true);
       console.log(error);
@@ -59,10 +51,8 @@ export default function Page() {
       validateName();
       validatePW();
       validateCPW();
-
-      console.log(isInvalidEmail, isInvalidName, isInvalidPW, isInvalidCPW);
       if (isInvalidEmail || isInvalidName || isInvalidPW || isInvalidCPW) {
-        throw new Error(`Invalid values used for sign-up, unable to sign-up.`);
+        throw new Error(`Invalid values used for sign-up. Try again.`);
       }
 
       const res = await fetch("/api/users", {
@@ -70,34 +60,92 @@ export default function Page() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name: name, email: email, password: password }),
       });
-
       if (!res.ok) {
-        throw new Error(`Unable to sign-up: ${res.json}.`);
+        throw new Error("An internal error occurred. Try again later.");
       }
-      setIsLogin(true);
+
+      handleChangeView(view);
       setName("");
       setEmail(email);
       setPassword("");
       setConfirmPassword("");
       setIsSubmit(false);
     } catch (error) {
+      setToast({
+        isSuccess: false,
+        header: "Unable to sign-up",
+        message: `${error.message}`,
+      });
+      setShowToast(true);
       console.log(error);
     }
   }
 
-  // async function handleForgotPassword() {
-  //   try {
-  //   } catch (error) {
-  //     console.log(error);
-  //   }
-  // }
+  // STARRED: How to display error messages in Toasts
+  async function handleForgotPassword() {
+    try {
+      // 1. Check if entered email exists
+      const res1 = await fetch(`/api/users?email=${email}`);
+      if (!res1.ok) {
+        throw new Error(
+          `No user exists for ${email}. Try again with a registered email.`
+        );
+      }
+      const user = await res1.json();
 
-  const [view, setView] = useState("login");              // login || signup || forgot
+      // 2. Generate temporary password
+      const tempPassword = random(5, "upper");
+
+      // 3. Update user with new temporary password
+      const res2 = await fetch("/api/users", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: user.id, newPassword: tempPassword }),
+      });
+      if (!res2.ok) {
+        throw new Error("An internal error occurred. Try again later.");
+      }
+
+      // 4. Send email with temporary password to login with
+      const res3 = await fetch("/api/mail", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          user: user,
+          type: "forgot",
+          details: { tempPassword: tempPassword },
+        }),
+      });
+      if (!res3.ok) {
+        throw new Error(`Unable to send email to ${email}. Try again later.`);
+      }
+      // 5. When user logs in, they have to go to profile and update their password
+      setToast({
+        isSuccess: true,
+        header: "Requested password reset",
+        message: `An email has been sent to ${email} with instructions to reset your password.`,
+      });
+      setShowToast(true);
+      handleChangeView(view);
+      setEmail("");
+      setIsSubmit(false);
+    } catch (error) {
+      setToast({
+        isSuccess: false,
+        header: "Unable to reset password",
+        message: `${error.message}`,
+      });
+      setShowToast(true);
+      console.log(error);
+    }
+  }
+
+  const [view, setView] = useState("login"); // login || signup || forgot
   const [message, setMessage] = useState("Welcome back"); // Welcome back || Create an account || Forgot password
-  const [button, setButton] = useState("Login");          // Login || Sign-up || Continue
+  const [button, setButton] = useState("Login"); // Login || Sign-up || Continue
 
   const [bottomAction, setBottomAction] = useState("Don't have an account?"); // Don't have an account? || Already have an account? || Back to
-  const [bottomButton, setBottomButton] = useState("Sign-up");                // Sign-up || Login || login
+  const [bottomButton, setBottomButton] = useState("Sign-up"); // Sign-up || Login || login
 
   const handleChangeView = (currentView) => {
     if (currentView == "login") {
@@ -132,7 +180,7 @@ export default function Page() {
       case "signup":
         return handleSignUp();
       case "forgot":
-        return;
+        return handleForgotPassword();
     }
   };
 
@@ -145,7 +193,7 @@ export default function Page() {
     if (showToast) {
       timer = setTimeout(() => {
         setShowToast(false);
-      }, 3000);
+      }, 8000);
     }
     return () => clearTimeout(timer);
   }, [showToast]);
