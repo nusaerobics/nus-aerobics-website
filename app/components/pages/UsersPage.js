@@ -50,7 +50,7 @@ export default function UsersPage() {
 
   useEffect(() => {
     const fetchUsers = async () => {
-      const res = await fetch("/api/users", { cache: "force-cache" });
+      const res = await fetch("/api/users");
       if (!res.ok) {
         throw new Error(`Unable to get users: ${res.status}`);
       }
@@ -221,9 +221,9 @@ export default function UsersPage() {
 
   return (
     <>
-      <div className="h-full flex flex-col gap-y-5 p-10 pt-20 overflow-y-scroll">
+      <div className="w-full h-full flex flex-col gap-y-5 p-10 pt-20 overflow-y-scroll">
         <PageTitle title="Users" />
-        <div className="h-full flex flex-col rounded-[20px] border border-a-black/10 p-5 bg-white gap-y-2.5">
+        <div className="flex flex-col rounded-[20px] border border-a-black/10 p-5 bg-white gap-y-2.5">
           <div className="self-end w-1/4">
             <Input
               placeholder="Search"

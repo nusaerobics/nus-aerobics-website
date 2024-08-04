@@ -22,7 +22,7 @@ export default function AdminClassDetails({ selectedClass, toggleIsEdit }) {
       <div className="flex flex-col gap-y-2.5">
         <div className="flex flex-row items-center gap-2.5">
           <MdOutlineCalendarMonth size={24} color={"#1F4776"} />
-          <p>{format(selectedClass.date, "d/MM/y HH:mm")}</p>
+          <p>{format(selectedClass.date, "d/MM/y HH:mm (EEE)")}</p>
         </div>
         <div className="flex flex-row items-center gap-2.5">
           <MdOutlineLocationOn size={24} color={"#1F4776"} />

@@ -317,7 +317,7 @@ export default function UserClassLandingPage({ userId }) {
                             {chipTypes[c.status].message}
                           </Chip>
                         </TableCell>
-                        <TableCell>{format(c.date, "d/MM/y HH:mm")}</TableCell>
+                        <TableCell>{format(c.date, "d/MM/y HH:mm (EEE)")}</TableCell>
                       </TableRow>
                     );
                   })}
@@ -393,7 +393,7 @@ export default function UserClassLandingPage({ userId }) {
                           </Chip>
                         </TableCell>
                         <TableCell>
-                          {format(booking.class.date, "d/MM/y HH:mm")}
+                          {format(booking.class.date, "d/MM/y HH:mm (EEE)")}
                         </TableCell>
                         <TableCell>
                           {format(booking.createdAt, "d/MM/y HH:mm")}

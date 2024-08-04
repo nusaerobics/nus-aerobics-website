@@ -1,5 +1,9 @@
 "use client";
 
+import { format } from "date-fns";
+import PropTypes from "prop-types";
+import { useCallback, useEffect, useMemo, useState } from "react";
+
 import { MdOutlineFilterAlt } from "react-icons/md";
 import {
   Dropdown,
@@ -30,8 +34,6 @@ import {
   modalClassNames,
   tableClassNames,
 } from "../utils/ClassNames";
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { format } from "date-fns";
 
 export default function WalletPage({ session }) {
   const [balance, setBalance] = useState(0);
@@ -385,3 +387,7 @@ export default function WalletPage({ session }) {
     </>
   );
 }
+
+WalletPage.propTypes = {
+  session: PropTypes.object,
+};

@@ -321,7 +321,7 @@ export default function UsersViewPage({ userId }) {
                     <TableCell>{booking.class.name}</TableCell>
                     <TableCell>{booking.attendance}</TableCell>
                     <TableCell>
-                      {format(booking.class.date, "d/MM/y HH:mm")}
+                      {format(booking.class.date, "d/MM/y HH:mm (EEE)")}
                     </TableCell>
                     <TableCell>
                       {format(booking.createdAt, "d/MM/y HH:mm")}

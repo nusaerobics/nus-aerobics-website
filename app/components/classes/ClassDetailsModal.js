@@ -362,7 +362,7 @@ export default function ClassDetailsModal({
                       <div className="flex flex-row items-center gap-2.5">
                         <MdOutlineCalendarMonth size={24} color={"#1F4776"} />
                         <p className="text-a-black">
-                          {format(selectedClass.date, "d/MM/y HH:mm")}
+                          {format(selectedClass.date, "d/MM/y HH:mm (EEE)")}
                         </p>
                       </div>
                       <div className="flex flex-row items-center gap-2.5">

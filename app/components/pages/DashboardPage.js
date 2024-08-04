@@ -194,7 +194,7 @@ export default function DashboardPage({ session }) {
                       >
                         <div className="flex flex-col">
                           <p className="font-bold text-base">{c.name}</p>
-                          <p>{format(c.date, "d/MM/y HH:mm")}</p>
+                          <p>{format(c.date, "d/MM/y HH:mm (EEE)")}</p>
                         </div>
                         <div className="flex justify-end">
                           <button

@@ -11,7 +11,7 @@ export default function ClassCard({ booking }) {
       <div className="flex flex-col gap-y-2.5 p-2.5 rounded-[20px] border-l-[4px] border-l-a-navy bg-a-navy/10">
         <div className="flex flex-col">
           <p className="font-bold text-base">{booking.class.name}</p>
-          <p>{format(booking.class.date, "d/MM/y HH:mm")}</p>
+          <p>{format(booking.class.date, "d/MM/y HH:mm (EEE)")}</p>
         </div>
         <div className="flex justify-end">
           <button
