@@ -101,18 +101,25 @@ export async function PUT(request) {
     }
     if (body.newPassword != undefined) {
       const newPassword = body.newPassword;
-      const currentPassword = body.currentPassword;
-      console.log(newPassword, currentPassword);
-      const existingPassword = user.password;
 
-      console.log(existingPassword);
-      const isMatchingPassword = await bcrypt.compare(currentPassword, existingPassword);
-      if (!isMatchingPassword) {
-        return NextResponse.json(
-          { error: "Current password does not match existing" },
-          { status: 400 }
+      if (body.currentPassword != undefined) {  // If changing password in Profile
+        const currentPassword = body.currentPassword;
+        const existingPassword = user.password;
+
+        const isMatchingPassword = await bcrypt.compare(
+          currentPassword,
+          existingPassword
         );
+        if (!isMatchingPassword) {
+          return NextResponse.json(
+            { error: "Current password does not match existing" },
+            { status: 400 }
+          );
+        }
       }
+
+      // Else for resetting to temporary password
+
       const saltRounds = 10;
       const hashedPassword = await bcrypt.hash(newPassword, saltRounds);
       updates = { password: hashedPassword };

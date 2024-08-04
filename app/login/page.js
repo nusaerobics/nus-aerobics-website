@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 import { z } from "zod";
 import Toast from "../components/Toast";
 
+var random = require("random-string-generator");
 export default function Page() {
   const router = useRouter();
   const [isSubmit, setIsSubmit] = useState(false);
@@ -18,26 +19,16 @@ export default function Page() {
     try {
       setIsSubmit(true);
       validateEmail();
-
       const res = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: email, password: password }),
       });
-
       if (!res.ok) {
         setEmail("");
         setPassword("");
-        setToast({
-          isSuccess: false,
-          header: "Unable to login",
-          message: `${res.json}.`,
-        });
-        setShowToast(true);
-        // TODO: Change this to be an error under password that it's the wrong login
-        throw new Error(`Unable to login: ${res.json}.`);
+        throw new Error("Incorrect email or password. Try again.");
       }
-
       router.push("/dashboard");
       setIsSubmit(false);
     } catch (error) {
@@ -46,7 +37,7 @@ export default function Page() {
       setToast({
         isSuccess: false,
         header: "Unable to login",
-        message: `An error occurred while logging in. Try again later.`,
+        message: `${error.message}`,
       });
       setShowToast(true);
       console.log(error);
@@ -60,10 +51,8 @@ export default function Page() {
       validateName();
       validatePW();
       validateCPW();
-
-      console.log(isInvalidEmail, isInvalidName, isInvalidPW, isInvalidCPW);
       if (isInvalidEmail || isInvalidName || isInvalidPW || isInvalidCPW) {
-        throw new Error(`Invalid values used for sign-up, unable to sign-up.`);
+        throw new Error(`Invalid values used for sign-up. Try again.`);
       }
 
       const res = await fetch("/api/users", {
@@ -71,30 +60,130 @@ export default function Page() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name: name, email: email, password: password }),
       });
-
       if (!res.ok) {
-        throw new Error(`Unable to sign-up: ${res.json}.`);
+        throw new Error("An internal error occurred. Try again later.");
       }
-      setIsLogin(true);
+
+      handleChangeView(view);
       setName("");
       setEmail(email);
       setPassword("");
       setConfirmPassword("");
       setIsSubmit(false);
     } catch (error) {
+      setToast({
+        isSuccess: false,
+        header: "Unable to sign-up",
+        message: `${error.message}`,
+      });
+      setShowToast(true);
       console.log(error);
     }
   }
 
-  const [isLogin, setIsLogin] = useState(true);
-  const toggleIsLogin = () => {
-    setIsSubmit(false);
-    setName("");
-    setEmail("");
-    setPassword("");
-    setConfirmPassword("");
-    setIsLogin(!isLogin);
+  // STARRED: How to display error messages in Toasts
+  async function handleForgotPassword() {
+    try {
+      // 1. Check if entered email exists
+      const res1 = await fetch(`/api/users?email=${email}`);
+      if (!res1.ok) {
+        throw new Error(
+          `No user exists for ${email}. Try again with a registered email.`
+        );
+      }
+      const user = await res1.json();
+
+      // 2. Generate temporary password
+      const tempPassword = random(5, "upper");
+
+      // 3. Update user with new temporary password
+      const res2 = await fetch("/api/users", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: user.id, newPassword: tempPassword }),
+      });
+      if (!res2.ok) {
+        throw new Error("An internal error occurred. Try again later.");
+      }
+
+      // 4. Send email with temporary password to login with
+      const res3 = await fetch("/api/mail", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          user: user,
+          type: "forgot",
+          details: { tempPassword: tempPassword },
+        }),
+      });
+      if (!res3.ok) {
+        throw new Error(`Unable to send email to ${email}. Try again later.`);
+      }
+      // 5. When user logs in, they have to go to profile and update their password
+      setToast({
+        isSuccess: true,
+        header: "Requested password reset",
+        message: `An email has been sent to ${email} with instructions to reset your password.`,
+      });
+      setShowToast(true);
+      handleChangeView(view);
+      setEmail("");
+      setIsSubmit(false);
+    } catch (error) {
+      setToast({
+        isSuccess: false,
+        header: "Unable to reset password",
+        message: `${error.message}`,
+      });
+      setShowToast(true);
+      console.log(error);
+    }
+  }
+
+  const [view, setView] = useState("login"); // login || signup || forgot
+  const [message, setMessage] = useState("Welcome back"); // Welcome back || Create an account || Forgot password
+  const [button, setButton] = useState("Login"); // Login || Sign-up || Continue
+
+  const [bottomAction, setBottomAction] = useState("Don't have an account?"); // Don't have an account? || Already have an account? || Back to
+  const [bottomButton, setBottomButton] = useState("Sign-up"); // Sign-up || Login || login
+
+  const handleChangeView = (currentView) => {
+    if (currentView == "login") {
+      changeView("signup");
+    } else {
+      changeView("login");
+    }
   };
+  const changeView = (view) => {
+    if (view == "login") {
+      setMessage("Welcome back");
+      setButton("Login");
+      setBottomAction("Don't have an account?");
+      setBottomButton("Sign-up");
+    } else if (view == "signup") {
+      setMessage("Create an account");
+      setButton("Sign-up");
+      setBottomAction("Already have an account?");
+      setBottomButton("Login");
+    } else if (view == "forgot") {
+      setMessage("Forgot password");
+      setButton("Continue");
+      setBottomAction("Back to");
+      setBottomButton("login");
+    }
+    setView(view);
+  };
+  const handleClick = () => {
+    switch (view) {
+      case "login":
+        return handleLogin();
+      case "signup":
+        return handleSignUp();
+      case "forgot":
+        return handleForgotPassword();
+    }
+  };
+
   const toggleShowToast = () => {
     setShowToast(!showToast);
   };
@@ -104,17 +193,10 @@ export default function Page() {
     if (showToast) {
       timer = setTimeout(() => {
         setShowToast(false);
-      }, 3000);
+      }, 8000);
     }
     return () => clearTimeout(timer);
   }, [showToast]);
-
-  const message = isLogin ? "Welcome back" : "Create an account";
-  const button = isLogin ? "Login" : "Sign-up";
-  const bottomAction = isLogin
-    ? "Don't have an account?"
-    : "Already have an account?";
-  const bottomButton = isLogin ? "Sign-up" : "Login";
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -187,7 +269,7 @@ export default function Page() {
             </p>
           </div>
           <div className="w-full flex flex-col gap-y-2.5">
-            {!isLogin ? (
+            {view == "signup" ? (
               <Input
                 label="Full name"
                 value={name}
@@ -213,32 +295,36 @@ export default function Page() {
               size="sm"
               classNames={inputClassNames}
             />
-            <Input
-              label="Password"
-              value={password}
-              onValueChange={setPassword}
-              type={isPWVisible ? "text" : "password"}
-              endContent={
-                <button
-                  className="focus:outline-none cursor-pointer"
-                  type="button"
-                  onClick={togglePWVisible}
-                >
-                  {isPWVisible ? (
-                    <MdVisibilityOff className="text-2xl text-a-black/50 pointer-events-none" />
-                  ) : (
-                    <MdVisibility className="text-2xl text-a-black/50 pointer-events-none" />
-                  )}
-                </button>
-              }
-              isInvalid={!isLogin && isSubmit && isInvalidPW}
-              errorMessage="Password should be at least 5 characters"
-              isRequired
-              variant="bordered"
-              size="sm"
-              classNames={inputClassNames}
-            />
-            {!isLogin ? (
+            {view != "forgot" ? (
+              <Input
+                label="Password"
+                value={password}
+                onValueChange={setPassword}
+                type={isPWVisible ? "text" : "password"}
+                endContent={
+                  <button
+                    className="focus:outline-none cursor-pointer"
+                    type="button"
+                    onClick={togglePWVisible}
+                  >
+                    {isPWVisible ? (
+                      <MdVisibilityOff className="text-2xl text-a-black/50 pointer-events-none" />
+                    ) : (
+                      <MdVisibility className="text-2xl text-a-black/50 pointer-events-none" />
+                    )}
+                  </button>
+                }
+                isInvalid={view != "login" && isSubmit && isInvalidPW}
+                errorMessage="Password should be at least 5 characters"
+                isRequired
+                variant="bordered"
+                size="sm"
+                classNames={inputClassNames}
+              />
+            ) : (
+              <></>
+            )}
+            {view == "signup" ? (
               <Input
                 label="Confirm password"
                 value={confirmPassword}
@@ -268,18 +354,22 @@ export default function Page() {
               <></>
             )}
             {/* TODO: Implement handling forgot password */}
-            {isLogin ? (
-              <button className="text-end text-sm text-a-navy font-bold underline">
+            {view == "login" ? (
+              <button
+                className="text-end text-sm text-a-navy font-bold underline cursor-pointer"
+                onClick={() => changeView("forgot")}
+              >
                 Forgot password?
               </button>
             ) : (
               <></>
             )}
           </div>
+
           <div className="w-full flex flex-col gap-y-2.5">
             <button
               className="rounded-[30px] px-[20px] py-[10px] bg-a-navy text-sm text-white cursor-pointer"
-              onClick={isLogin ? handleLogin : handleSignUp}
+              onClick={handleClick}
             >
               {button}
             </button>
@@ -289,7 +379,7 @@ export default function Page() {
               </p>
               <button
                 className="text-end text-sm text-a-navy font-bold underline cursor-pointer bottom-button"
-                onClick={toggleIsLogin}
+                onClick={() => handleChangeView(view)}
               >
                 {bottomButton}
               </button>
