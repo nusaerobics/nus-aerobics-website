@@ -37,9 +37,9 @@ export default function ClassDetailsModal({
 }) {
   const [user, setUser] = useState({});
   const [isCancel, setIsCancel] = useState(true);
-  const [status, setStatus] = useState();             // "open" || "closed" + "full" || "booked"
+  const [isBooked, setIsBooked] = useState(false);
   const [modalType, setModalType] = useState("view"); // Either: "view", "loading", or "result"
-  const [result, setResult] = useState({});           // {  isSuccess: boolean, header: string, message: string }
+  const [result, setResult] = useState({}); // {  isSuccess: boolean, header: string, message: string }
 
   useEffect(() => {
     // getUser
@@ -57,25 +57,19 @@ export default function ClassDetailsModal({
     };
     fetchUser();
   }, []);
-  
+
   useEffect(() => {
     if (tab == "schedule") {
       // Checks if selectedClass has already been booked by user
       checkIsBooked(selectedClass).then((result) => {
-        if (result) {
-          setStatus("booked");
-        // } else if (selectedClass.bookedCapacity == selectedClass.maxCapacity) {
-        //   setStatus("full");
-        } else {
-          setStatus(selectedClass.status);
-        }
+        setIsBooked(result);
         // TODO: Add a catch
       });
     } else {
       // Checks if booked selectedClass can be cancelled
       const result = isAllowedCancel(selectedClass);
       setIsCancel(result);
-      setStatus("booked");
+      setIsBooked(true);
     }
   });
 
@@ -191,7 +185,7 @@ export default function ClassDetailsModal({
       });
       if (!res3.ok) {
         throw new Error("Unable to update user");
-      } 
+      }
 
       // 4. Create new transaction
       const newTransaction = {
@@ -231,8 +225,7 @@ export default function ClassDetailsModal({
       setResult({
         isSuccess: true,
         header: "Booking successful",
-        message:
-          "Your booking has been successful.",
+        message: "Your booking has been successful.",
       });
       setModalType("result");
     } catch (error) {
@@ -298,7 +291,7 @@ export default function ClassDetailsModal({
       });
       if (!res3.ok) {
         throw new Error("Unable to update user");
-      } 
+      }
 
       // 4. Create new transaction
       const newTransaction = {
@@ -320,8 +313,7 @@ export default function ClassDetailsModal({
       setResult({
         isSuccess: true,
         header: "Cancellation successful",
-        message:
-          "Your booking has been successfully cancelled.",
+        message: "Your booking has been successfully cancelled.",
       });
     } catch (error) {
       setModalType("result");
@@ -352,8 +344,17 @@ export default function ClassDetailsModal({
                   <ModalHeader>
                     <div className="flex flex-row gap-x-5">
                       <p className="text-a-navy">{selectedClass.name}</p>
-                      <Chip classNames={chipClassNames[status]}>
-                        {chipTypes[status].message}
+                      <Chip
+                        classNames={
+                          chipClassNames[
+                            isBooked ? "booked" : selectedClass.status
+                          ]
+                        }
+                      >
+                        {
+                          chipTypes[isBooked ? "booked" : selectedClass.status]
+                            .message
+                        }
                       </Chip>
                     </div>
                   </ModalHeader>
@@ -386,7 +387,7 @@ export default function ClassDetailsModal({
                     <div className="flex justify-end">
                       {tab == "schedule" ? (
                         <>
-                          {status == "open" ? (
+                          {!isBooked && selectedClass.status == "open" ? (
                             <button
                               onClick={bookClass}
                               className="rounded-[30px] px-[20px] py-[10px] bg-a-navy text-white cursor-pointer"
