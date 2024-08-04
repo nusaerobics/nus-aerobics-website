@@ -25,6 +25,7 @@ export async function GET(request) {
       const userId = searchParams.get("userId");
       const userBookings = await Booking.findAll({
         where: { userId: userId },
+        order: [[{ model: Class, as: "class" }, 'date', 'ASC' ]],
         include: [
           {
             model: Class,

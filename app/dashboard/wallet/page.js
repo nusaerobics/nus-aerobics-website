@@ -22,5 +22,6 @@ export default async function Page() {
     console.log(error);
     redirect("/");
   }
-  return <WalletPage user={user} />;
+  // TODO: Fix not giving user across pages when values are dynamic - only give values which aren't changing
+  return <WalletPage session={{ userId: user.id, permission: user.permission }} />;
 }

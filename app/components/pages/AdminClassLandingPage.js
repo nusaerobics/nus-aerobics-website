@@ -271,7 +271,7 @@ export default function AdminClassLandingPage({ openCreate }) {
                     </Chip>
                   </TableCell>
                   <TableCell>{`${c.bookedCapacity}/${c.maxCapacity}`}</TableCell>
-                  <TableCell>{format(c.date, "d/MM/y HH:mm")}</TableCell>
+                  <TableCell>{format(c.date, "d/MM/y HH:mm (EEE)")}</TableCell>
                   <TableCell>
                     <Dropdown>
                       <DropdownTrigger>

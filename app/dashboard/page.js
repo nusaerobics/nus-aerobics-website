@@ -23,6 +23,6 @@ export default async function Page() {
     redirect("/");
   }
   return (
-    <DashboardPage user={user} />
+    <DashboardPage session={{ userId: user.id, permission: user.permission }} />
   );
 }

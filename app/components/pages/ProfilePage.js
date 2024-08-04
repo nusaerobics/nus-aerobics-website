@@ -1,10 +1,11 @@
 "use client";
 
 import clsx from "clsx";
+import PropTypes from "prop-types";
 import { useState } from "react";
 
 import { MdVisibility, MdVisibilityOff } from "react-icons/md";
-import { Checkbox, Input } from "@nextui-org/react";
+import { Input } from "@nextui-org/react";
 import { PageTitle, SectionTitle } from "../utils/Titles";
 import { inputClassNames } from "../utils/ClassNames";
 import Toast from "../Toast";
@@ -172,9 +173,6 @@ export default function ProfilePage({ user }) {
                   classNames={inputClassNames}
                 />
               </div>
-              {/* <Checkbox defaultChecked color="primary">
-                <p className="text-a-black text-sm"> Get email notifications</p>
-              </Checkbox> */}
             </div>
           </div>
         </div>
@@ -298,3 +296,7 @@ export default function ProfilePage({ user }) {
     </>
   );
 }
+
+ProfilePage.propTypes = {
+  user: PropTypes.object,
+};
