@@ -80,6 +80,7 @@ export default function UserClassLandingPage({ userId }) {
           );
         }
         const data = await res.json();
+        // TODO: For each booking, make the status of the related class "booked"
         setBookings(data);
       } catch (error) {
         // TODO: Add toast notification
