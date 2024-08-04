@@ -53,7 +53,7 @@ export default function UserClassLandingPage({ userId }) {
         }
       : { column: "bookingDate", direction: "ascending" }
   );
-  const [filters, setFilters] = useState(new Set(["open", "upcoming"]));
+  const [filters, setFilters] = useState(new Set([])); // "open", "upcoming"
 
   useEffect(() => {
     const fetchClasses = async () => {
@@ -119,8 +119,9 @@ export default function UserClassLandingPage({ userId }) {
       })
       .filter((c) => {
         if (filters.has("open")) {
+          const isFull = c.bookedCapacity == c.maxCapacity;
           const classStatus = c.status.toLowerCase();
-          return classStatus == "open";
+          return !isFull && classStatus == "open";
         }
         return true;
       })
@@ -150,8 +151,9 @@ export default function UserClassLandingPage({ userId }) {
       })
       .filter((c) => {
         if (filters.has("open")) {
+          const isFull = c.bookedCapacity == c.maxCapacity;
           const classStatus = c.status.toLowerCase();
-          return classStatus == "open";
+          return !isFull && classStatus == "open";
         }
         return true;
       })
@@ -317,7 +319,9 @@ export default function UserClassLandingPage({ userId }) {
                             {chipTypes[c.status].message}
                           </Chip>
                         </TableCell>
-                        <TableCell>{format(c.date, "d/MM/y HH:mm (EEE)")}</TableCell>
+                        <TableCell>
+                          {format(c.date, "d/MM/y HH:mm (EEE)")}
+                        </TableCell>
                       </TableRow>
                     );
                   })}

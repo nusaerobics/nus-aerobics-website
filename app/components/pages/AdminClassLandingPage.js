@@ -82,8 +82,9 @@ export default function AdminClassLandingPage({ openCreate }) {
       })
       .filter((c) => {
         if (filters.has("open")) {
+          const isFull = c.bookedCapacity == c.maxCapacity;
           const classStatus = c.status.toLowerCase();
-          return classStatus == "open";
+          return !isFull && classStatus == "open";
         }
         return true;
       })
@@ -122,8 +123,9 @@ export default function AdminClassLandingPage({ openCreate }) {
       })
       .filter((c) => {
         if (filters.has("open")) {
+          const isFull = c.bookedCapacity == c.maxCapacity;
           const classStatus = c.status.toLowerCase();
-          return classStatus == "open";
+          return !isFull && classStatus == "open";
         }
         return true;
       })
