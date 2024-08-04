@@ -53,7 +53,7 @@ export default function UserClassLandingPage({ userId }) {
         }
       : { column: "bookingDate", direction: "ascending" }
   );
-  const [filters, setFilters] = useState(new Set([])); // "open", "upcoming"
+  const [filters, setFilters] = useState(new Set(["open", "upcoming"])); // "open", "upcoming"
 
   useEffect(() => {
     const fetchClasses = async () => {
