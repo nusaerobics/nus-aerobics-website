@@ -165,7 +165,7 @@ export default function ClassDetailsModal({
         body: JSON.stringify(newBooking),
       });
       if (!res2.ok) {
-        // Revert 2. Update class bookedCapacity back to original selectedClass
+        // TODO: Revert 2. Update class bookedCapacity back to original selectedClass
         const revert1 = await fetch("/api/classes", {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
@@ -178,10 +178,16 @@ export default function ClassDetailsModal({
       }
 
       // 3. Update user's balance
+      const userRes = await fetch(`/api/users?id=${userId}`);
+      if (!userRes.ok) {
+        // TODO: Revert
+        throw new Error("Unable to get user");
+      }
+      const latestUser = await userRes.json();
       const res3 = await fetch("/api/users", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: userId, balance: user.balance - 1 }),
+        body: JSON.stringify({ id: userId, balance: latestUser.balance - 1 }),
       });
       if (!res3.ok) {
         throw new Error("Unable to update user");
@@ -284,10 +290,16 @@ export default function ClassDetailsModal({
       }
 
       // 3. Update user's balance
+      const userRes = await fetch(`/api/users?id=${userId}`);
+      if (!userRes.ok) {
+        // TODO: Revert
+        throw new Error("Unable to get user");
+      }
+      const latestUser = await userRes.json();
       const res3 = await fetch("/api/users", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: userId, balance: user.balance + 1 }),
+        body: JSON.stringify({ id: userId, balance: latestUser.balance + 1 }),
       });
       if (!res3.ok) {
         throw new Error("Unable to update user");
