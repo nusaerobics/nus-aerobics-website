@@ -22,5 +22,6 @@ export default async function Page() {
     console.log(error);
     redirect("/");
   }
+  // TODO: return <WalletPage session={{ userId: user.id, permission: user.permission }} />;
   return <ProfilePage user={user} />;
 }

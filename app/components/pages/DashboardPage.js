@@ -18,11 +18,12 @@ import { fromZonedTime, toZonedTime } from "date-fns-tz";
 import { useRouter } from "next/navigation";
 import { format } from "date-fns";
 
-export default function DashboardPage({ user }) {
+export default function DashboardPage({ session }) {
   const router = useRouter();
 
   const [isAdmin, setIsAdmin] = useState(false);
   const [transactions, setTransactions] = useState([]);
+  const [balance, setBalance] = useState(0);  // NTH TODO: Need to fix this so that it can be more seamless in rendering after refund/book/deposits occur
   const [bookings, setBookings] = useState([]);
   const [classes, setClasses] = useState([]);
   const [deposits, setDeposits] = useState(0); // Total number of Transaction amounts which are deposits
@@ -31,12 +32,27 @@ export default function DashboardPage({ user }) {
   const [slotsBooked, setSlotsBooked] = useState(0); // Total number of Bookings
 
   useEffect(() => {
-    const permission = user.permission;
+    // NOTE: Doing this so that the balance can be updated
+    const permission = session.permission;
     setIsAdmin(permission == "admin");
-  });
+
+    const fetchBalance = async () => {
+      try {
+        const res = await fetch(`/api/users?id=${session.userId}`);
+        if (!res.ok) {
+          throw new Error(`Unable to get user ${session.userId}: ${res.status}`);
+        }
+        const data = await res.json();
+        setBalance(data.balance);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    fetchBalance();
+  }, []);
 
   useEffect(() => {
-    if (user.permission == "admin") {
+    if (session.permission == "admin") {
       const fetchClasses = async () => {
         try {
           const res = await fetch("/api/classes?isToday=true");
@@ -109,10 +125,10 @@ export default function DashboardPage({ user }) {
     } else {
       const fetchTransactions = async () => {
         try {
-          const res = await fetch(`/api/transactions?userId=${user.id}`);
+          const res = await fetch(`/api/transactions?userId=${session.userId}`);
           if (!res.ok) {
             throw new Error(
-              `Unable to get transactions for user ${user.id}: ${res.status}`
+              `Unable to get transactions for user ${session.userId}: ${res.status}`
             );
           }
           const data = await res.json();
@@ -126,10 +142,10 @@ export default function DashboardPage({ user }) {
 
       const fetchBookings = async () => {
         try {
-          const res = await fetch(`/api/bookings?userId=${user.id}`);
+          const res = await fetch(`/api/bookings?userId=${session.userId}`);
           if (!res.ok) {
             throw new Error(
-              `Unable to get bookings for user ${user.id}: ${res.status}`
+              `Unable to get bookings for user ${session.userId}: ${res.status}`
             );
           }
           const data = await res.json();
@@ -243,7 +259,7 @@ export default function DashboardPage({ user }) {
             <div className="h-full w-1/3 flex flex-col gap-y-5">
               <div className="h-1/4 flex flex-col justify-center p-5 bg-white rounded-[20px] border border-a-black/10">
                 <p className="font-poppins font-bold text-a-navy text-5xl">
-                  {user.balance}
+                  {balance}
                 </p>
                 <p className="font-poppins text-a-navy text-2xl">
                   credits remaining
@@ -277,5 +293,5 @@ export default function DashboardPage({ user }) {
 }
 
 DashboardPage.propTypes = {
-  user: PropTypes.object,
+  session: PropTypes.object,
 };

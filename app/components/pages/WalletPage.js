@@ -33,7 +33,8 @@ import {
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { format } from "date-fns";
 
-export default function WalletPage({ user }) {
+export default function WalletPage({ session }) {
+  const [balance, setBalance] = useState(0);
   const [isAdmin, setIsAdmin] = useState(false);
   const [searchInput, setSearchInput] = useState("");
   const [transactions, setTransactions] = useState([]);
@@ -47,7 +48,7 @@ export default function WalletPage({ user }) {
   const [creditsSpent, setCreditsSpent] = useState(0); // Sum of bookings which are by userID
 
   useEffect(() => {
-    const permission = user.permission;
+    const permission = session.permission;
     setIsAdmin(permission == "admin");
 
     if (permission == "admin") {
@@ -62,10 +63,10 @@ export default function WalletPage({ user }) {
       fetchTransactions();
     } else {
       const fetchTransactions = async () => {
-        const res = await fetch(`/api/transactions?userId=${user.id}`);
+        const res = await fetch(`/api/transactions?userId=${session.userId}`);
         if (!res.ok) {
           throw new Error(
-            `Unable to get transactions for user ${user.id}: ${res.status}`
+            `Unable to get transactions for user ${session.userId}: ${res.status}`
           );
         }
         const data = await res.json();
@@ -75,9 +76,9 @@ export default function WalletPage({ user }) {
 
       const countCreditsSpent = async () => {
         try {
-          const res = await fetch(`/api/bookings?isCountByUser=${user.id}`);
+          const res = await fetch(`/api/bookings?isCountByUser=${session.userId}`);
           if (!res.ok) {
-            throw new Error(`Unable to count credits spent for user ${id}.`);
+            throw new Error(`Unable to count credits spent for user ${session.userId}.`);
           }
           const data = await res.json();
           setCreditsSpent(data);
@@ -86,6 +87,20 @@ export default function WalletPage({ user }) {
         }
       };
       countCreditsSpent();
+
+      const fetchBalance = async () => {
+        try {
+          const res = await fetch(`/api/users?id=${session.userId}`);
+          if (!res.ok) {
+            throw new Error(`Unable to get user ${session.userId}: ${res.status}`);
+          }
+          const data = await res.json();
+          setBalance(data.balance);
+        } catch (error) {
+          console.log(error);
+        }
+      };
+      fetchBalance();
     }
   }, []);
 
@@ -306,7 +321,7 @@ export default function WalletPage({ user }) {
           <div className="h-1/4 flex flex-row gap-x-5">
             <div className="w-1/2 rounded-[20px] border border-a-black/10 p-5 bg-white">
               <p className="font-poppins font-bold text-a-navy text-3xl">
-                {user.balance}
+                {balance}
               </p>
               <p className="font-poppins text-[#393E46] text-lg">
                 credits remaining

@@ -183,6 +183,16 @@ export default function ClassDetailsModal({
         throw new Error("Unable to create booking");
       }
 
+      // 3. Update user's balance
+      const res3 = await fetch("/api/users", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: userId, balance: user.balance - 1 }),
+      });
+      if (!res3.ok) {
+        throw new Error("Unable to update user");
+      } 
+
       // 4. Create new transaction
       const newTransaction = {
         userId: userId,
@@ -190,12 +200,12 @@ export default function ClassDetailsModal({
         type: "book",
         description: `Booked '${selectedClass.name}'`,
       };
-      const res3 = await fetch("/api/transactions", {
+      const res4 = await fetch("/api/transactions", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(newTransaction),
       });
-      if (!res3.ok) {
+      if (!res4.ok) {
         // Revert 2. Update class bookedCapacity back to original selectedClass
         const revert1 = await fetch("/api/classes", {
           method: "PUT",
@@ -215,9 +225,9 @@ export default function ClassDetailsModal({
         if (!revert2.ok) {
           throw new Error("Unable to revert previous created booking");
         }
-
         throw new Error("Unable to create transaction");
       }
+
       setResult({
         isSuccess: true,
         header: "Booking successful",
@@ -280,7 +290,17 @@ export default function ClassDetailsModal({
         throw new Error(`Unable to update class ${selectedClass.id}`);
       }
 
-      // 3. Create new transaction
+      // 3. Update user's balance
+      const res3 = await fetch("/api/users", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: userId, balance: user.balance + 1 }),
+      });
+      if (!res3.ok) {
+        throw new Error("Unable to update user");
+      } 
+
+      // 4. Create new transaction
       const newTransaction = {
         userId: selectedBooking.userId,
         amount: 1,
