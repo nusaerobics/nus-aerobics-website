@@ -52,6 +52,27 @@ export async function GET(request) {
       return NextResponse.json(classBookings, { status: 200 });
     }
 
+    // getNumberOfBookings
+    if (searchParams.get("isCount") != undefined) {
+      const number = await Booking.count();
+      if (number == null) {
+        return NextResponse.json(0, { status: 200 });
+      }
+      return NextResponse.json(number, { status: 200 });
+    }
+
+    // getNumberOfBookingsByUser
+    if (searchParams.get("isCountByUser") != undefined) {
+      const userId = searchParams.get("isCountByUser");
+      const number = await Booking.count({
+        where: { userId: userId }
+      });
+      if (number == null) {
+        return NextResponse.json(0, { status: 200 });
+      }
+      return NextResponse.json(number, { status: 200 });
+    }
+
     // getBookings
     const bookings = await Booking.findAll();
     return NextResponse.json(bookings, { status: 200 });

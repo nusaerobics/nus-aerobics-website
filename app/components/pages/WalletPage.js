@@ -44,13 +44,13 @@ export default function WalletPage({ user }) {
     direction: "ascending",
   });
   const [filters, setFilters] = useState(new Set([]));
+  const [creditsSpent, setCreditsSpent] = useState(0); // Sum of bookings which are by userID
 
   useEffect(() => {
     const permission = user.permission;
     setIsAdmin(permission == "admin");
 
     if (permission == "admin") {
-      console.log("isAdmin here");
       const fetchTransactions = async () => {
         const res = await fetch("/api/transactions");
         if (!res.ok) {
@@ -72,6 +72,20 @@ export default function WalletPage({ user }) {
         setTransactions(data);
       };
       fetchTransactions();
+
+      const countCreditsSpent = async () => {
+        try {
+          const res = await fetch(`/api/bookings?isCountByUser=${user.id}`);
+          if (!res.ok) {
+            throw new Error(`Unable to count credits spent for user ${id}.`);
+          }
+          const data = await res.json();
+          setCreditsSpent(data);
+        } catch (error) {
+          console.log(error);
+        }
+      };
+      countCreditsSpent();
     }
   }, []);
 
@@ -94,17 +108,18 @@ export default function WalletPage({ user }) {
 
   const transactionPages = useMemo(() => {
     if (searchInput != "") {
-      const transactionsSearch = sortedTransactions.filter((transaction) => {
-        const transactionUser = transaction.user.name.toLowerCase();
-        const searchValue = searchInput.toLowerCase();
-        return transactionUser.includes(searchValue);
-      })
-      .filter((transaction) => {
-        if (filters.size > 0) {
-          const transactionType = transaction.type;
-          return filters.has(transactionType);
-        }
-      });
+      const transactionsSearch = sortedTransactions
+        .filter((transaction) => {
+          const transactionUser = transaction.user.name.toLowerCase();
+          const searchValue = searchInput.toLowerCase();
+          return transactionUser.includes(searchValue);
+        })
+        .filter((transaction) => {
+          if (filters.size > 0) {
+            const transactionType = transaction.type;
+            return filters.has(transactionType);
+          }
+        });
       setPage(1);
       return Math.ceil(transactionsSearch.length / rowsPerPage);
     }
@@ -114,7 +129,7 @@ export default function WalletPage({ user }) {
         return filters.has(transactionType);
       }
       return true;
-    })
+    });
     setPage(1);
     return Math.ceil(filteredTransactions.length / rowsPerPage);
   }, [sortedTransactions, searchInput, filters]);
@@ -132,9 +147,7 @@ export default function WalletPage({ user }) {
         })
         .filter((transaction) => {
           if (filters.size > 0) {
-            console.log(filters.size);
             const transactionType = transaction.type;
-            console.log(transactionType);
             return filters.has(transactionType);
           }
         });
@@ -288,74 +301,71 @@ export default function WalletPage({ user }) {
           </Modal>
         </div>
       ) : (
-        <>
-          <div className="h-full flex flex-col gap-y-5 p-10 pt-20 overflow-y-scroll">
-            <PageTitle title="Wallet" />
-            <div className="h-1/4 flex flex-row gap-x-5">
-              <div className="w-1/2 rounded-[20px] border border-a-black/10 p-5 bg-white">
-                <p className="font-poppins font-bold text-a-navy text-3xl">
-                  {user.balance}
-                </p>
-                <p className="font-poppins text-[#393E46] text-lg">
-                  credits remaining
-                </p>
-              </div>
-              <div className="w-1/2 rounded-[20px] border border-a-black/10 p-5 bg-white">
-                {/* TODO: Implement logic to count how many credits spent */}
-                <p className="font-poppins font-bold text-a-navy text-3xl">8</p>
-                <p className="font-poppins text-a-black text-lg">
-                  credits spent
-                </p>
-              </div>
+        <div className="h-full flex flex-col gap-y-5 p-10 pt-20 overflow-y-scroll">
+          <PageTitle title="Wallet" />
+          <div className="h-1/4 flex flex-row gap-x-5">
+            <div className="w-1/2 rounded-[20px] border border-a-black/10 p-5 bg-white">
+              <p className="font-poppins font-bold text-a-navy text-3xl">
+                {user.balance}
+              </p>
+              <p className="font-poppins text-[#393E46] text-lg">
+                credits remaining
+              </p>
             </div>
-            <div className="w-full flex flex-col rounded-[20px] border border-a-black/10 p-5 bg-white gap-y-2.5">
-              <div className="flex flex-row">
-                <div className="w-3/4">
-                  <SectionTitle title="All transactions" />
-                </div>
-              </div>
-              <Table
-                removeWrapper
-                classNames={tableClassNames}
-                sortDescriptor={sortDescriptor}
-                onSortChange={setSortDescriptor}
-              >
-                <TableHeader>
-                  <TableColumn key="createdAt" allowsSorting>
-                    Date
-                  </TableColumn>
-                  <TableColumn>Amount</TableColumn>
-                  <TableColumn>Description</TableColumn>
-                </TableHeader>
-                <TableBody>
-                  {transactionItems.map((transaction) => {
-                    return (
-                      <TableRow key={transaction.id}>
-                        <TableCell>
-                          {format(transaction.createdAt, "d/MM/y HH:mm")}
-                        </TableCell>
-                        <TableCell>{transaction.amount}</TableCell>
-                        <TableCell>{transaction.description}</TableCell>
-                      </TableRow>
-                    );
-                  })}
-                </TableBody>
-              </Table>
-              <div className="flex flex-row justify-center">
-                <Pagination
-                  showControls
-                  isCompact
-                  color="primary"
-                  size="sm"
-                  loop={true}
-                  page={page}
-                  total={transactionPages}
-                  onChange={(page) => setPage(page)}
-                />
-              </div>
+            <div className="w-1/2 rounded-[20px] border border-a-black/10 p-5 bg-white">
+              <p className="font-poppins font-bold text-a-navy text-3xl">
+                {creditsSpent}
+              </p>
+              <p className="font-poppins text-a-black text-lg">credits spent</p>
             </div>
           </div>
-        </>
+          <div className="w-full flex flex-col rounded-[20px] border border-a-black/10 p-5 bg-white gap-y-2.5">
+            <div className="flex flex-row">
+              <div className="w-3/4">
+                <SectionTitle title="All transactions" />
+              </div>
+            </div>
+            <Table
+              removeWrapper
+              classNames={tableClassNames}
+              sortDescriptor={sortDescriptor}
+              onSortChange={setSortDescriptor}
+            >
+              <TableHeader>
+                <TableColumn key="createdAt" allowsSorting>
+                  Date
+                </TableColumn>
+                <TableColumn>Amount</TableColumn>
+                <TableColumn>Description</TableColumn>
+              </TableHeader>
+              <TableBody>
+                {transactionItems.map((transaction) => {
+                  return (
+                    <TableRow key={transaction.id}>
+                      <TableCell>
+                        {format(transaction.createdAt, "d/MM/y HH:mm")}
+                      </TableCell>
+                      <TableCell>{transaction.amount}</TableCell>
+                      <TableCell>{transaction.description}</TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+            <div className="flex flex-row justify-center">
+              <Pagination
+                showControls
+                isCompact
+                color="primary"
+                size="sm"
+                loop={true}
+                page={page}
+                total={transactionPages}
+                onChange={(page) => setPage(page)}
+              />
+            </div>
+          </div>
+        </div>
       )}
     </>
   );

@@ -31,6 +31,24 @@ export async function GET(request) {
       return NextResponse.json(user, { status: 200 });
     }
 
+    // getNumberOfUsers
+    if (searchParams.get("isCountUsers") != undefined) {
+      const number = await User.count();
+      if (number == null) {
+        return NextResponse.json(0, { status: 200 });
+      }
+      return NextResponse.json(number, { status: 200 });
+    }
+
+    // getNumberOfCreditsUnused
+    if (searchParams.get("isCountCredits") != undefined) {
+      const number = await User.sum('balance');
+      if (number == null) {
+        return NextResponse.json(0, { status: 200 });
+      }
+      return NextResponse.json(number, { status: 200 });
+    }
+    
     // getUsers
     const users = await User.findAll();
     return NextResponse.json(users, { status: 200 });
