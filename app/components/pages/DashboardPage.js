@@ -19,16 +19,19 @@ import { useRouter } from "next/navigation";
 import { format } from "date-fns";
 
 export default function DashboardPage({ user }) {
+  const router = useRouter();
+
   const [isAdmin, setIsAdmin] = useState(false);
   const [transactions, setTransactions] = useState([]);
   const [bookings, setBookings] = useState([]);
   const [classes, setClasses] = useState([]);
-
-  const router = useRouter();
+  const [deposits, setDeposits] = useState(0); // Total number of Transaction amounts which are deposits
+  const [creditsUnused, setCreditsUnused] = useState(0);
+  const [members, setMembers] = useState(0); // Total number of Users
+  const [slotsBooked, setSlotsBooked] = useState(0); // Total number of Bookings
 
   useEffect(() => {
     const permission = user.permission;
-    console.log("permission on dashboard is", permission);
     setIsAdmin(permission == "admin");
   });
 
@@ -36,8 +39,7 @@ export default function DashboardPage({ user }) {
     if (user.permission == "admin") {
       const fetchClasses = async () => {
         try {
-          console.log("in admin fetchClasses");
-          const res = await fetch("api/classes?isToday=true");
+          const res = await fetch("/api/classes?isToday=true");
           if (!res.ok) {
             throw new Error(`Unable to get classes: ${res.status}`);
           }
@@ -48,6 +50,62 @@ export default function DashboardPage({ user }) {
         }
       };
       fetchClasses();
+
+      const countDeposits = async () => {
+        try {
+          const res = await fetch("/api/transactions?isCount=true");
+          if (!res.ok) {
+            throw new Error("Unable to count deposits.");
+          }
+          const data = await res.json();
+          setDeposits(data);
+        } catch (error) {
+          console.log(error);
+        }
+      };
+      countDeposits();
+
+      const countMembers = async () => {
+        try {
+          const res = await fetch("/api/users?isCountUsers=true");
+          if (!res.ok) {
+            throw new Error("Unable to count members.");
+          }
+          const data = await res.json();
+          setMembers(data);
+        } catch (error) {
+          console.log(error);
+        }
+      };
+      countMembers();
+
+      const countCreditsUnused = async () => {
+        try {
+          const res = await fetch("/api/users?isCountCredits=true");
+          if (!res.ok) {
+            throw new Error("Unable to count users' credits.");
+          }
+          const data = await res.json();
+          setCreditsUnused(data);
+        } catch (error) {
+          console.log(error);
+        }
+      };
+      countCreditsUnused();
+
+      const countSlotsBooked = async () => {
+        try {
+          const res = await fetch("api/bookings?isCount=true");
+          if (!res.ok) {
+            throw new Error("Unable to count bookings.");
+          }
+          const data = await res.json();
+          setSlotsBooked(data);
+        } catch (error) {
+          console.log(error);
+        }
+      };
+      countSlotsBooked();
     } else {
       const fetchTransactions = async () => {
         try {
@@ -112,44 +170,43 @@ export default function DashboardPage({ user }) {
                 <p>No classes today</p>
               ) : (
                 <>
-              {classes.map((c) => {
-                return (
-                  <div
-                    key={c.id}
-                    className="flex flex-col gap-y-2.5 p-2.5 rounded-[20px] border-l-[4px] border-l-a-navy bg-a-navy/10"
-                  >
-                    <div className="flex flex-col">
-                      <p className="font-bold text-base">{c.name}</p>
-                      <p>{format(c.date, "d/MM/y HH:mm")}</p>
-                    </div>
-                    <div className="flex justify-end">
-                      <button
-                        onClick={() => handleClick(c)}
-                        className="rounded-[30px] px-[20px] py-[10px] bg-a-navy text-white cursor-pointer"
+                  {classes.map((c) => {
+                    return (
+                      <div
+                        key={c.id}
+                        className="flex flex-col gap-y-2.5 p-2.5 rounded-[20px] border-l-[4px] border-l-a-navy bg-a-navy/10"
                       >
-                        View details
-                      </button>
-                    </div>
-                  </div>
-                );
-              })}
-              </>
+                        <div className="flex flex-col">
+                          <p className="font-bold text-base">{c.name}</p>
+                          <p>{format(c.date, "d/MM/y HH:mm")}</p>
+                        </div>
+                        <div className="flex justify-end">
+                          <button
+                            onClick={() => handleClick(c)}
+                            className="rounded-[30px] px-[20px] py-[10px] bg-a-navy text-white cursor-pointer"
+                          >
+                            View details
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </>
               )}
             </div>
             <div className="h-full w-1/3 flex flex-col gap-y-5">
               <div className="h-1/4 flex flex-col justify-center p-5 bg-white rounded-[20px] border border-a-black/10">
                 <div className="flex flex-row items-end gap-x-1">
-                  {/* TODO: Figure out how to count these values */}
                   <p className="font-poppins font-bold text-a-navy text-3xl">
-                    1500
+                    {deposits}
                   </p>
                   <p className="font-bold text-a-navy text-xl">/ 3000</p>
                 </div>
-                <p className="font-poppins text-a-navy text-xl">credits sold</p>
+                <p className="font-poppins text-a-navy text-xl">deposits</p>
               </div>
               <div className="h-1/4 flex flex-col justify-center p-5 bg-white rounded-[20px] border border-a-black/10">
                 <p className="font-poppins font-bold text-a-navy text-3xl">
-                  10
+                  {creditsUnused}
                 </p>
                 <p className="font-poppins text-a-navy text-xl">
                   credits unused
@@ -158,7 +215,7 @@ export default function DashboardPage({ user }) {
               <div className="h-1/4 flex flex-col justify-center p-5 bg-white rounded-[20px] border border-a-black/10">
                 <div className="flex flex-row items-end gap-x-1">
                   <p className="font-poppins font-bold text-a-navy text-3xl">
-                    1000
+                    {slotsBooked}
                   </p>
                   <p className="font-bold text-a-navy text-xl">/ 2850</p>
                 </div>
@@ -166,11 +223,9 @@ export default function DashboardPage({ user }) {
               </div>
               <div className="h-1/4 flex flex-col justify-center p-5 bg-white rounded-[20px] border border-a-black/10">
                 <p className="font-poppins font-bold text-a-navy text-3xl">
-                  100
+                  {members}
                 </p>
-                <p className="font-poppins text-a-navy text-xl">
-                  active members
-                </p>
+                <p className="font-poppins text-a-navy text-xl">members</p>
               </div>
             </div>
           </div>

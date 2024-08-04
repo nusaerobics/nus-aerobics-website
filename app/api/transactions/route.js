@@ -21,6 +21,19 @@ export async function GET(request) {
       return NextResponse.json(transactionsByUser, { status: 200 });
     }
 
+    // getNumberOfDeposits
+    if (searchParams.get("isCount") != undefined) {
+      const number = await Transaction.sum('amount', {
+        where: {
+          type: "deposit",
+        }
+      });
+      if (number == null) {
+        return NextResponse.json(0, { status: 200 });
+      }
+      return NextResponse.json(number, { status: 200 });
+    }
+
     // getTransactions
     const transactions = await Transaction.findAll({
       include: [
