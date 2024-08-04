@@ -3,12 +3,13 @@
 import { useEffect, useState } from "react";
 import { Input } from "@nextui-org/react";
 import { MdVisibility, MdVisibilityOff } from "react-icons/md";
-import { inputClassNames } from "../components/utils/ClassNames";
+import { inputClassNames } from "../utils/ClassNames";
 import { useRouter } from "next/navigation";
 import { z } from "zod";
-import Toast from "../components/Toast";
+import Toast from "../Toast";
 
 var random = require("random-string-generator");
+
 export default function Page() {
   const router = useRouter();
   const [isSubmit, setIsSubmit] = useState(false);

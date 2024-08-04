@@ -13,6 +13,7 @@ export default function Layout({ children, home }) {
           <div>
             <Head>
               <link rel="icon" href="/favicon.ico" />
+              <title>NUS Aerobics</title>
             </Head>
             <header></header>
             <main
