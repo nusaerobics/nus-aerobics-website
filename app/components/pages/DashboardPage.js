@@ -1,5 +1,11 @@
 "use client";
 
+import { format } from "date-fns";
+import { fromZonedTime, toZonedTime } from "date-fns-tz";
+import PropTypes from "prop-types";
+import { useEffect, useState } from "react";
+
+import { useRouter } from "next/navigation";
 import {
   Table,
   TableHeader,
@@ -12,18 +18,12 @@ import ClassCard from "../dashboard/ClassCard";
 import { tableClassNames } from "../utils/ClassNames";
 import { PageTitle, SectionTitle } from "../utils/Titles";
 
-import { useEffect, useState } from "react";
-import PropTypes from "prop-types";
-import { fromZonedTime, toZonedTime } from "date-fns-tz";
-import { useRouter } from "next/navigation";
-import { format } from "date-fns";
-
 export default function DashboardPage({ session }) {
   const router = useRouter();
 
   const [isAdmin, setIsAdmin] = useState(false);
   const [transactions, setTransactions] = useState([]);
-  const [balance, setBalance] = useState(0);  // NTH TODO: Need to fix this so that it can be more seamless in rendering after refund/book/deposits occur
+  const [balance, setBalance] = useState(0); // NTH TODO: Need to fix this so that it can be more seamless in rendering after refund/book/deposits occur
   const [bookings, setBookings] = useState([]);
   const [classes, setClasses] = useState([]);
   const [deposits, setDeposits] = useState(0); // Total number of Transaction amounts which are deposits
@@ -32,24 +32,9 @@ export default function DashboardPage({ session }) {
   const [slotsBooked, setSlotsBooked] = useState(0); // Total number of Bookings
 
   useEffect(() => {
-    // NOTE: Doing this so that the balance can be updated
     const permission = session.permission;
     setIsAdmin(permission == "admin");
-
-    const fetchBalance = async () => {
-      try {
-        const res = await fetch(`/api/users?id=${session.userId}`);
-        if (!res.ok) {
-          throw new Error(`Unable to get user ${session.userId}: ${res.status}`);
-        }
-        const data = await res.json();
-        setBalance(data.balance);
-      } catch (error) {
-        console.log(error);
-      }
-    };
-    fetchBalance();
-  }, []);
+  });
 
   useEffect(() => {
     if (session.permission == "admin") {
@@ -123,6 +108,22 @@ export default function DashboardPage({ session }) {
       };
       countSlotsBooked();
     } else {
+      const fetchBalance = async () => {
+        try {
+          const res = await fetch(`/api/users?id=${session.userId}`);
+          if (!res.ok) {
+            throw new Error(
+              `Unable to get user ${session.userId}: ${res.status}`
+            );
+          }
+          const data = await res.json();
+          setBalance(data.balance);
+        } catch (error) {
+          console.log(error);
+        }
+      };
+      fetchBalance();
+
       const fetchTransactions = async () => {
         try {
           const res = await fetch(`/api/transactions?userId=${session.userId}`);
@@ -179,7 +180,6 @@ export default function DashboardPage({ session }) {
     <>
       {isAdmin ? (
         <div className="w-full h-full flex flex-col gap-y-5 p-10 pt-20 overflow-y-scroll">
-          {/* TODO: This page should be under app/page.js probably */}
           <PageTitle title="Dashboard" />
           <div className="h-full flex flex-row gap-x-5">
             <div className="h-full w-2/3 flex flex-col p-5 gap-y-2.5 bg-white rounded-[20px] border border-a-black/10">

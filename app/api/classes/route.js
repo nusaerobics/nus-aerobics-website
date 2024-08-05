@@ -1,19 +1,10 @@
 import { fromZonedTime, toZonedTime } from "date-fns-tz";
 import { NextResponse } from "next/server";
-import { Op, fn } from "sequelize";
 
 const db = require("../../config/sequelize");
 const Class = db.classes;
 
-
 function getStatus(c) {
-  // const hasBooking = bookings.filter((booking) => {
-  //   return booking.class.id == selectedClass.id;
-  // });
-  // if (hasBooking.length > 0) {
-  //   return "booked";
-  // }
-
   if (c.bookedCapacity == c.maxCapacity) {
     return "full";
   }
@@ -24,7 +15,8 @@ function getStatus(c) {
   if (sgClassDate < sgCurrentDate) {
     return "closed";
   }
-  return "open";
+  // should remain as closed or open otherwise
+  return c.status;
 };
 
 export async function GET(request) {

@@ -164,8 +164,6 @@ export default function UsersViewPage({ userId }) {
           return originalBooking.id != selectedBooking.id;
         });
         setBookings(updatedBookings);
-        console.log(selectedBooking);
-        console.log(updatedBookings);
 
         setToast({
           isSuccess: true,
