@@ -127,6 +127,17 @@ export default function AdminClassViewPage({ classId }) {
   const toggleShowToast = () => {
     setShowToast(!showToast);
   };
+
+  useEffect(() => {
+    let timer;
+    if (showToast) {
+      timer = setTimeout(() => {
+        setShowToast(false);
+      }, 5000);
+    }
+    return () => clearTimeout(timer);
+  }, [showToast]);
+
   const selectRow = (rowData) => {
     setSelectedBooking(rowData);
   };

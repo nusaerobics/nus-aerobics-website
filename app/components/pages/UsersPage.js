@@ -81,7 +81,9 @@ export default function UsersPage() {
         const userName = user.name.toLowerCase();
         const userEmail = user.email.toLowerCase();
         const searchValue = searchInput.toLowerCase();
-        return userName.includes(searchValue) || userEmail.includes(searchValue);
+        return (
+          userName.includes(searchValue) || userEmail.includes(searchValue)
+        );
       });
       return usersSearch.slice(start, end);
     }
@@ -91,6 +93,17 @@ export default function UsersPage() {
   const toggleShowToast = () => {
     setShowToast(!showToast);
   };
+
+  useEffect(() => {
+    let timer;
+    if (showToast) {
+      timer = setTimeout(() => {
+        setShowToast(false);
+      }, 5000);
+    }
+    return () => clearTimeout(timer);
+  }, [showToast]);
+
   const selectRow = (rowData) => {
     setSelectedUser(rowData);
   };
@@ -175,7 +188,9 @@ export default function UsersPage() {
       });
       if (!res1.ok) {
         // TODO: Restore transactions for user
-        throw new Error(`Unable to delete transactions for user ${selectedUser.id}`);
+        throw new Error(
+          `Unable to delete transactions for user ${selectedUser.id}`
+        );
       }
 
       const res2 = await fetch("/api/bookings", {

@@ -253,6 +253,16 @@ export default function UserClassLandingPage({ userId }) {
     setShowToast(!showToast);
   };
 
+  useEffect(() => {
+    let timer;
+    if (showToast) {
+      timer = setTimeout(() => {
+        setShowToast(false);
+      }, 5000);
+    }
+    return () => clearTimeout(timer);
+  }, [showToast]);
+
   return (
     <>
       <div className="w-full h-full flex flex-col gap-y-5 p-10 pt-20 overflow-y-scroll">

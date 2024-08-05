@@ -49,6 +49,16 @@ export default function ClassDetailsModal({
   };
 
   useEffect(() => {
+    let timer;
+    if (showToast) {
+      timer = setTimeout(() => {
+        setShowToast(false);
+      }, 5000);
+    }
+    return () => clearTimeout(timer);
+  }, [showToast]);
+
+  useEffect(() => {
     // getUser
     const fetchUser = async () => {
       try {

@@ -39,6 +39,16 @@ export default function DashboardPage({ session }) {
   };
 
   useEffect(() => {
+    let timer;
+    if (showToast) {
+      timer = setTimeout(() => {
+        setShowToast(false);
+      }, 5000);
+    }
+    return () => clearTimeout(timer);
+  }, [showToast]);
+
+  useEffect(() => {
     // NOTE: Doing this so that the balance can be updated
     const permission = session.permission;
     setIsAdmin(permission == "admin");

@@ -145,6 +145,17 @@ export default function AdminClassLandingPage({ openCreate }) {
   const toggleShowToast = () => {
     setShowToast(!showToast);
   };
+
+  useEffect(() => {
+    let timer;
+    if (showToast) {
+      timer = setTimeout(() => {
+        setShowToast(false);
+      }, 5000);
+    }
+    return () => clearTimeout(timer);
+  }, [showToast]);
+
   const selectRow = (rowData) => {
     console.log("selectedClass:", rowData);
     setSelectedClass(rowData);

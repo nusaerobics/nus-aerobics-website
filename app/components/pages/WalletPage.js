@@ -57,6 +57,16 @@ export default function WalletPage({ session }) {
   };
 
   useEffect(() => {
+    let timer;
+    if (showToast) {
+      timer = setTimeout(() => {
+        setShowToast(false);
+      }, 5000);
+    }
+    return () => clearTimeout(timer);
+  }, [showToast]);
+
+  useEffect(() => {
     const permission = session.permission;
     setIsAdmin(permission == "admin");
 
