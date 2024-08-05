@@ -53,7 +53,7 @@ export default function UserClassLandingPage({ userId }) {
         }
       : { column: "bookingDate", direction: "ascending" }
   );
-  const [filters, setFilters] = useState(new Set(["open", "upcoming"])); // "open", "upcoming"
+  const [filters, setFilters] = useState(new Set(["open", "upcoming"]));
 
   useEffect(() => {
     const fetchClasses = async () => {
@@ -136,7 +136,6 @@ export default function UserClassLandingPage({ userId }) {
         }
         return true;
       });
-    setPage(1);
     return Math.ceil(filteredClasses.length / rowsPerPage);
   }, [sortedClasses, classQ, filters]);
 

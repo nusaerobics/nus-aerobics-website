@@ -98,7 +98,6 @@ export default function AdminClassLandingPage({ openCreate }) {
         }
         return true;
       });
-    setPage(1);
     return Math.ceil(filteredClasses.length / rowsPerPage);
   }, [sortedClasses, searchInput, filters]);
 
