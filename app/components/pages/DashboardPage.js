@@ -279,7 +279,7 @@ export default function DashboardPage({ session }) {
                 </>
               )}
             </div>
-            <div className="h-full md:w-1/3 sm:w-1/2 flex flex-col gap-y-5">
+            <div className="h-full md:w-1/3 w-1/2 flex flex-col gap-y-5">
               <div className="h-1/4 flex flex-col justify-center p-5 bg-white rounded-[20px] border border-a-black/10">
                 <div className="flex flex-row items-end gap-x-1">
                   <p className="font-poppins font-bold text-a-navy md:text-3xl sm:text-2xl">
@@ -335,7 +335,7 @@ export default function DashboardPage({ session }) {
                 return <ClassCard key={booking.id} booking={booking} />;
               })}
             </div>
-            <div className="h-full md:w-1/3 sm:w-1/2 flex flex-col gap-y-5">
+            <div className="h-full md:w-1/3 w-1/2 flex flex-col gap-y-5">
               <div className="h-1/4 flex flex-col justify-center p-5 bg-white rounded-[20px] border border-a-black/10">
                 <p className="font-poppins font-bold text-a-navy md:text-5xl sm:text-3xl">
                   {balance}
