@@ -8,7 +8,6 @@ export default async function Page() {
   let redirectPath;
   try {
     const session = await getSession();
-    console.log(session);
     if (session) {
       redirectPath = "/dashboard";
     }

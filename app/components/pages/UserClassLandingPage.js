@@ -182,8 +182,6 @@ export default function UserClassLandingPage({ userId }) {
         first = a.class["date"];
         second = b.class["date"];
       }
-      console.log(a, b);
-      console.log(first, second);
       const compare = first < second ? -1 : first > second ? 1 : 0;
       return sortDescriptor.direction == "descending" ? -compare : compare;
     });

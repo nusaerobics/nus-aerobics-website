@@ -93,11 +93,10 @@ export default function ClassDetailsModal({
   }
 
   function isAllowedCancel(selectedClass) {
-    console.log(selectedClass);
     const utcDate = fromZonedTime(selectedClass.date, "Asia/Singapore");
     const sgDate = toZonedTime(utcDate, "Asia/Singapore");
     const sgCurrentDate = toZonedTime(new Date(), "Asia/Singapore");
-    const cancelDeadline = new Date(sgDate.getTime() + 12 * 60 * 60 * 1000);
+    const cancelDeadline = new Date(sgDate.getTime() - 12 * 60 * 60 * 1000);
     return sgCurrentDate < cancelDeadline;
   }
 

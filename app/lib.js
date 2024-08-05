@@ -1,7 +1,6 @@
 import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
 import { createSecretKey } from "crypto";
-import { NextResponse } from "next/server";
 
 const secretKey = createSecretKey(process.env.TOKEN_SECRET, "utf-8");
 
@@ -28,9 +27,4 @@ export async function getSession() {
 
   const sessionValue = session.value;
   return await decrypt(sessionValue);
-  
-  // console.log(session);
-  // const sessionValue = session.value;
-  // if (!sessionValue) return null;
-  // return await decrypt(sessionValue);
 }
