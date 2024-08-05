@@ -238,7 +238,7 @@ export default function DashboardPage({ session }) {
         <div className="w-full h-full flex flex-col gap-y-5 p-10 pt-20 overflow-y-scroll">
           {/* TODO: This page should be under app/page.js probably */}
           <PageTitle title="Dashboard" />
-          <div className="h-full flex flex-row gap-x-5">
+          <div className="h-full flex md:flex-row sm:flex-col gap-x-5 sm:gap-y-5">
             <div className="h-full w-2/3 flex flex-col p-5 gap-y-2.5 bg-white rounded-[20px] border border-a-black/10">
               <SectionTitle title="Today's classes" />
               {classes.length == 0 ? (
@@ -269,38 +269,48 @@ export default function DashboardPage({ session }) {
                 </>
               )}
             </div>
-            <div className="h-full w-1/3 flex flex-col gap-y-5">
+            <div className="h-full md:w-1/3 sm:w-1/2 flex flex-col gap-y-5">
               <div className="h-1/4 flex flex-col justify-center p-5 bg-white rounded-[20px] border border-a-black/10">
                 <div className="flex flex-row items-end gap-x-1">
-                  <p className="font-poppins font-bold text-a-navy text-3xl">
+                  <p className="font-poppins font-bold text-a-navy md:text-3xl sm:text-2xl">
                     {deposits}
                   </p>
-                  <p className="font-bold text-a-navy text-xl">/ 3000</p>
+                  <p className="font-bold text-a-navy md:text-xl sm:text-lg">
+                    / 3000
+                  </p>
                 </div>
-                <p className="font-poppins text-a-navy text-xl">deposits</p>
+                <p className="font-poppins text-a-navy md:text-xl sm:text-base">
+                  deposits
+                </p>
               </div>
               <div className="h-1/4 flex flex-col justify-center p-5 bg-white rounded-[20px] border border-a-black/10">
-                <p className="font-poppins font-bold text-a-navy text-3xl">
+                <p className="font-poppins font-bold text-a-navy md:text-3xl sm:text-2xl">
                   {creditsUnused}
                 </p>
-                <p className="font-poppins text-a-navy text-xl">
+                <p className="font-poppins text-a-navy md:text-xl sm:text-lg">
                   credits unused
                 </p>
               </div>
               <div className="h-1/4 flex flex-col justify-center p-5 bg-white rounded-[20px] border border-a-black/10">
                 <div className="flex flex-row items-end gap-x-1">
-                  <p className="font-poppins font-bold text-a-navy text-3xl">
+                  <p className="font-poppins font-bold text-a-navy md:text-3xl sm:text-2xl">
                     {slotsBooked}
                   </p>
-                  <p className="font-bold text-a-navy text-xl">/ 2850</p>
+                  <p className="font-bold text-a-navy md:text-xl sm:text-lg">
+                    / 2850
+                  </p>
                 </div>
-                <p className="font-poppins text-a-navy text-xl">slots booked</p>
+                <p className="font-poppins text-a-navy md:text-xl sm:text-lg">
+                  slots booked
+                </p>
               </div>
               <div className="h-1/4 flex flex-col justify-center p-5 bg-white rounded-[20px] border border-a-black/10">
-                <p className="font-poppins font-bold text-a-navy text-3xl">
+                <p className="font-poppins font-bold text-a-navy md:text-3xl sm:text-2xl">
                   {members}
                 </p>
-                <p className="font-poppins text-a-navy text-xl">members</p>
+                <p className="font-poppins text-a-navy md:text-xl sm:text-lg">
+                  members
+                </p>
               </div>
             </div>
           </div>
@@ -308,19 +318,19 @@ export default function DashboardPage({ session }) {
       ) : (
         <div className="h-full flex flex-col gap-y-5 p-10 pt-20 overflow-y-scroll">
           <PageTitle title="Dashboard" />
-          <div className="h-full flex flex-row gap-x-5">
+          <div className="h-full flex md:flex-row sm:flex-col gap-x-5 sm:gap-y-5">
             <div className="h-full w-2/3 flex flex-col p-5 gap-y-2.5 bg-white rounded-[20px] border border-a-black/10">
               <SectionTitle title="Upcoming classes" />
               {bookings.map((booking) => {
                 return <ClassCard key={booking.id} booking={booking} />;
               })}
             </div>
-            <div className="h-full w-1/3 flex flex-col gap-y-5">
+            <div className="h-full md:w-1/3 sm:w-1/2 flex flex-col gap-y-5">
               <div className="h-1/4 flex flex-col justify-center p-5 bg-white rounded-[20px] border border-a-black/10">
-                <p className="font-poppins font-bold text-a-navy text-5xl">
+                <p className="font-poppins font-bold text-a-navy md:text-5xl sm:text-3xl">
                   {balance}
                 </p>
-                <p className="font-poppins text-a-navy text-2xl">
+                <p className="font-poppins text-a-navy md:text-2xl sm:text-lg">
                   credits remaining
                 </p>
               </div>
