@@ -34,6 +34,7 @@ import {
   modalClassNames,
   tableClassNames,
 } from "../utils/ClassNames";
+import Toast from "../Toast";
 
 export default function WalletPage({ session }) {
   const [balance, setBalance] = useState(0);
@@ -48,6 +49,12 @@ export default function WalletPage({ session }) {
   });
   const [filters, setFilters] = useState(new Set([]));
   const [creditsSpent, setCreditsSpent] = useState(0); // Sum of bookings which are by userID
+  const [showToast, setShowToast] = useState(false);
+  const [toast, setToast] = useState({});
+
+  const toggleShowToast = () => {
+    setShowToast(!showToast);
+  };
 
   useEffect(() => {
     const permission = session.permission;
@@ -78,13 +85,23 @@ export default function WalletPage({ session }) {
 
       const countCreditsSpent = async () => {
         try {
-          const res = await fetch(`/api/bookings?isCountByUser=${session.userId}`);
+          const res = await fetch(
+            `/api/bookings?isCountByUser=${session.userId}`
+          );
           if (!res.ok) {
-            throw new Error(`Unable to count credits spent for user ${session.userId}.`);
+            throw new Error(
+              `Unable to count credits spent for user ${session.userId}.`
+            );
           }
           const data = await res.json();
           setCreditsSpent(data);
         } catch (error) {
+          setToast({
+            isSuccess: false,
+            header: "Unable to count credits spent",
+            message: `Unable to count credits spent for user ${session.userId}. Try again later.`,
+          });
+          setShowToast(true);
           console.log(error);
         }
       };
@@ -94,11 +111,19 @@ export default function WalletPage({ session }) {
         try {
           const res = await fetch(`/api/users?id=${session.userId}`);
           if (!res.ok) {
-            throw new Error(`Unable to get user ${session.userId}: ${res.status}`);
+            throw new Error(
+              `Unable to get user ${session.userId}: ${res.status}`
+            );
           }
           const data = await res.json();
           setBalance(data.balance);
         } catch (error) {
+          setToast({
+            isSuccess: false,
+            header: "Unable to get user",
+            message: `Unable to get user ${session.userId}. Try again later.`,
+          });
+          setShowToast(true);
           console.log(error);
         }
       };
@@ -383,6 +408,17 @@ export default function WalletPage({ session }) {
             </div>
           </div>
         </div>
+      )}
+      {showToast ? (
+        <div onClick={toggleShowToast}>
+          <Toast
+            isSuccess={toast.isSuccess}
+            header={toast.header}
+            message={toast.message}
+          />
+        </div>
+      ) : (
+        <></>
       )}
     </>
   );

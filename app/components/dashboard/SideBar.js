@@ -12,6 +12,7 @@ import {
 } from "react-icons/md";
 import clsx from "clsx";
 import { useEffect, useState } from "react";
+import Toast from "../Toast";
 
 const userLinks = [
   { name: "Dashboard", href: "/dashboard", icon: MdGridView },
@@ -38,6 +39,11 @@ const adminLinks = [
 
 export default function SideBar({ user }) {
   const router = useRouter();
+  const [showToast, setShowToast] = useState(false);
+  const [toast, setToast] = useState({});
+  const toggleShowToast = () => {
+    setShowToast(!showToast);
+  };
 
   useEffect(() => {
     const permission = user.permission;
@@ -59,6 +65,12 @@ export default function SideBar({ user }) {
       }
       throw new Error("Unable to logout");
     } catch (error) {
+      setToast({
+        isSuccess: false,
+        header: "Unable to logout",
+        message: `Unable to logout. Try again later.`,
+      });
+      setShowToast(true);
       console.log(error);
     }
   }
@@ -175,6 +187,17 @@ export default function SideBar({ user }) {
             </Link>
           </div>
         </div>
+      )}
+      {showToast ? (
+        <div onClick={toggleShowToast}>
+          <Toast
+            isSuccess={toast.isSuccess}
+            header={toast.header}
+            message={toast.message}
+          />
+        </div>
+      ) : (
+        <></>
       )}
     </>
   );

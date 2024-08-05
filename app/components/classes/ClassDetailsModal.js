@@ -25,6 +25,7 @@ import clsx from "clsx";
 import { useEffect, useState } from "react";
 import { fromZonedTime, toZonedTime } from "date-fns-tz";
 import { SectionTitle } from "../utils/Titles";
+import Toast from "../Toast";
 
 export default function ClassDetailsModal({
   selectedClass,
@@ -40,6 +41,12 @@ export default function ClassDetailsModal({
   const [isBooked, setIsBooked] = useState(false);
   const [modalType, setModalType] = useState("view"); // Either: "view", "loading", or "result"
   const [result, setResult] = useState({}); // {  isSuccess: boolean, header: string, message: string }
+  const [showToast, setShowToast] = useState(false);
+  const [toast, setToast] = useState({});
+
+  const toggleShowToast = () => {
+    setShowToast(!showToast);
+  };
 
   useEffect(() => {
     // getUser
@@ -52,6 +59,12 @@ export default function ClassDetailsModal({
         const data = await res.json();
         setUser(data);
       } catch (error) {
+        setToast({
+          isSuccess: false,
+          header: "Unable to get user",
+          message: `Unable to get user ${userId}. Try again later.`,
+        });
+        setShowToast(true);
         console.log(error);
       }
     };
@@ -340,137 +353,152 @@ export default function ClassDetailsModal({
   }
 
   return (
-    <Modal
-      isOpen={isOpen}
-      onOpenChange={onOpenChange}
-      size="2xl"
-      backdrop="opaque"
-      classNames={modalClassNames}
-    >
-      <ModalContent>
-        {(onClose) => {
-          return (
-            <>
-              {modalType == "view" ? (
-                <>
-                  <ModalHeader>
-                    <div className="flex flex-row gap-x-5">
-                      <p className="text-a-navy">{selectedClass.name}</p>
-                      <Chip
-                        classNames={
-                          chipClassNames[
-                            isBooked ? "booked" : selectedClass.status
-                          ]
-                        }
-                      >
-                        {
-                          chipTypes[isBooked ? "booked" : selectedClass.status]
-                            .message
-                        }
-                      </Chip>
-                    </div>
-                  </ModalHeader>
+    <>
+      <Modal
+        isOpen={isOpen}
+        onOpenChange={onOpenChange}
+        size="2xl"
+        backdrop="opaque"
+        classNames={modalClassNames}
+      >
+        <ModalContent>
+          {(onClose) => {
+            return (
+              <>
+                {modalType == "view" ? (
+                  <>
+                    <ModalHeader>
+                      <div className="flex flex-row gap-x-5">
+                        <p className="text-a-navy">{selectedClass.name}</p>
+                        <Chip
+                          classNames={
+                            chipClassNames[
+                              isBooked ? "booked" : selectedClass.status
+                            ]
+                          }
+                        >
+                          {
+                            chipTypes[
+                              isBooked ? "booked" : selectedClass.status
+                            ].message
+                          }
+                        </Chip>
+                      </div>
+                    </ModalHeader>
+                    <ModalBody>
+                      <div className="flex flex-col gap-y-2.5">
+                        <div className="flex flex-row items-center gap-2.5">
+                          <MdOutlineCalendarMonth size={24} color={"#1F4776"} />
+                          <p className="text-a-black">
+                            {format(selectedClass.date, "d/MM/y HH:mm (EEE)")}
+                          </p>
+                        </div>
+                        <div className="flex flex-row items-center gap-2.5">
+                          <MdOutlineLocationOn size={24} color={"#1F4776"} />
+                          <p className="text-a-black">
+                            UTown Gym Aerobics Studio
+                          </p>
+                        </div>
+                        <div className="flex flex-row items-center gap-2.5">
+                          <MdPersonOutline size={24} color={"#1F4776"} />
+                          <p className="text-a-black">Alpha Fitness</p>
+                        </div>
+                      </div>
+                      <div>
+                        <p className="text-a-black">
+                          {selectedClass.description}
+                        </p>
+                      </div>
+                    </ModalBody>
+                    <ModalFooter>
+                      <div className="flex justify-end">
+                        {tab == "schedule" ? (
+                          <>
+                            {!isBooked && selectedClass.status == "open" ? (
+                              <button
+                                onClick={bookClass}
+                                className="rounded-[30px] px-[20px] py-[10px] bg-a-navy text-white cursor-pointer"
+                              >
+                                Book class
+                              </button>
+                            ) : (
+                              <></>
+                            )}
+                          </>
+                        ) : (
+                          <Tooltip
+                            content="Classes can only be cancelled 12 hours before"
+                            isDisabled={isCancel}
+                          >
+                            <button
+                              onClick={unbookClass}
+                              disabled={!isCancel}
+                              className={clsx(
+                                "rounded-[30px] px-[20px] py-[10px]",
+                                {
+                                  "bg-a-red text-white cursor-pointer":
+                                    isCancel,
+                                  "bg-a-red/10 text-a-red cursor-not-allowed":
+                                    !isCancel,
+                                }
+                              )}
+                            >
+                              Unbook class
+                            </button>
+                          </Tooltip>
+                        )}
+                      </div>
+                    </ModalFooter>
+                  </>
+                ) : (
+                  <></>
+                )}
+                {modalType == "loading" ? (
                   <ModalBody>
-                    <div className="flex flex-col gap-y-2.5">
-                      <div className="flex flex-row items-center gap-2.5">
-                        <MdOutlineCalendarMonth size={24} color={"#1F4776"} />
-                        <p className="text-a-black">
-                          {format(selectedClass.date, "d/MM/y HH:mm (EEE)")}
-                        </p>
-                      </div>
-                      <div className="flex flex-row items-center gap-2.5">
-                        <MdOutlineLocationOn size={24} color={"#1F4776"} />
-                        <p className="text-a-black">
-                          UTown Gym Aerobics Studio
-                        </p>
-                      </div>
-                      <div className="flex flex-row items-center gap-2.5">
-                        <MdPersonOutline size={24} color={"#1F4776"} />
-                        <p className="text-a-black">Alpha Fitness</p>
-                      </div>
-                    </div>
-                    <div>
+                    <div className="flex flex-col items-center justify-center gap-y-5 p-20">
+                      <Spinner color="primary" size="lg" />
                       <p className="text-a-black">
-                        {selectedClass.description}
+                        {tab == "schedule"
+                          ? "Booking your class..."
+                          : "Cancelling your booking..."}
                       </p>
                     </div>
                   </ModalBody>
-                  <ModalFooter>
-                    <div className="flex justify-end">
-                      {tab == "schedule" ? (
-                        <>
-                          {!isBooked && selectedClass.status == "open" ? (
-                            <button
-                              onClick={bookClass}
-                              className="rounded-[30px] px-[20px] py-[10px] bg-a-navy text-white cursor-pointer"
-                            >
-                              Book class
-                            </button>
-                          ) : (
-                            <></>
-                          )}
-                        </>
+                ) : (
+                  <></>
+                )}
+                {modalType == "result" ? (
+                  <ModalBody>
+                    <div className="flex flex-col items-center justify-center gap-y-2.5 p-10">
+                      {result.isSuccess ? (
+                        <MdCheckCircleOutline size={84} color={"#2A9E2F"} />
                       ) : (
-                        <Tooltip
-                          content="Classes can only be cancelled 12 hours before"
-                          isDisabled={isCancel}
-                        >
-                          <button
-                            onClick={unbookClass}
-                            disabled={!isCancel}
-                            className={clsx(
-                              "rounded-[30px] px-[20px] py-[10px]",
-                              {
-                                "bg-a-red text-white cursor-pointer": isCancel,
-                                "bg-a-red/10 text-a-red cursor-not-allowed":
-                                  !isCancel,
-                              }
-                            )}
-                          >
-                            Unbook class
-                          </button>
-                        </Tooltip>
+                        <MdOutlineCancel size={84} color={"#9E2A2A"} />
                       )}
+                      <SectionTitle title={result.header} />
+                      <p className="text-a-black">{result.message}</p>
                     </div>
-                  </ModalFooter>
-                </>
-              ) : (
-                <></>
-              )}
-              {modalType == "loading" ? (
-                <ModalBody>
-                  <div className="flex flex-col items-center justify-center gap-y-5 p-20">
-                    <Spinner color="primary" size="lg" />
-                    <p className="text-a-black">
-                      {tab == "schedule"
-                        ? "Booking your class..."
-                        : "Cancelling your booking..."}
-                    </p>
-                  </div>
-                </ModalBody>
-              ) : (
-                <></>
-              )}
-              {modalType == "result" ? (
-                <ModalBody>
-                  <div className="flex flex-col items-center justify-center gap-y-2.5 p-10">
-                    {result.isSuccess ? (
-                      <MdCheckCircleOutline size={84} color={"#2A9E2F"} />
-                    ) : (
-                      <MdOutlineCancel size={84} color={"#9E2A2A"} />
-                    )}
-                    <SectionTitle title={result.header} />
-                    <p className="text-a-black">{result.message}</p>
-                  </div>
-                </ModalBody>
-              ) : (
-                <></>
-              )}
-            </>
-          );
-        }}
-      </ModalContent>
-    </Modal>
+                  </ModalBody>
+                ) : (
+                  <></>
+                )}
+              </>
+            );
+          }}
+        </ModalContent>
+      </Modal>
+      {showToast ? (
+        <div onClick={toggleShowToast}>
+          <Toast
+            isSuccess={toast.isSuccess}
+            header={toast.header}
+            message={toast.message}
+          />
+        </div>
+      ) : (
+        <></>
+      )}
+    </>
   );
 }
 

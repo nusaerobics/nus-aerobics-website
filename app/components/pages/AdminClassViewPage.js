@@ -81,6 +81,12 @@ export default function AdminClassViewPage({ classId }) {
         const data = await res.json();
         setSelectedClass(data);
       } catch (error) {
+        setToast({
+          isSuccess: false,
+          header: "Unable to get class",
+          message: `Unable to get class ${classId}. Try again later.`,
+        });
+        setShowToast(true);
         console.log(error);
       }
     };
@@ -98,6 +104,12 @@ export default function AdminClassViewPage({ classId }) {
         const data = await res.json();
         setBookings(data);
       } catch (error) {
+        setToast({
+          isSuccess: false,
+          header: "Unable to get bookings for class",
+          message: `Unable to get bookings for class ${classId}. Try again later.`,
+        });
+        setShowToast(true);
         console.log(error);
       }
     };
@@ -217,6 +229,12 @@ export default function AdminClassViewPage({ classId }) {
           const data = await res.json();
           setBookings(data);
         } catch (error) {
+          setToast({
+            isSuccess: false,
+            header: "Unable to get updated bookings for class",
+            message: `Unable to get updated bookings for class ${classId}. Try again later.`,
+          });
+          setShowToast(true);
           console.log(error);
         }
       };

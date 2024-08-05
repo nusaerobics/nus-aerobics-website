@@ -17,19 +17,26 @@ import PropTypes from "prop-types";
 import { fromZonedTime, toZonedTime } from "date-fns-tz";
 import { useRouter } from "next/navigation";
 import { format } from "date-fns";
+import Toast from "../Toast";
 
 export default function DashboardPage({ session }) {
   const router = useRouter();
 
   const [isAdmin, setIsAdmin] = useState(false);
   const [transactions, setTransactions] = useState([]);
-  const [balance, setBalance] = useState(0);  // NTH TODO: Need to fix this so that it can be more seamless in rendering after refund/book/deposits occur
+  const [balance, setBalance] = useState(0); // NTH TODO: Need to fix this so that it can be more seamless in rendering after refund/book/deposits occur
   const [bookings, setBookings] = useState([]);
   const [classes, setClasses] = useState([]);
   const [deposits, setDeposits] = useState(0); // Total number of Transaction amounts which are deposits
   const [creditsUnused, setCreditsUnused] = useState(0);
   const [members, setMembers] = useState(0); // Total number of Users
   const [slotsBooked, setSlotsBooked] = useState(0); // Total number of Bookings
+  const [showToast, setShowToast] = useState(false);
+  const [toast, setToast] = useState({});
+
+  const toggleShowToast = () => {
+    setShowToast(!showToast);
+  };
 
   useEffect(() => {
     // NOTE: Doing this so that the balance can be updated
@@ -40,11 +47,19 @@ export default function DashboardPage({ session }) {
       try {
         const res = await fetch(`/api/users?id=${session.userId}`);
         if (!res.ok) {
-          throw new Error(`Unable to get user ${session.userId}: ${res.status}`);
+          throw new Error(
+            `Unable to get user ${session.userId}: ${res.status}`
+          );
         }
         const data = await res.json();
         setBalance(data.balance);
       } catch (error) {
+        setToast({
+          isSuccess: false,
+          header: "Unable to get user",
+          message: `Unable to get user ${session.userId}. Try again later.`,
+        });
+        setShowToast(true);
         console.log(error);
       }
     };
@@ -62,6 +77,12 @@ export default function DashboardPage({ session }) {
           const data = await res.json();
           setClasses(data);
         } catch (error) {
+          setToast({
+            isSuccess: false,
+            header: "Unable to get classes",
+            message: `Unable to get classes. Try again later.`,
+          });
+          setShowToast(true);
           console.log(error);
         }
       };
@@ -76,6 +97,12 @@ export default function DashboardPage({ session }) {
           const data = await res.json();
           setDeposits(data);
         } catch (error) {
+          setToast({
+            isSuccess: false,
+            header: "Unable to count deposits",
+            message: `Unable to count deposits. Try again later.`,
+          });
+          setShowToast(true);
           console.log(error);
         }
       };
@@ -90,6 +117,12 @@ export default function DashboardPage({ session }) {
           const data = await res.json();
           setMembers(data);
         } catch (error) {
+          setToast({
+            isSuccess: false,
+            header: "Unable to count members",
+            message: `Unable to count members. Try again later.`,
+          });
+          setShowToast(true);
           console.log(error);
         }
       };
@@ -104,6 +137,12 @@ export default function DashboardPage({ session }) {
           const data = await res.json();
           setCreditsUnused(data);
         } catch (error) {
+          setToast({
+            isSuccess: false,
+            header: "Unable to count users' credits",
+            message: `Unable to count users' credits. Try again later.`,
+          });
+          setShowToast(true);
           console.log(error);
         }
       };
@@ -118,6 +157,12 @@ export default function DashboardPage({ session }) {
           const data = await res.json();
           setSlotsBooked(data);
         } catch (error) {
+          setToast({
+            isSuccess: false,
+            header: "Unable to count bookings",
+            message: `Unable to count bookings. Try again later.`,
+          });
+          setShowToast(true);
           console.log(error);
         }
       };
@@ -135,6 +180,12 @@ export default function DashboardPage({ session }) {
           const recentTransactions = data.slice(-5);
           setTransactions(recentTransactions);
         } catch (error) {
+          setToast({
+            isSuccess: false,
+            header: "Unable to get transactions for user",
+            message: `Unable to get transactions for user ${session.userId}. Try again later.`,
+          });
+          setShowToast(true);
           console.log(error);
         }
       };
@@ -164,6 +215,12 @@ export default function DashboardPage({ session }) {
             .slice(0, 3);
           setBookings(upcomingBookings);
         } catch (error) {
+          setToast({
+            isSuccess: false,
+            header: "Unable to get bookings",
+            message: `Unable to get bookings for user ${session.userId}. Try again later.`,
+          });
+          setShowToast(true);
           console.log(error);
         }
       };
@@ -289,6 +346,17 @@ export default function DashboardPage({ session }) {
             </div>
           </div>
         </div>
+      )}
+      {showToast ? (
+        <div onClick={toggleShowToast}>
+          <Toast
+            isSuccess={toast.isSuccess}
+            header={toast.header}
+            message={toast.message}
+          />
+        </div>
+      ) : (
+        <></>
       )}
     </>
   );

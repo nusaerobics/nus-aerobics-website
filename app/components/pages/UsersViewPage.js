@@ -49,6 +49,12 @@ export default function UsersViewPage({ userId }) {
         const data = await res.json();
         setUser(data);
       } catch (error) {
+        setToast({
+          isSuccess: false,
+          header: "Unable to get user",
+          message: `Unable to get user ${userId} Try again later.`,
+        });
+        setShowToast(true);
         console.log(error);
       }
     };
@@ -66,6 +72,12 @@ export default function UsersViewPage({ userId }) {
         const data = await res.json();
         setBookings(data);
       } catch (error) {
+        setToast({
+          isSuccess: false,
+          header: "Unable to get bookings",
+          message: `Unable to get bookings for user ${userId}. Try again later.`,
+        });
+        setShowToast(true);
         console.log(error);
       }
     };
