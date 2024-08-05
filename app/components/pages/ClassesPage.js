@@ -7,7 +7,7 @@ import AdminClassCreatePage from "./AdminClassCreatePage";
 import AdminClassLandingPage from "./AdminClassLandingPage";
 import UserClassLandingPage from "./UserClassLandingPage";
 
-export default function ClassesPage({ user }) {
+export default function ClassesPage({ session }) {
   const [isAdmin, setIsAdmin] = useState(false);
   const [isCreateClass, setIsCreateClass] = useState(false);
 
@@ -20,10 +20,10 @@ export default function ClassesPage({ user }) {
   };
 
   useEffect(() => {
-    const permission = user.permission;
+    const permission = session.permission;
     setIsAdmin(permission == "admin");
   });
-
+  
   return (
     <>
       {isAdmin ? (
@@ -36,7 +36,7 @@ export default function ClassesPage({ user }) {
         </div>
       ) : (
         <UserClassLandingPage
-          userId={user.id}
+          userId={session.userId}
         />
       )}
     </>
@@ -44,5 +44,5 @@ export default function ClassesPage({ user }) {
 }
 
 ClassesPage.propTypes = {
-  user: PropTypes.object,
+  session: PropTypes.object,
 };

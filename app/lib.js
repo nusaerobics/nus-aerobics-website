@@ -23,7 +23,14 @@ export async function decrypt(input) {
 
 // https://nextjs.org/docs/messages/dynamic-server-error
 export async function getSession() {
-  const session = cookies().get("session").value;
-  if (!session) return null;
-  return await decrypt(session);
+  const session = cookies().get("session");
+  if (session == undefined) return null;
+
+  const sessionValue = session.value;
+  return await decrypt(sessionValue);
+  
+  // console.log(session);
+  // const sessionValue = session.value;
+  // if (!sessionValue) return null;
+  // return await decrypt(sessionValue);
 }

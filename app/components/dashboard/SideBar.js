@@ -1,5 +1,9 @@
 "use client";
 
+import clsx from "clsx";
+import PropTypes from "prop-types";
+import { useEffect, useState } from "react";
+
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
@@ -10,8 +14,6 @@ import {
   MdWallet,
   MdGroup,
 } from "react-icons/md";
-import clsx from "clsx";
-import { useEffect, useState } from "react";
 
 const userLinks = [
   { name: "Dashboard", href: "/dashboard", icon: MdGridView },
@@ -36,11 +38,11 @@ const adminLinks = [
   { name: "Profile", href: "/dashboard/profile", icon: MdPerson },
 ];
 
-export default function SideBar({ user }) {
+export default function SideBar({ session }) {
   const router = useRouter();
 
   useEffect(() => {
-    const permission = user.permission;
+    const permission = session.permission;
     setIsAdmin(permission == "admin");
   });
   const [isAdmin, setIsAdmin] = useState(false);
@@ -52,12 +54,10 @@ export default function SideBar({ user }) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
       });
-      if (res.ok) {
-        router.push("/");
-        // router.push("/login");
-        return;
+      if (!res.ok) {
+        throw new Error("Unable to logout");
       }
-      throw new Error("Unable to logout");
+      router.push("/");
     } catch (error) {
       console.log(error);
     }
@@ -179,3 +179,7 @@ export default function SideBar({ user }) {
     </>
   );
 }
+
+SideBar.propTypes = {
+  session: PropTypes.object,
+};

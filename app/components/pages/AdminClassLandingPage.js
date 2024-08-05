@@ -100,15 +100,6 @@ export default function AdminClassLandingPage({ openCreate }) {
       });
     setPage(1);
     return Math.ceil(filteredClasses.length / rowsPerPage);
-    // if (searchInput != "") {
-    //   const classesSearch = sortedClasses.filter((c) => {
-    //     const className = c.name.toLowerCase();
-    //     const searchValue = searchInput.toLowerCase();
-    //     return className.includes(searchValue);
-    //   });
-    //   return Math.ceil(classesSearch.length / rowsPerPage);
-    // }
-    // return Math.ceil(sortedClasses.length / rowsPerPage);
   }, [sortedClasses, searchInput, filters]);
 
   const classItems = useMemo(() => {
@@ -324,6 +315,5 @@ export default function AdminClassLandingPage({ openCreate }) {
 }
 
 AdminClassLandingPage.propTypes = {
-  classes: PropTypes.array,
   openCreate: PropTypes.func,
 };
