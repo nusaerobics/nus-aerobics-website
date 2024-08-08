@@ -65,6 +65,16 @@ export default function ProfilePage({ session }) {
     setShowToast(!showToast);
   };
 
+  useEffect(() => {
+    let timer;
+    if (showToast) {
+      timer = setTimeout(() => {
+        setShowToast(false);
+      }, 5000);
+    }
+    return () => clearTimeout(timer);
+  }, [showToast]);
+
   async function saveEdit() {
     try {
       const updatedUser = { id: session.userId, name: name, email: email };

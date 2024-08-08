@@ -37,8 +37,21 @@ export default function AdminClassForm({
   const toggleShowToast = () => {
     setShowToast(!showToast);
   };
+
+  useEffect(() => {
+    let timer;
+    if (showToast) {
+      timer = setTimeout(() => {
+        setShowToast(false);
+      }, 5000);
+    }
+    return () => clearTimeout(timer);
+  }, [showToast]);
+
   const validateDate = () => {
-    const dateSchema = z.string().refine((str) => /^\d{4}-\d{2}-\d{2}$/.test(str));
+    const dateSchema = z
+      .string()
+      .refine((str) => /^\d{4}-\d{2}-\d{2}$/.test(str));
     try {
       dateSchema.parse(date);
       return true;
@@ -67,7 +80,8 @@ export default function AdminClassForm({
         setToast({
           isSuccess: false,
           header: "Unable to create class",
-          message: "Incorrect date or time format used. Follow the format YYYY-MM-DD and HH:MM.",
+          message:
+            "Incorrect date or time format used. Follow the format YYYY-MM-DD and HH:MM.",
         });
         setShowToast(true);
         return;
@@ -248,13 +262,12 @@ export default function AdminClassForm({
         />
       </div>
       {showToast ? (
-                <div onClick={toggleShowToast}>
-
-        <Toast
-          isSuccess={toast.isSuccess}
-          header={toast.header}
-          message={toast.message}
-        />
+        <div onClick={toggleShowToast}>
+          <Toast
+            isSuccess={toast.isSuccess}
+            header={toast.header}
+            message={toast.message}
+          />
         </div>
       ) : (
         <></>

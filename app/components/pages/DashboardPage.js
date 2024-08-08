@@ -17,6 +17,7 @@ import {
 import ClassCard from "../dashboard/ClassCard";
 import { tableClassNames } from "../utils/ClassNames";
 import { PageTitle, SectionTitle } from "../utils/Titles";
+import Toast from "../Toast";
 
 export default function DashboardPage({ session }) {
   const router = useRouter();
@@ -30,6 +31,22 @@ export default function DashboardPage({ session }) {
   const [creditsUnused, setCreditsUnused] = useState(0);
   const [members, setMembers] = useState(0); // Total number of Users
   const [slotsBooked, setSlotsBooked] = useState(0); // Total number of Bookings
+  const [showToast, setShowToast] = useState(false);
+  const [toast, setToast] = useState({});
+
+  const toggleShowToast = () => {
+    setShowToast(!showToast);
+  };
+
+  useEffect(() => {
+    let timer;
+    if (showToast) {
+      timer = setTimeout(() => {
+        setShowToast(false);
+      }, 5000);
+    }
+    return () => clearTimeout(timer);
+  }, [showToast]);
 
   useEffect(() => {
     const permission = session.permission;
@@ -47,6 +64,12 @@ export default function DashboardPage({ session }) {
           const data = await res.json();
           setClasses(data);
         } catch (error) {
+          setToast({
+            isSuccess: false,
+            header: "Unable to get classes",
+            message: `Unable to get classes. Try again later.`,
+          });
+          setShowToast(true);
           console.log(error);
         }
       };
@@ -61,6 +84,12 @@ export default function DashboardPage({ session }) {
           const data = await res.json();
           setDeposits(data);
         } catch (error) {
+          setToast({
+            isSuccess: false,
+            header: "Unable to count deposits",
+            message: `Unable to count deposits. Try again later.`,
+          });
+          setShowToast(true);
           console.log(error);
         }
       };
@@ -75,6 +104,12 @@ export default function DashboardPage({ session }) {
           const data = await res.json();
           setMembers(data);
         } catch (error) {
+          setToast({
+            isSuccess: false,
+            header: "Unable to count members",
+            message: `Unable to count members. Try again later.`,
+          });
+          setShowToast(true);
           console.log(error);
         }
       };
@@ -89,6 +124,12 @@ export default function DashboardPage({ session }) {
           const data = await res.json();
           setCreditsUnused(data);
         } catch (error) {
+          setToast({
+            isSuccess: false,
+            header: "Unable to count users' credits",
+            message: `Unable to count users' credits. Try again later.`,
+          });
+          setShowToast(true);
           console.log(error);
         }
       };
@@ -103,6 +144,12 @@ export default function DashboardPage({ session }) {
           const data = await res.json();
           setSlotsBooked(data);
         } catch (error) {
+          setToast({
+            isSuccess: false,
+            header: "Unable to count bookings",
+            message: `Unable to count bookings. Try again later.`,
+          });
+          setShowToast(true);
           console.log(error);
         }
       };
@@ -136,6 +183,12 @@ export default function DashboardPage({ session }) {
           const recentTransactions = data.slice(-5);
           setTransactions(recentTransactions);
         } catch (error) {
+          setToast({
+            isSuccess: false,
+            header: "Unable to get transactions for user",
+            message: `Unable to get transactions for user ${session.userId}. Try again later.`,
+          });
+          setShowToast(true);
           console.log(error);
         }
       };
@@ -165,6 +218,12 @@ export default function DashboardPage({ session }) {
             .slice(0, 3);
           setBookings(upcomingBookings);
         } catch (error) {
+          setToast({
+            isSuccess: false,
+            header: "Unable to get bookings",
+            message: `Unable to get bookings for user ${session.userId}. Try again later.`,
+          });
+          setShowToast(true);
           console.log(error);
         }
       };
@@ -181,7 +240,7 @@ export default function DashboardPage({ session }) {
       {isAdmin ? (
         <div className="w-full h-full flex flex-col gap-y-5 p-10 pt-20 overflow-y-scroll">
           <PageTitle title="Dashboard" />
-          <div className="h-full flex flex-row gap-x-5">
+          <div className="h-full flex md:flex-row sm:flex-col gap-x-5 sm:gap-y-5">
             <div className="h-full w-2/3 flex flex-col p-5 gap-y-2.5 bg-white rounded-[20px] border border-a-black/10">
               <SectionTitle title="Today's classes" />
               {classes.length == 0 ? (
@@ -212,38 +271,48 @@ export default function DashboardPage({ session }) {
                 </>
               )}
             </div>
-            <div className="h-full w-1/3 flex flex-col gap-y-5">
+            <div className="h-full md:w-1/3 w-1/2 flex flex-col gap-y-5">
               <div className="h-1/4 flex flex-col justify-center p-5 bg-white rounded-[20px] border border-a-black/10">
                 <div className="flex flex-row items-end gap-x-1">
-                  <p className="font-poppins font-bold text-a-navy text-3xl">
+                  <p className="font-poppins font-bold text-a-navy md:text-3xl sm:text-2xl">
                     {deposits}
                   </p>
-                  <p className="font-bold text-a-navy text-xl">/ 3000</p>
+                  <p className="font-bold text-a-navy md:text-xl sm:text-lg">
+                    / 3000
+                  </p>
                 </div>
-                <p className="font-poppins text-a-navy text-xl">deposits</p>
+                <p className="font-poppins text-a-navy md:text-xl sm:text-base">
+                  deposits
+                </p>
               </div>
               <div className="h-1/4 flex flex-col justify-center p-5 bg-white rounded-[20px] border border-a-black/10">
-                <p className="font-poppins font-bold text-a-navy text-3xl">
+                <p className="font-poppins font-bold text-a-navy md:text-3xl sm:text-2xl">
                   {creditsUnused}
                 </p>
-                <p className="font-poppins text-a-navy text-xl">
+                <p className="font-poppins text-a-navy md:text-xl sm:text-lg">
                   credits unused
                 </p>
               </div>
               <div className="h-1/4 flex flex-col justify-center p-5 bg-white rounded-[20px] border border-a-black/10">
                 <div className="flex flex-row items-end gap-x-1">
-                  <p className="font-poppins font-bold text-a-navy text-3xl">
+                  <p className="font-poppins font-bold text-a-navy md:text-3xl sm:text-2xl">
                     {slotsBooked}
                   </p>
-                  <p className="font-bold text-a-navy text-xl">/ 2850</p>
+                  <p className="font-bold text-a-navy md:text-xl sm:text-lg">
+                    / 2850
+                  </p>
                 </div>
-                <p className="font-poppins text-a-navy text-xl">slots booked</p>
+                <p className="font-poppins text-a-navy md:text-xl sm:text-lg">
+                  slots booked
+                </p>
               </div>
               <div className="h-1/4 flex flex-col justify-center p-5 bg-white rounded-[20px] border border-a-black/10">
-                <p className="font-poppins font-bold text-a-navy text-3xl">
+                <p className="font-poppins font-bold text-a-navy md:text-3xl sm:text-2xl">
                   {members}
                 </p>
-                <p className="font-poppins text-a-navy text-xl">members</p>
+                <p className="font-poppins text-a-navy md:text-xl sm:text-lg">
+                  members
+                </p>
               </div>
             </div>
           </div>
@@ -251,19 +320,19 @@ export default function DashboardPage({ session }) {
       ) : (
         <div className="h-full flex flex-col gap-y-5 p-10 pt-20 overflow-y-scroll">
           <PageTitle title="Dashboard" />
-          <div className="h-full flex flex-row gap-x-5">
+          <div className="h-full flex md:flex-row sm:flex-col gap-x-5 sm:gap-y-5">
             <div className="h-full w-2/3 flex flex-col p-5 gap-y-2.5 bg-white rounded-[20px] border border-a-black/10">
               <SectionTitle title="Upcoming classes" />
               {bookings.map((booking) => {
                 return <ClassCard key={booking.id} booking={booking} />;
               })}
             </div>
-            <div className="h-full w-1/3 flex flex-col gap-y-5">
+            <div className="h-full md:w-1/3 w-1/2 flex flex-col gap-y-5">
               <div className="h-1/4 flex flex-col justify-center p-5 bg-white rounded-[20px] border border-a-black/10">
-                <p className="font-poppins font-bold text-a-navy text-5xl">
+                <p className="font-poppins font-bold text-a-navy md:text-5xl sm:text-3xl">
                   {balance}
                 </p>
-                <p className="font-poppins text-a-navy text-2xl">
+                <p className="font-poppins text-a-navy md:text-2xl sm:text-lg">
                   credits remaining
                 </p>
               </div>
@@ -289,6 +358,17 @@ export default function DashboardPage({ session }) {
             </div>
           </div>
         </div>
+      )}
+      {showToast ? (
+        <div onClick={toggleShowToast}>
+          <Toast
+            isSuccess={toast.isSuccess}
+            header={toast.header}
+            message={toast.message}
+          />
+        </div>
+      ) : (
+        <></>
       )}
     </>
   );

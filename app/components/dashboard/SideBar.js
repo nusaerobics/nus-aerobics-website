@@ -14,6 +14,7 @@ import {
   MdWallet,
   MdGroup,
 } from "react-icons/md";
+import Toast from "../Toast";
 
 const userLinks = [
   { name: "Dashboard", href: "/dashboard", icon: MdGridView },
@@ -40,6 +41,21 @@ const adminLinks = [
 
 export default function SideBar({ session }) {
   const router = useRouter();
+  const [showToast, setShowToast] = useState(false);
+  const [toast, setToast] = useState({});
+  const toggleShowToast = () => {
+    setShowToast(!showToast);
+  };
+
+  useEffect(() => {
+    let timer;
+    if (showToast) {
+      timer = setTimeout(() => {
+        setShowToast(false);
+      }, 5000);
+    }
+    return () => clearTimeout(timer);
+  }, [showToast]);
 
   useEffect(() => {
     const permission = session.permission;
@@ -59,6 +75,12 @@ export default function SideBar({ session }) {
       }
       router.push("/");
     } catch (error) {
+      setToast({
+        isSuccess: false,
+        header: "Unable to logout",
+        message: `Unable to logout. Try again later.`,
+      });
+      setShowToast(true);
       console.log(error);
     }
   }
@@ -175,6 +197,17 @@ export default function SideBar({ session }) {
             </Link>
           </div>
         </div>
+      )}
+      {showToast ? (
+        <div onClick={toggleShowToast}>
+          <Toast
+            isSuccess={toast.isSuccess}
+            header={toast.header}
+            message={toast.message}
+          />
+        </div>
+      ) : (
+        <></>
       )}
     </>
   );

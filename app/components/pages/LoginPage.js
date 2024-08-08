@@ -194,7 +194,7 @@ export default function Page() {
     if (showToast) {
       timer = setTimeout(() => {
         setShowToast(false);
-      }, 8000);
+      }, 5000);
     }
     return () => clearTimeout(timer);
   }, [showToast]);
