@@ -14,8 +14,6 @@ import {
   MdWallet,
   MdGroup,
 } from "react-icons/md";
-import clsx from "clsx";
-import { useEffect, useState } from "react";
 import Toast from "../Toast";
 
 const userLinks = [
