@@ -1,31 +1,31 @@
 export const chipClassNames = {
   open: {
     base: ["bg-a-green/10"],
-    content: ["text-a-green"],
+    content: ["text-xs md:text-sm text-a-green"],
   },
   full: {
     base: ["bg-a-red/10"],
-    content: ["text-a-red"],
+    content: ["text-xs md:text-sm text-a-red"],
   },
   closed: {
     base: ["bg-a-black/10"],
-    content: ["text-a-black"],
+    content: ["text-xs md:text-sm text-a-black"],
   },
   booked: {
     base: ["bg-a-navy/10"],
-    content: ["text-a-navy"],
+    content: ["text-xs md:text-sm text-a-navy"],
   },
 };
 
 export const chipTypes = {
   open: {
-    message: "Open for booking",
+    message: "Open",
   },
   full: {
-    message: "Fully booked",
+    message: "Full",
   },
   closed: {
-    message: "Closed for booking",
+    message: "Closed",
   },
   booked: {
     message: "Booked",
@@ -34,9 +34,9 @@ export const chipTypes = {
 
 export const inputClassNames = {
   label: [
-    "text-sm text-a-black/50 group-data-[filled-within=true]:text-a-black/50",
+    "text-xs md:text-sm text-a-black/50 group-data-[filled-within=true]:text-a-black/50",
   ],
-  input: "bg-transparent text-sm text-a-black",
+  input: "bg-transparent text-xs md:text-sm text-a-black",
   innerWrapper: ["bg-transparent", "hover:bg-transparent"],
   inputWrapper: [
     "bg-transparent",
@@ -59,11 +59,12 @@ export const switchClassNames = {
 };
 
 export const tableClassNames = {
-  th: ["bg-white", "font-normal", "text-a-black/50", "text-sm", "border-b"],
+  th: ["bg-white", "font-normal", "text-a-black/50", "text-xs md:text-sm", "border-b"],
   td: [
     "font-normal",
+    "trunate",
     "text-a-black",
-    "text-sm",
+    "text-xs md:text-sm",
     // changing the rows border radius
     // first
     "group-data-[first=true]:first:before:rounded-none",

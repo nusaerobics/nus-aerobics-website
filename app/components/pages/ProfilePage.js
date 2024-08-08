@@ -151,16 +151,16 @@ export default function ProfilePage({ session }) {
 
   return (
     <>
-      <div className="flex flex-col gap-y-5 p-10 pt-20 overflow-y-scroll">
+      <div className="w-full h-full flex flex-col gap-y-5 p-10 pt-20 overflow-y-scroll">
         <PageTitle title="Profile" />
-        <div className="h-1/2 flex flex-col rounded-[20px] border border-a-black/10 p-5 bg-white gap-y-2.5">
+        <div className="flex flex-col rounded-[20px] border border-a-black/10 p-5 bg-white gap-y-2.5">
           <div className="flex flex-row justify-between items-center gap-x-2.5">
             <SectionTitle title="User details" />
             <div className="flex flex-row gap-x-2.5">
               {isEdit ? (
                 <button
                   onClick={toggleIsEdit}
-                  className="h-[36px] rounded-[30px] px-[20px] bg-a-navy/10 text-a-navy text-sm cursor-pointer"
+                  className="rounded-[30px] px-[10px] md:px-[20px] bg-a-navy/10 text-a-navy text-xs md:text-sm cursor-pointer"
                 >
                   Cancel
                 </button>
@@ -170,17 +170,20 @@ export default function ProfilePage({ session }) {
               <button
                 onClick={isEdit ? saveEdit : toggleIsEdit}
                 disabled={isReset}
-                className={clsx("h-[36px] rounded-[30px] px-[20px] text-sm", {
-                  "bg-a-navy text-white cursor-pointer": !isReset,
-                  "bg-a-navy/20 text-white cursor-not-allowed": isReset,
-                })}
+                className={clsx(
+                  "rounded-[30px] px-[10px] md:px-[20px] py-[10px] text-xs md:text-sm text-white",
+                  {
+                    "bg-a-navy  cursor-pointer": !isReset,
+                    "bg-a-navy/20  cursor-not-allowed": isReset,
+                  }
+                )}
               >
                 {isEdit ? "Save changes" : "Edit user"}
               </button>
             </div>
           </div>
           <div className="flex flex-col gap-y-2.5 w-[265px]">
-            <p className="text-a-black/50 text-sm">Full name</p>
+            <p className="text-a-black/50 text-xs md:text-sm">Full name</p>
             <Input
               value={name}
               onValueChange={setName}
@@ -190,30 +193,26 @@ export default function ProfilePage({ session }) {
               classNames={inputClassNames}
             />
           </div>
-          <div className="flex flex-col gap-y-2.5 items-start">
-            <p className="text-a-black/50 text-sm">Email</p>
-            <div className="flex flex-row gap-x-2.5">
-              <div className="w-[265px]">
-                <Input
-                  value={email}
-                  onValueChange={setEmail}
-                  isDisabled={!isEdit}
-                  variant="bordered"
-                  size="xs"
-                  classNames={inputClassNames}
-                />
-              </div>
-            </div>
+          <div className="flex flex-col gap-y-2.5 w-[265px]">
+            <p className="text-a-black/50 text-xs md:text-sm">Email</p>
+            <Input
+              value={email}
+              onValueChange={setEmail}
+              isDisabled={!isEdit}
+              variant="bordered"
+              size="xs"
+              classNames={inputClassNames}
+            />
           </div>
         </div>
-        <div className="h-1/2 flex flex-col rounded-[20px] border border-a-black/10 p-5 bg-white gap-y-2.5">
+        <div className="flex flex-col rounded-[20px] border border-a-black/10 p-5 bg-white gap-y-2.5">
           <div className="flex flex-row justify-between items-center gap-x-2.5">
             <SectionTitle title="Change password" />
             <div className="flex flex-row gap-x-2.5">
               {isReset ? (
                 <button
                   onClick={toggleIsReset}
-                  className="h-[36px] rounded-[30px] px-[20px] bg-a-navy/10 text-a-navy text-sm cursor-pointer"
+                  className="rounded-[30px] px-[20px] bg-a-navy/10 text-a-navy text-xs md:text-sm cursor-pointer"
                 >
                   Cancel
                 </button>
@@ -223,18 +222,22 @@ export default function ProfilePage({ session }) {
               <button
                 onClick={isReset ? resetPassword : toggleIsReset}
                 disabled={isEdit}
-                className={clsx("h-[36px] rounded-[30px] px-[20px] text-sm", {
-                  "bg-a-navy text-white cursor-pointer": !isEdit,
-                  "bg-a-navy/20 text-white cursor-not-allowed": isEdit,
-                })}
+                className={clsx(
+                  "rounded-[30px] px-[10px] md:px-[20px] py-[10px] text-xs md:text-sm text-white whitespace-nowrap",
+                  {
+                    "bg-a-navy cursor-pointer": !isEdit,
+                    "bg-a-navy/20 cursor-not-allowed": isEdit,
+                  }
+                )}
               >
                 {isReset ? "Save changes" : "Reset password"}
               </button>
             </div>
           </div>
-
           <div className="flex flex-col gap-y-2.5 w-[265px]">
-            <p className="text-a-black/50 text-sm">Current password</p>
+            <p className="text-a-black/50 text-xs md:text-sm">
+              Current password
+            </p>
             <Input
               value={currentPW}
               onValueChange={setCurrentPW}
@@ -258,9 +261,9 @@ export default function ProfilePage({ session }) {
               classNames={inputClassNames}
             />
           </div>
-          <div className="flex flex-row gap-x-2.5">
+          <div className="flex flex-col md:flex-row gap-x-2.5 gap-y-2.5">
             <div className="flex flex-col gap-y-2.5 w-[265px]">
-              <p className="text-a-black/50 text-sm">New password</p>
+              <p className="text-a-black/50 text-xs md:text-sm">New password</p>
               <Input
                 value={newPW}
                 onValueChange={setNewPW}
@@ -285,7 +288,9 @@ export default function ProfilePage({ session }) {
               />
             </div>
             <div className="flex flex-col gap-y-2.5 w-[265px]">
-              <p className="text-a-black/50 text-sm">Confirm password</p>
+              <p className="text-a-black/50 text-xs md:text-sm">
+                Confirm password
+              </p>
               <Input
                 value={confirmPW}
                 onValueChange={setConfirmPW}
