@@ -1,5 +1,11 @@
 "use client";
 
+import { format } from "date-fns";
+import { fromZonedTime, toZonedTime } from "date-fns-tz";
+import PropTypes from "prop-types";
+import { useEffect, useState } from "react";
+
+import { useRouter } from "next/navigation";
 import {
   Table,
   TableHeader,
@@ -11,12 +17,6 @@ import {
 import ClassCard from "../dashboard/ClassCard";
 import { tableClassNames } from "../utils/ClassNames";
 import { PageTitle, SectionTitle } from "../utils/Titles";
-
-import { useEffect, useState } from "react";
-import PropTypes from "prop-types";
-import { fromZonedTime, toZonedTime } from "date-fns-tz";
-import { useRouter } from "next/navigation";
-import { format } from "date-fns";
 import Toast from "../Toast";
 
 export default function DashboardPage({ session }) {
@@ -49,32 +49,9 @@ export default function DashboardPage({ session }) {
   }, [showToast]);
 
   useEffect(() => {
-    // NOTE: Doing this so that the balance can be updated
     const permission = session.permission;
     setIsAdmin(permission == "admin");
-
-    const fetchBalance = async () => {
-      try {
-        const res = await fetch(`/api/users?id=${session.userId}`);
-        if (!res.ok) {
-          throw new Error(
-            `Unable to get user ${session.userId}: ${res.status}`
-          );
-        }
-        const data = await res.json();
-        setBalance(data.balance);
-      } catch (error) {
-        setToast({
-          isSuccess: false,
-          header: "Unable to get user",
-          message: `Unable to get user ${session.userId}. Try again later.`,
-        });
-        setShowToast(true);
-        console.log(error);
-      }
-    };
-    fetchBalance();
-  }, []);
+  });
 
   useEffect(() => {
     if (session.permission == "admin") {
@@ -178,6 +155,22 @@ export default function DashboardPage({ session }) {
       };
       countSlotsBooked();
     } else {
+      const fetchBalance = async () => {
+        try {
+          const res = await fetch(`/api/users?id=${session.userId}`);
+          if (!res.ok) {
+            throw new Error(
+              `Unable to get user ${session.userId}: ${res.status}`
+            );
+          }
+          const data = await res.json();
+          setBalance(data.balance);
+        } catch (error) {
+          console.log(error);
+        }
+      };
+      fetchBalance();
+
       const fetchTransactions = async () => {
         try {
           const res = await fetch(`/api/transactions?userId=${session.userId}`);
@@ -246,7 +239,6 @@ export default function DashboardPage({ session }) {
     <>
       {isAdmin ? (
         <div className="w-full h-full flex flex-col gap-y-5 p-10 pt-20 overflow-y-scroll">
-          {/* TODO: This page should be under app/page.js probably */}
           <PageTitle title="Dashboard" />
           <div className="h-full flex md:flex-row sm:flex-col gap-x-5 sm:gap-y-5">
             <div className="h-full w-2/3 flex flex-col p-5 gap-y-2.5 bg-white rounded-[20px] border border-a-black/10">

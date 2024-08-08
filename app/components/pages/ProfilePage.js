@@ -2,7 +2,7 @@
 
 import clsx from "clsx";
 import PropTypes from "prop-types";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { MdVisibility, MdVisibilityOff } from "react-icons/md";
 import { Input } from "@nextui-org/react";
@@ -10,12 +10,13 @@ import { PageTitle, SectionTitle } from "../utils/Titles";
 import { inputClassNames } from "../utils/ClassNames";
 import Toast from "../Toast";
 
-export default function ProfilePage({ user }) {
-  const [name, setName] = useState(user.name);
-  const [email, setEmail] = useState(user.email);
+export default function ProfilePage({ session }) {
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
   const [currentPW, setCurrentPW] = useState("");
   const [newPW, setNewPW] = useState("");
   const [confirmPW, setConfirmPW] = useState("");
+
   const [showToast, setShowToast] = useState(false);
   const [toast, setToast] = useState({});
 
@@ -25,6 +26,25 @@ export default function ProfilePage({ user }) {
 
   const [isEdit, setIsEdit] = useState(false);
   const [isReset, setIsReset] = useState(false);
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const res = await fetch(`/api/users?id=${session.userId}`);
+        if (!res.ok) {
+          throw new Error(
+            `Unable to get user ${session.userId}: ${res.status}`
+          );
+        }
+        const data = await res.json();
+        setName(data.name);
+        setEmail(data.email);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    fetchUser();
+  }, []);
 
   const toggleCurrentPW = () => {
     setIsCurrentPWVisible(!isCurrentPWVisible);
@@ -57,14 +77,14 @@ export default function ProfilePage({ user }) {
 
   async function saveEdit() {
     try {
-      const updatedUser = { id: user.id, name: name, email: email };
+      const updatedUser = { id: session.userId, name: name, email: email };
       const res = await fetch("/api/users", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(updatedUser),
       });
       if (!res.ok) {
-        throw new Error(`Unable to update user ${user.id}.`);
+        throw new Error(`Unable to update user ${session.userId}.`);
       }
       toggleIsEdit();
       setToast({
@@ -96,7 +116,7 @@ export default function ProfilePage({ user }) {
         return;
       }
       const updatedUser = {
-        id: user.id,
+        id: session.userId,
         newPassword: confirmPW,
         currentPassword: currentPW,
       };
@@ -106,7 +126,7 @@ export default function ProfilePage({ user }) {
         body: JSON.stringify(updatedUser),
       });
       if (!res.ok) {
-        throw new Error(`Unable to reset password for user ${user.id}.`);
+        throw new Error(`Unable to reset password for user ${session.userId}.`);
       }
       toggleIsReset();
       setCurrentPW("");
@@ -308,5 +328,5 @@ export default function ProfilePage({ user }) {
 }
 
 ProfilePage.propTypes = {
-  user: PropTypes.object,
+  session: PropTypes.object,
 };

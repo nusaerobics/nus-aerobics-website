@@ -56,7 +56,7 @@ export default function UserClassLandingPage({ userId }) {
         }
       : { column: "bookingDate", direction: "ascending" }
   );
-  const [filters, setFilters] = useState(new Set(["open", "upcoming"])); // "open", "upcoming"
+  const [filters, setFilters] = useState(new Set(["open", "upcoming"]));
 
   useEffect(() => {
     const fetchClasses = async () => {
@@ -149,7 +149,6 @@ export default function UserClassLandingPage({ userId }) {
         }
         return true;
       });
-    setPage(1);
     return Math.ceil(filteredClasses.length / rowsPerPage);
   }, [sortedClasses, classQ, filters]);
 
@@ -195,8 +194,6 @@ export default function UserClassLandingPage({ userId }) {
         first = a.class["date"];
         second = b.class["date"];
       }
-      console.log(a, b);
-      console.log(first, second);
       const compare = first < second ? -1 : first > second ? 1 : 0;
       return sortDescriptor.direction == "descending" ? -compare : compare;
     });

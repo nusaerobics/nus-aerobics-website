@@ -5,26 +5,21 @@ import { getSession } from "../../lib";
 import UsersPage from "../../components/pages/UsersPage";
 
 export default async function Page() {
-  let user;
+  let redirectPath;
   try {
     const session = await getSession();
     if (!session) {
-      redirect("/");
-    }
-    user = {
-      id: session.user.id,
-      name: session.user.name,
-      email: session.user.email,
-      permission: session.user.permission,
-      balance: session.user.balance,
-    }
-    if (user.permission == "normal") {
-      redirect("/dashboard");
+      redirectPath = "/";
+    } else if (session.user.permission == "normal") {
+      redirectPath = "/dashboard";
     }
   } catch (error) {
+    redirectPath = "/";
     console.log(error);
-    redirect("/");
+  } finally {
+    if (redirectPath) {
+      redirect(redirectPath);
+    }
   }
-  // TODO: return <WalletPage session={{ userId: user.id, permission: user.permission }} />;
   return <UsersPage />;
 }

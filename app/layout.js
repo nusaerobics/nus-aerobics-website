@@ -5,7 +5,7 @@ import "../styles/globals.css";
 import Providers from "./providers";
 import { noto_serif_display, poppins } from "./components/utils/Font";
 
-export default function Layout({ children, home }) {
+export default function Layout({ children }) {
   return (
     <html lang="en">
       <body>
@@ -27,3 +27,4 @@ export default function Layout({ children, home }) {
     </html>
   );
 }
+
