@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import { LinkIcon } from "@nextui-org/react";
 import {
   MdClass,
   MdGridView,
@@ -15,6 +16,7 @@ import {
   MdGroup,
 } from "react-icons/md";
 import Toast from "../Toast";
+import MobileSideBar from "./MobileSideBar";
 
 const userLinks = [
   { name: "Dashboard", href: "/dashboard", icon: MdGridView },
@@ -143,7 +145,8 @@ export default function SideBar({ session }) {
           </div>
         </div>
       ) : (
-        <div className="h-full flex flex-col py-10 px-5 gap-y-10 md:px-2">
+        // TODO: Change design to MobileSideBar
+        <div className="md:h-full flex flex-col py-2.5 md:py-10 md:px-2 md:gap-y-10">
           <img
             src="/images/logo.png"
             alt="NUS Aerobics"
@@ -151,7 +154,7 @@ export default function SideBar({ session }) {
             height="81"
             className="self-center"
           />
-          <div className="flex flex-row grow justify-between md:flex-col md:space-x-0 md:space-y-2">
+          <div className="flex flex-row px-10 md:p-0 md:grow justify-between md:flex-col md:space-x-0 md:space-y-2">
             <div className="flex flex-row md:flex-col gap-y-2.5">
               {userLinks.map((link) => {
                 const LinkIcon = link.icon;
@@ -160,7 +163,6 @@ export default function SideBar({ session }) {
                     key={link.name}
                     href={link.href}
                     className={clsx(
-                      // TODO: Fix the MD versions - for phones
                       "flex flex-row justify-center items-center gap-x-2.5 h-[50px] rounded-[10px] text-[#393E46] bg-white p-2.5 hover:bg-[#1F477610] hover:text-[#1F4776] md:flex-none md:justify-start md:p-2 md:px-3",
                       {
                         "bg-[#1F477620] text-[#1F4776]": pathname === link.href,
@@ -187,7 +189,6 @@ export default function SideBar({ session }) {
             </div>
             <Link
               href="/"
-              // href="/login"
               className="flex flex-row justify-center items-center gap-x-2.5 h-[50px] rounded-[10px] text-[#393E46] bg-white p-2.5 hover:bg-red-200 hover:text-red-500 md:flex-none md:justify-start md:p-2 md:px-3"
               style={{ textDecoration: "none" }}
               onClick={handleLogout}

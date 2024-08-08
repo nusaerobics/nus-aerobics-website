@@ -398,23 +398,23 @@ export default function ClassDetailsModal({
                       <div className="flex flex-col gap-y-2.5">
                         <div className="flex flex-row items-center gap-2.5">
                           <MdOutlineCalendarMonth size={24} color={"#1F4776"} />
-                          <p className="text-a-black">
+                          <p className="text-a-black text-sm md:text-base">
                             {format(selectedClass.date, "d/MM/y HH:mm (EEE)")}
                           </p>
                         </div>
                         <div className="flex flex-row items-center gap-2.5">
                           <MdOutlineLocationOn size={24} color={"#1F4776"} />
-                          <p className="text-a-black">
+                          <p className="text-a-black text-sm md:text-base">
                             UTown Gym Aerobics Studio
                           </p>
                         </div>
                         <div className="flex flex-row items-center gap-2.5">
                           <MdPersonOutline size={24} color={"#1F4776"} />
-                          <p className="text-a-black">Alpha Fitness</p>
+                          <p className="text-a-black text-sm md:text-base">Alpha Fitness</p>
                         </div>
                       </div>
                       <div>
-                        <p className="text-a-black">
+                        <p className="text-a-black text-sm md:text-base">
                           {selectedClass.description}
                         </p>
                       </div>
@@ -426,7 +426,7 @@ export default function ClassDetailsModal({
                             {!isBooked && selectedClass.status == "open" ? (
                               <button
                                 onClick={bookClass}
-                                className="rounded-[30px] px-[20px] py-[10px] bg-a-navy text-white cursor-pointer"
+                                className="rounded-[30px] px-[10px] md:px-[20px] py-[10px] text-xs md:text-sm bg-a-navy text-white cursor-pointer"
                               >
                                 Book class
                               </button>
@@ -443,7 +443,7 @@ export default function ClassDetailsModal({
                               onClick={unbookClass}
                               disabled={!isCancel}
                               className={clsx(
-                                "rounded-[30px] px-[20px] py-[10px]",
+                                "rounded-[30px] px-[10px] md:px-[20px] py-[10px] text-xs md:text-sm",
                                 {
                                   "bg-a-red text-white cursor-pointer":
                                     isCancel,
@@ -466,7 +466,7 @@ export default function ClassDetailsModal({
                   <ModalBody>
                     <div className="flex flex-col items-center justify-center gap-y-5 p-20">
                       <Spinner color="primary" size="lg" />
-                      <p className="text-a-black">
+                      <p className="text-a-black text-sm md:text-base">
                         {tab == "schedule"
                           ? "Booking your class..."
                           : "Cancelling your booking..."}
@@ -485,7 +485,7 @@ export default function ClassDetailsModal({
                         <MdOutlineCancel size={84} color={"#9E2A2A"} />
                       )}
                       <SectionTitle title={result.header} />
-                      <p className="text-a-black">{result.message}</p>
+                      <p className="text-a-black text-sm md:text-base">{result.message}</p>
                     </div>
                   </ModalBody>
                 ) : (

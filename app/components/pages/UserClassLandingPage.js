@@ -276,16 +276,16 @@ export default function UserClassLandingPage({ userId }) {
               title={
                 <div className="flex flex-row items-center gap-x-2">
                   <MdList />
-                  <p className="text-base">Class schedule</p>
+                  <p className="text-sm md:text-base">Class schedule</p>
                 </div>
               }
             >
-              <div className="h-full w-full flex flex-col p-2.5 gap-y-5">
+              <div className="md:h-full md:w-full flex flex-col p-2.5 gap-y-5 overflow-x-scroll">
                 <div className="flex flex-row justify-end items-center gap-x-2.5">
                   <Dropdown>
                     <DropdownTrigger>
-                      <button className="cursor-pointer">
-                        <MdOutlineFilterAlt color="#393E46" size={24} />
+                      <button className="cursor-pointer text-lg">
+                        <MdOutlineFilterAlt color="#393E46" />
                       </button>
                     </DropdownTrigger>
                     <DropdownMenu
@@ -302,7 +302,7 @@ export default function UserClassLandingPage({ userId }) {
                       </DropdownSection>
                     </DropdownMenu>
                   </Dropdown>
-                  <div className="self-end w-1/4">
+                  <div className="self-end md:w-1/4">
                     <Input
                       placeholder="Search"
                       value={classQ}
@@ -334,10 +334,10 @@ export default function UserClassLandingPage({ userId }) {
                           <TableCell>{c.name}</TableCell>
                           <TableCell>
                             <button
-                              className="cursor-pointer"
+                              className="cursor-pointer text-base md:text-lg"
                               onClick={() => selectRow(c)}
                             >
-                              <MdOpenInNew />
+                              <MdOpenInNew color="#393E46" />
                             </button>
                           </TableCell>
                           <TableCell>
@@ -372,12 +372,12 @@ export default function UserClassLandingPage({ userId }) {
               title={
                 <div className="flex flex-row items-center gap-x-2">
                   <MdList />
-                  <p className="text-base">Booked classes</p>
+                  <p className="text-sm md:text-base">Booked classes</p>
                 </div>
               }
             >
-              <div className="w-full flex flex-col p-2.5 gap-y-5">
-                <div className="self-end w-1/4">
+              <div className="md:h-full md:w-full flex flex-col p-2.5 gap-y-5 overflow-x-scroll">
+                <div className="self-end md:w-1/4">
                   <Input
                     placeholder="Search"
                     value={bookingQ}
@@ -411,10 +411,10 @@ export default function UserClassLandingPage({ userId }) {
                           <TableCell>{booking.class.name}</TableCell>
                           <TableCell>
                             <button
-                              className="cursor-pointer"
+                              className="cursor-pointer text-base md:text-lg"
                               onClick={() => selectRow(booking)}
                             >
-                              <MdOpenInNew />
+                              <MdOpenInNew color="#393E46" />
                             </button>
                           </TableCell>
                           <TableCell>
