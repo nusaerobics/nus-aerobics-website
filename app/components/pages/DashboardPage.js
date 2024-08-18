@@ -301,7 +301,7 @@ export default function DashboardPage({ session }) {
                     {slotsBooked}
                   </p>
                   <p className="font-bold text-a-navy md:text-xl sm:text-lg">
-                    / 2850
+                    / 2584
                   </p>
                 </div>
                 <p className="font-poppins text-a-navy md:text-xl sm:text-lg">
