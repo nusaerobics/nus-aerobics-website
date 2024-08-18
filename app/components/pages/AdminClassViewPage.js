@@ -396,7 +396,7 @@ export default function AdminClassViewPage({ classId }) {
 
   return (
     <>
-      <div className="w-full h-full flex flex-col gap-y-5 p-10 pt-20 overflow-y-scroll">
+      <div className="w-full h-full flex flex-col gap-y-5 p-5 md:p-10 pt-20 overflow-y-scroll">
         <div className="flex flex-row items-center gap-x-2.5">
           <button onClick={() => router.back()} className="cursor-pointer">
             <MdChevronLeft color="#1F4776" size={42} />
@@ -540,7 +540,7 @@ export default function AdminClassViewPage({ classId }) {
               )}
               {modalType == "result" ? (
                 <ModalBody>
-                  <div className="flex flex-col items-center justify-center gap-y-2.5 p-10">
+                  <div className="flex flex-col items-center justify-center gap-y-2.5 p-5 md:p-10">
                     {result.isSuccess ? (
                       <MdCheckCircleOutline size={84} color={"#2A9E2F"} />
                     ) : (
