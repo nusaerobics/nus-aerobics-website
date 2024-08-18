@@ -27,10 +27,10 @@ export default function DashboardPage({ session }) {
   const [balance, setBalance] = useState(0); // NTH TODO: Need to fix this so that it can be more seamless in rendering after refund/book/deposits occur
   const [bookings, setBookings] = useState([]);
   const [classes, setClasses] = useState([]);
-  const [deposits, setDeposits] = useState(0); // Total number of Transaction amounts which are deposits
+  const [deposits, setDeposits] = useState(0);
   const [creditsUnused, setCreditsUnused] = useState(0);
-  const [members, setMembers] = useState(0); // Total number of Users
-  const [slotsBooked, setSlotsBooked] = useState(0); // Total number of Bookings
+  const [members, setMembers] = useState(0);
+  const [slotsBooked, setSlotsBooked] = useState(0);
   const [showToast, setShowToast] = useState(false);
   const [toast, setToast] = useState({});
 
@@ -241,7 +241,7 @@ export default function DashboardPage({ session }) {
         <div className="w-full h-full flex flex-col gap-y-5 p-10 pt-20 overflow-y-scroll">
           <PageTitle title="Dashboard" />
           <div className="h-full flex md:flex-row sm:flex-col gap-x-5 sm:gap-y-5">
-            <div className="h-full w-2/3 flex flex-col p-5 gap-y-2.5 bg-white rounded-[20px] border border-a-black/10">
+            <div className="h-full w-2/3 flex flex-col p-5 gap-y-2.5 md:bg-white rounded-[20px] border border-a-black/10">
               <SectionTitle title="Today's classes" />
               {classes.length == 0 ? (
                 <p>No classes today</p>
@@ -318,25 +318,25 @@ export default function DashboardPage({ session }) {
           </div>
         </div>
       ) : (
-        <div className="h-full flex flex-col gap-y-5 p-10 pt-20 overflow-y-scroll">
+        <div className="w-full h-full flex flex-col gap-y-5 p-10 pt-20 overflow-y-scroll">
           <PageTitle title="Dashboard" />
           <div className="h-full flex md:flex-row sm:flex-col gap-x-5 sm:gap-y-5">
-            <div className="h-full w-2/3 flex flex-col p-5 gap-y-2.5 bg-white rounded-[20px] border border-a-black/10">
+            <div className="w-full md:w-2/3 flex flex-col p-5 gap-y-2.5 bg-white rounded-[20px] border border-a-black/10">
               <SectionTitle title="Upcoming classes" />
               {bookings.map((booking) => {
                 return <ClassCard key={booking.id} booking={booking} />;
               })}
             </div>
-            <div className="h-full md:w-1/3 w-1/2 flex flex-col gap-y-5">
-              <div className="h-1/4 flex flex-col justify-center p-5 bg-white rounded-[20px] border border-a-black/10">
-                <p className="font-poppins font-bold text-a-navy md:text-5xl sm:text-3xl">
+            <div className="w-full md:w-1/3 flex flex-col gap-y-5">
+              <div className="md:h-1/4 flex flex-col justify-center p-5 bg-white rounded-[20px] border border-a-black/10">
+                <p className="font-poppins font-bold text-a-navy md:text-5xl text-3xl">
                   {balance}
                 </p>
-                <p className="font-poppins text-a-navy md:text-2xl sm:text-lg">
+                <p className="font-poppins text-a-navy md:text-2xl text-base">
                   credits remaining
                 </p>
               </div>
-              <div className="h-3/4 flex flex-col p-5 bg-white rounded-[20px] border border-a-black/10">
+              <div className="md:h-3/4 flex flex-col p-5 bg-white rounded-[20px] border border-a-black/10">
                 <SectionTitle title="Recent transactions" />
                 <Table removeWrapper classNames={tableClassNames}>
                   <TableHeader>

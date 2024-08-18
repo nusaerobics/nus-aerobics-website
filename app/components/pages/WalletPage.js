@@ -353,30 +353,28 @@ export default function WalletPage({ session }) {
           </Modal>
         </div>
       ) : (
-        <div className="h-full flex flex-col gap-y-5 p-10 pt-20 overflow-y-scroll">
+        <div className="w-full h-full flex flex-col gap-y-5 p-10 pt-20 overflow-y-scroll">
           <PageTitle title="Wallet" />
           <div className="h-1/4 flex flex-row gap-x-5">
             <div className="w-1/2 rounded-[20px] border border-a-black/10 p-5 bg-white">
-              <p className="font-poppins font-bold text-a-navy text-3xl">
+              <p className="font-poppins font-bold text-a-navy text-2xl md:text-3xl">
                 {balance}
               </p>
-              <p className="font-poppins text-[#393E46] text-lg">
+              <p className="font-poppins text-a-black text-sm md:text-lg">
                 credits remaining
               </p>
             </div>
             <div className="w-1/2 rounded-[20px] border border-a-black/10 p-5 bg-white">
-              <p className="font-poppins font-bold text-a-navy text-3xl">
+              <p className="font-poppins font-bold text-a-navy text-2xl md:text-3xl">
                 {creditsSpent}
               </p>
-              <p className="font-poppins text-a-black text-lg">credits spent</p>
+              <p className="font-poppins text-a-black text-sm md:text-lg">
+                credits spent
+              </p>
             </div>
           </div>
           <div className="w-full flex flex-col rounded-[20px] border border-a-black/10 p-5 bg-white gap-y-2.5">
-            <div className="flex flex-row">
-              <div className="w-3/4">
-                <SectionTitle title="All transactions" />
-              </div>
-            </div>
+            <SectionTitle title="All transactions" />
             <Table
               removeWrapper
               classNames={tableClassNames}
