@@ -135,6 +135,22 @@ export default function UsersPage() {
         setShowToast(true);
         throw new Error(`Unable to credit user ${selectedUser.id}`);
       }
+
+      const newTransaction = {
+        userId: selectedUser.id,
+        amount: newBalance,
+        type: "deposit",
+        description: `Deposited ${credits} credit(s)`,
+      };
+      const res2 = await fetch("/api/transactions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newTransaction),
+      });
+      if (!res2.ok) {
+        throw new Error("Unable to create transaction");
+      }
+
       // Update users
       const updatedUsers = users.map((originalUser) => {
         if (originalUser.id == selectedUser.id) {
