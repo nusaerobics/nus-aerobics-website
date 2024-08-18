@@ -241,7 +241,7 @@ export default function DashboardPage({ session }) {
         <div className="w-full h-full flex flex-col gap-y-5 p-10 pt-20 overflow-y-scroll">
           <PageTitle title="Dashboard" />
           <div className="h-full flex md:flex-row sm:flex-col gap-x-5 sm:gap-y-5">
-            <div className="h-full w-2/3 flex flex-col p-5 gap-y-2.5 md:bg-white rounded-[20px] border border-a-black/10">
+            <div className="w-full md:w-2/3 flex flex-col p-5 gap-y-2.5 bg-white rounded-[20px] border border-a-black/10">
               <SectionTitle title="Today's classes" />
               {classes.length == 0 ? (
                 <p>No classes today</p>
@@ -258,6 +258,7 @@ export default function DashboardPage({ session }) {
                           <p>{format(c.date, "d/MM/y HH:mm (EEE)")}</p>
                         </div>
                         <div className="flex justify-end">
+                          {/* TODO: Check implementation */}
                           <button
                             onClick={() => handleClick(c)}
                             className="rounded-[30px] px-[20px] py-[10px] bg-a-navy text-white cursor-pointer"
@@ -271,12 +272,13 @@ export default function DashboardPage({ session }) {
                 </>
               )}
             </div>
-            <div className="h-full md:w-1/3 w-1/2 flex flex-col gap-y-5">
-              <div className="h-1/4 flex flex-col justify-center p-5 bg-white rounded-[20px] border border-a-black/10">
+            <div className="w-full md:w-1/3 flex flex-col gap-y-5">
+              <div className="md:h-1/4 flex flex-col justify-center p-5 bg-white rounded-[20px] border border-a-black/10">
                 <div className="flex flex-row items-end gap-x-1">
                   <p className="font-poppins font-bold text-a-navy md:text-3xl sm:text-2xl">
                     {deposits}
                   </p>
+                  {/* TODO: Update actual amount */}
                   <p className="font-bold text-a-navy md:text-xl sm:text-lg">
                     / 3000
                   </p>
@@ -285,7 +287,7 @@ export default function DashboardPage({ session }) {
                   deposits
                 </p>
               </div>
-              <div className="h-1/4 flex flex-col justify-center p-5 bg-white rounded-[20px] border border-a-black/10">
+              <div className="md:h-1/4 flex flex-col justify-center p-5 bg-white rounded-[20px] border border-a-black/10">
                 <p className="font-poppins font-bold text-a-navy md:text-3xl sm:text-2xl">
                   {creditsUnused}
                 </p>
@@ -293,7 +295,7 @@ export default function DashboardPage({ session }) {
                   credits unused
                 </p>
               </div>
-              <div className="h-1/4 flex flex-col justify-center p-5 bg-white rounded-[20px] border border-a-black/10">
+              <div className="md:h-1/4 flex flex-col justify-center p-5 bg-white rounded-[20px] border border-a-black/10">
                 <div className="flex flex-row items-end gap-x-1">
                   <p className="font-poppins font-bold text-a-navy md:text-3xl sm:text-2xl">
                     {slotsBooked}
@@ -306,7 +308,7 @@ export default function DashboardPage({ session }) {
                   slots booked
                 </p>
               </div>
-              <div className="h-1/4 flex flex-col justify-center p-5 bg-white rounded-[20px] border border-a-black/10">
+              <div className="md:h-1/4 flex flex-col justify-center p-5 bg-white rounded-[20px] border border-a-black/10">
                 <p className="font-poppins font-bold text-a-navy md:text-3xl sm:text-2xl">
                   {members}
                 </p>
@@ -322,10 +324,17 @@ export default function DashboardPage({ session }) {
           <PageTitle title="Dashboard" />
           <div className="h-full flex md:flex-row sm:flex-col gap-x-5 sm:gap-y-5">
             <div className="w-full md:w-2/3 flex flex-col p-5 gap-y-2.5 bg-white rounded-[20px] border border-a-black/10">
-              <SectionTitle title="Upcoming classes" />
-              {bookings.map((booking) => {
-                return <ClassCard key={booking.id} booking={booking} />;
-              })}
+              <SectionTitle title="Upcoming bookings" />
+              {/* TODO: Check */}
+              {bookings.length == 0 ? (
+                <p>No upcoming bookings</p>
+              ) : (
+                <>
+                  {bookings.map((booking) => {
+                    return <ClassCard key={booking.id} booking={booking} />;
+                  })}
+                </>
+              )}
             </div>
             <div className="w-full md:w-1/3 flex flex-col gap-y-5">
               <div className="md:h-1/4 flex flex-col justify-center p-5 bg-white rounded-[20px] border border-a-black/10">

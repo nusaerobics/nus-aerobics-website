@@ -23,7 +23,7 @@ export default function ClassesPage({ session }) {
     const permission = session.permission;
     setIsAdmin(permission == "admin");
   });
-  
+
   return (
     <>
       {isAdmin ? (
@@ -35,9 +35,7 @@ export default function ClassesPage({ session }) {
           )}
         </div>
       ) : (
-        <UserClassLandingPage
-          userId={session.userId}
-        />
+        <UserClassLandingPage userId={session.userId} />
       )}
     </>
   );
