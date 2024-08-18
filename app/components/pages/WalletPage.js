@@ -227,12 +227,12 @@ export default function WalletPage({ session }) {
         <div className="w-full h-full flex flex-col gap-y-5 p-5 md:p-10 pt-20 overflow-y-scroll">
           <div className="flex flex-row items-center justify-between">
             <PageTitle title="Wallet" />
-            <button
+            {/* <button
               onClick={onOpen}
               className="h-[36px] rounded-[30px] px-[20px] bg-a-navy text-white text-sm cursor-pointer"
             >
               Credit accounts
-            </button>
+            </button> */}
           </div>
           <div className="md:h-full md:w-full flex flex-col rounded-[20px] border border-a-black/10 p-5 bg-white gap-y-2.5">
             <div className="flex flex-row md:justify-end items-center gap-x-2.5">

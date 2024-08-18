@@ -35,8 +35,8 @@ export default function UsersViewPage({ userId }) {
   const [toast, setToast] = useState({});
   const [page, setPage] = useState(1);
   const [isEdit, setIsEdit] = useState(false);
-  const [balance, setBalance] = useState();
-  const [permission, setPermission] = useState(new Set([]));
+  // const [balance, setBalance] = useState();
+  // const [permission, setPermission] = useState(new Set([]));
 
   useEffect(() => {
     // getUser
@@ -92,10 +92,10 @@ export default function UsersViewPage({ userId }) {
     return bookings.slice(start, end);
   }, [page, bookings]);
 
-  const permissions = [
-    { key: "admin", label: "Admin" },
-    { key: "normal", label: "Normal" },
-  ];
+  // const permissions = [
+  //   { key: "admin", label: "Admin" },
+  //   { key: "normal", label: "Normal" },
+  // ];
 
   const toggleShowToast = () => {
     setShowToast(!showToast);
@@ -156,7 +156,8 @@ export default function UsersViewPage({ userId }) {
         }
 
         // 3. Update user's balance
-        const newBalance = user.balance + 1;
+        const newBalance = parseInt(user.balance) + 1;
+
         const res3 = await fetch("/api/users", {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
@@ -206,40 +207,40 @@ export default function UsersViewPage({ userId }) {
     }
   };
 
-  async function saveEdit() {
-    try {
-      // 1. Update user's account balance
-      const updatedUser = { id: userId, balance: balance };
-      const res1 = await fetch("/api/users", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(updatedUser),
-      });
-      if (!res1.ok) {
-        throw new Error(`Unable to update user ${userId}`);
-      }
+  // async function saveEdit() {
+  //   try {
+  //     // 1. Update user's account balance
+  //     const updatedUser = { id: userId, balance: balance };
+  //     const res1 = await fetch("/api/users", {
+  //       method: "PUT",
+  //       headers: { "Content-Type": "application/json" },
+  //       body: JSON.stringify(updatedUser),
+  //     });
+  //     if (!res1.ok) {
+  //       throw new Error(`Unable to update user ${userId}`);
+  //     }
 
-      // 2. Create new transaction of deposit
-      const newTransaction = {
-        userId: userId,
-        amount: balance,
-        type: "deposit",
-        description: `Deposited ${balance} credit(s)`,
-      };
-      const res2 = await fetch("/api/transactions", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(newTransaction),
-      });
-      if (!res2.ok) {
-        throw new Error("Unable to create transaction");
-      }
-      toggleIsEdit();
-      // TODO: Refresh users list in UsersPage
-    } catch (error) {
-      console.log(error);
-    }
-  }
+  //     // 2. Create new transaction of deposit
+  //     const newTransaction = {
+  //       userId: userId,
+  //       amount: balance,
+  //       type: "deposit",
+  //       description: `Deposited ${balance} credit(s)`,
+  //     };
+  //     const res2 = await fetch("/api/transactions", {
+  //       method: "POST",
+  //       headers: { "Content-Type": "application/json" },
+  //       body: JSON.stringify(newTransaction),
+  //     });
+  //     if (!res2.ok) {
+  //       throw new Error("Unable to create transaction");
+  //     }
+  //     toggleIsEdit();
+  //     // TODO: Refresh users list in UsersPage
+  //   } catch (error) {
+  //     console.log(error);
+  //   }
+  // }
 
   return (
     <>
@@ -250,10 +251,10 @@ export default function UsersViewPage({ userId }) {
           </button>
           <PageTitle title="View user" />
         </div>
-        <div className="h-full flex flex-col rounded-[20px] border border-a-black/10 p-5 bg-white gap-y-2.5">
+        <div className="flex flex-col rounded-[20px] border border-a-black/10 p-5 bg-white gap-y-2.5">
           <div className="flex flex-row justify-between">
             <SectionTitle title="User details" />
-            <div className="flex flex-row gap-x-2.5">
+            {/* <div className="flex flex-row gap-x-2.5">
               {isEdit ? (
                 <button
                   onClick={toggleIsEdit}
@@ -270,7 +271,7 @@ export default function UsersViewPage({ userId }) {
               >
                 {isEdit ? "Save" : "Edit profile"}
               </button>
-            </div>
+            </div> */}
           </div>
           <div className="flex flex-col md:flex-row gap-y-5 md:gap-x-5">
             <div className="flex flex-col gap-y-2.5 w-[265px]">
@@ -295,7 +296,7 @@ export default function UsersViewPage({ userId }) {
             </div>
           </div>
         </div>
-        <div className="h-full flex flex-col rounded-[20px] border border-a-black/10 p-5 bg-white gap-y-2.5">
+        <div className="flex flex-col rounded-[20px] border border-a-black/10 p-5 bg-white gap-y-2.5">
           <SectionTitle title="Bookings" />
           <div className="overflow-x-scroll">
             <Table removeWrapper classNames={tableClassNames}>
