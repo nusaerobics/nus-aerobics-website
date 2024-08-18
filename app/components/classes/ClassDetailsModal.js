@@ -478,7 +478,7 @@ export default function ClassDetailsModal({
                 )}
                 {modalType == "result" ? (
                   <ModalBody>
-                    <div className="flex flex-col items-center justify-center gap-y-2.5 p-10">
+                    <div className="flex flex-col items-center justify-center gap-y-2.5 p-5 md:p-10">
                       {result.isSuccess ? (
                         <MdCheckCircleOutline size={84} color={"#2A9E2F"} />
                       ) : (

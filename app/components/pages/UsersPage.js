@@ -236,7 +236,7 @@ export default function UsersPage() {
 
   return (
     <>
-      <div className="w-full h-full flex flex-col gap-y-5 p-10 pt-20 overflow-y-scroll">
+      <div className="w-full h-full flex flex-col gap-y-5 p-5 md:p-10  pt-20 overflow-y-scroll">
         <PageTitle title="Users" />
         <div className="flex flex-col rounded-[20px] border border-a-black/10 p-5 bg-white gap-y-2.5">
           <div className="md:self-end md:w-1/4">

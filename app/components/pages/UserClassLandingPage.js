@@ -262,7 +262,7 @@ export default function UserClassLandingPage({ userId }) {
 
   return (
     <>
-      <div className="w-full h-full flex flex-col gap-y-5 p-10 pt-20 overflow-y-scroll">
+      <div className="w-full h-full flex flex-col gap-y-5 p-5 md:p-10 pt-20 overflow-y-scroll">
         <PageTitle title="Classes" />
         <div className="w-full rounded-[20px] border border-a-black/10 bg-white gap-y-2.5">
           <Tabs

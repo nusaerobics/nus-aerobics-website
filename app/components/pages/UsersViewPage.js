@@ -243,7 +243,7 @@ export default function UsersViewPage({ userId }) {
 
   return (
     <>
-      <div className="h-full flex flex-col gap-y-5 p-10 pt-20 overflow-y-scroll">
+      <div className="h-full flex flex-col gap-y-5 p-5 md:p-10 pt-20 overflow-y-scroll">
         <div className="flex flex-row items-center gap-x-5">
           <button onClick={() => router.back()} className="cursor-pointer">
             <MdChevronLeft color="#1F4776" size={42} />

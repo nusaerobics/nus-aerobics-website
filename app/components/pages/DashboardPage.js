@@ -238,7 +238,7 @@ export default function DashboardPage({ session }) {
   return (
     <>
       {isAdmin ? (
-        <div className="w-full h-full flex flex-col gap-y-5 p-10 pt-20 overflow-y-scroll">
+        <div className="w-full h-full flex flex-col gap-y-5 p-5 md:p-10  pt-20 overflow-y-scroll">
           <PageTitle title="Dashboard" />
           <div className="h-full flex md:flex-row sm:flex-col gap-x-5 sm:gap-y-5">
             <div className="w-full md:w-2/3 flex flex-col p-5 gap-y-2.5 bg-white rounded-[20px] border border-a-black/10">
@@ -320,7 +320,7 @@ export default function DashboardPage({ session }) {
           </div>
         </div>
       ) : (
-        <div className="w-full h-full flex flex-col gap-y-5 p-10 pt-20 overflow-y-scroll">
+        <div className="w-full h-full flex flex-col gap-y-5 p-5 md:p-10  pt-20 overflow-y-scroll">
           <PageTitle title="Dashboard" />
           <div className="h-full flex md:flex-row sm:flex-col gap-x-5 sm:gap-y-5">
             <div className="w-full md:w-2/3 flex flex-col p-5 gap-y-2.5 bg-white rounded-[20px] border border-a-black/10">

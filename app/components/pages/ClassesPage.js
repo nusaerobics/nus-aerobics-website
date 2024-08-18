@@ -27,7 +27,7 @@ export default function ClassesPage({ session }) {
   return (
     <>
       {isAdmin ? (
-        <div className="w-full h-full flex flex-col gap-y-5 p-10 pt-20 overflow-y-scroll">
+        <div className="w-full h-full flex flex-col gap-y-5 p-5 md:p-10 pt-20 overflow-y-scroll">
           {isCreateClass ? (
             <AdminClassCreatePage closeCreate={closeCreate} />
           ) : (
