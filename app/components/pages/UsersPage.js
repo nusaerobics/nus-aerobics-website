@@ -43,7 +43,7 @@ export default function UsersPage() {
   const [users, setUsers] = useState([]);
   const [page, setPage] = useState(1);
   const [selectedUser, setSelectedUser] = useState({});
-  const [showToast, setShowToast] = useState(false); // TODO: Add in setInterval to only show Toast for X seconds
+  const [showToast, setShowToast] = useState(false);
   const [toast, setToast] = useState({});
   const [credits, setCredits] = useState(0);
   const [searchInput, setSearchInput] = useState("");

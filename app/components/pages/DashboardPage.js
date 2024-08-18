@@ -325,7 +325,6 @@ export default function DashboardPage({ session }) {
           <div className="h-full flex md:flex-row sm:flex-col gap-x-5 sm:gap-y-5">
             <div className="w-full md:w-2/3 flex flex-col p-5 gap-y-2.5 bg-white rounded-[20px] border border-a-black/10">
               <SectionTitle title="Upcoming bookings" />
-              {/* TODO: Check */}
               {bookings.length == 0 ? (
                 <p>No upcoming bookings</p>
               ) : (

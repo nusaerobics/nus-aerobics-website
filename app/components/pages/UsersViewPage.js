@@ -294,36 +294,6 @@ export default function UsersViewPage({ userId }) {
               />
             </div>
           </div>
-          {/* <div className="flex flex-row gap-x-5"> */}
-          {/* <div className="flex flex-col gap-y-2.5 w-[265px]">
-              <p className="text-a-black/50 text-sm">Balance</p>
-              <Input
-                type="number"
-                value={balance}
-                onValueChange={setBalance}
-                isDisabled={!isEdit}
-                variant="bordered"
-                size="xs"
-                classNames={inputClassNames}
-              />
-            </div> */}
-          {/* TODO: Fix the status handling */}
-          {/* <div className="flex flex-col gap-y-2.5 w-[265px]">
-              <p className="text-a-black/50 text-sm">Status</p>
-              <Select
-                isDisabled={!isEdit}
-                selectedKeys={permission}
-                onSelectionChange={setPermission}
-                defaultSelectedKeys={[user.permission]}
-              >
-                {permissions.map((permission) => {
-                  <SelectItem key={permission.key}>
-                    {permission.label}
-                  </SelectItem>;
-                })}
-              </Select>
-            </div> */}
-          {/* </div> */}
         </div>
         <div className="h-full flex flex-col rounded-[20px] border border-a-black/10 p-5 bg-white gap-y-2.5">
           <SectionTitle title="Bookings" />

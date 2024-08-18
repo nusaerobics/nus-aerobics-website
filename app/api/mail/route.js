@@ -60,7 +60,7 @@ export async function POST(request) {
       <br>Login with your temporary password and reset your password in the Profile page.
       <br><strong>Temporary password:</strong> ${details.tempPassword}
       <br>
-      <br>If you have any questions or problems, please let us know.
+      <br>If you have any questions or problems, please contact us at: aerobics@nussportsclub.org.
       <br>Kindest regards,
       <br>NUS Aerobics`;
     }
