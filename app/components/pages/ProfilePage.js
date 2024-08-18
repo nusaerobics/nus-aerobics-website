@@ -178,7 +178,7 @@ export default function ProfilePage({ session }) {
                   }
                 )}
               >
-                {isEdit ? "Save changes" : "Edit user"}
+                {isEdit ? "Save" : "Edit profile"}
               </button>
             </div>
           </div>
@@ -230,7 +230,7 @@ export default function ProfilePage({ session }) {
                   }
                 )}
               >
-                {isReset ? "Save changes" : "Reset password"}
+                {isReset ? "Save" : "Change password"}
               </button>
             </div>
           </div>

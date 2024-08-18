@@ -270,6 +270,7 @@ export default function UserClassLandingPage({ userId }) {
             selectedKey={tab}
             onSelectionChange={handleTabChange}
             classNames={tabsClassNames}
+            fullWidth
           >
             <Tab
               key="schedule"
@@ -280,7 +281,7 @@ export default function UserClassLandingPage({ userId }) {
                 </div>
               }
             >
-              <div className="md:h-full md:w-full flex flex-col p-2.5 gap-y-5 overflow-x-scroll">
+              <div className="md:h-full md:w-full flex flex-col p-2.5 gap-y-5">
                 <div className="flex flex-row justify-end items-center gap-x-2.5">
                   <Dropdown>
                     <DropdownTrigger>
@@ -313,46 +314,48 @@ export default function UserClassLandingPage({ userId }) {
                     />
                   </div>
                 </div>
-                <Table
-                  removeWrapper
-                  classNames={tableClassNames}
-                  sortDescriptor={sortDescriptor}
-                  onSortChange={setSortDescriptor}
-                >
-                  <TableHeader>
-                    <TableColumn>Class</TableColumn>
-                    <TableColumn></TableColumn>
-                    <TableColumn>Status</TableColumn>
-                    <TableColumn key="date" allowsSorting>
-                      Date
-                    </TableColumn>
-                  </TableHeader>
-                  <TableBody>
-                    {classItems.map((c) => {
-                      return (
-                        <TableRow key={c.id}>
-                          <TableCell>{c.name}</TableCell>
-                          <TableCell>
-                            <button
-                              className="cursor-pointer text-base md:text-lg"
-                              onClick={() => selectRow(c)}
-                            >
-                              <MdOpenInNew color="#393E46" />
-                            </button>
-                          </TableCell>
-                          <TableCell>
-                            <Chip classNames={chipClassNames[c.status]}>
-                              {chipTypes[c.status].message}
-                            </Chip>
-                          </TableCell>
-                          <TableCell>
-                            {format(c.date, "d/MM/y HH:mm (EEE)")}
-                          </TableCell>
-                        </TableRow>
-                      );
-                    })}
-                  </TableBody>
-                </Table>
+                <div className="overflow-x-scroll">
+                  <Table
+                    removeWrapper
+                    classNames={tableClassNames}
+                    sortDescriptor={sortDescriptor}
+                    onSortChange={setSortDescriptor}
+                  >
+                    <TableHeader>
+                      <TableColumn>Class</TableColumn>
+                      <TableColumn></TableColumn>
+                      <TableColumn>Status</TableColumn>
+                      <TableColumn key="date" allowsSorting>
+                        Date
+                      </TableColumn>
+                    </TableHeader>
+                    <TableBody>
+                      {classItems.map((c) => {
+                        return (
+                          <TableRow key={c.id}>
+                            <TableCell>{c.name}</TableCell>
+                            <TableCell>
+                              <button
+                                className="cursor-pointer text-base md:text-lg"
+                                onClick={() => selectRow(c)}
+                              >
+                                <MdOpenInNew color="#393E46" />
+                              </button>
+                            </TableCell>
+                            <TableCell>
+                              <Chip classNames={chipClassNames[c.status]}>
+                                {chipTypes[c.status].message}
+                              </Chip>
+                            </TableCell>
+                            <TableCell>
+                              {format(c.date, "d/MM/y HH:mm (EEE)")}
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
+                    </TableBody>
+                  </Table>
+                </div>
                 <div className="flex flex-row justify-center">
                   <Pagination
                     showControls

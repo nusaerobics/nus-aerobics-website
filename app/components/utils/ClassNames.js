@@ -59,7 +59,13 @@ export const switchClassNames = {
 };
 
 export const tableClassNames = {
-  th: ["bg-white", "font-normal", "text-a-black/50", "text-xs md:text-sm", "border-b"],
+  th: [
+    "bg-white",
+    "font-normal",
+    "text-a-black/50",
+    "text-xs md:text-sm",
+    "border-b",
+  ],
   td: [
     "font-normal",
     "trunate",
@@ -78,7 +84,7 @@ export const tableClassNames = {
 };
 
 export const tabsClassNames = {
-  tabList: "gap-5 w-full relative rounded-none mx-2.5 p-0",
+  tabList: "gap-5 w-full relative rounded-none mx-2.5 p-0 overflow-x-scroll",
   cursor: "w-full bg-a-black", // Horizontal indicator line
   tab: "max-w-fit px-2.5 h-12",
   tabContent: ["group-data-[selected=true]:text-a-black"], // Content of a tab

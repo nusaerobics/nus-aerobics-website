@@ -216,7 +216,7 @@ export default function AdminClassLandingPage({ openCreate }) {
       </div>
       {/* STARRED: This is how to do the pagination with overflow for 10 rows */}
       <div className="w-full flex flex-col p-5 rounded-[20px] border border-a-black/10 bg-white gap-y-2.5">
-        <div className="flex flex-row justify-end items-center gap-x-2.5">
+        <div className="flex flex-row md:justify-end items-center gap-x-2.5">
           <Dropdown>
             <DropdownTrigger>
               <button className="cursor-pointer">
@@ -237,7 +237,7 @@ export default function AdminClassLandingPage({ openCreate }) {
               </DropdownSection>
             </DropdownMenu>
           </Dropdown>
-          <div className="self-end w-1/4">
+          <div className="md:self-end md:w-1/4">
             <Input
               placeholder="Search"
               value={searchInput}
@@ -248,54 +248,58 @@ export default function AdminClassLandingPage({ openCreate }) {
             />
           </div>
         </div>
-        <Table
-          removeWrapper
-          classNames={tableClassNames}
-          sortDescriptor={sortDescriptor}
-          onSortChange={setSortDescriptor}
-        >
-          <TableHeader>
-            <TableColumn>Class</TableColumn>
-            <TableColumn>Status</TableColumn>
-            <TableColumn>Booked capacity</TableColumn>
-            <TableColumn key="date" allowsSorting>
-              Date
-            </TableColumn>
-            <TableColumn></TableColumn>
-          </TableHeader>
-          <TableBody>
-            {classItems.map((c) => {
-              return (
-                <TableRow key={c.id}>
-                  <TableCell>{c.name}</TableCell>
-                  <TableCell>
-                    <Chip classNames={chipClassNames[c.status]}>
-                      {chipTypes[c.status].message}
-                    </Chip>
-                  </TableCell>
-                  <TableCell>{`${c.bookedCapacity}/${c.maxCapacity}`}</TableCell>
-                  <TableCell>{format(c.date, "d/MM/y HH:mm (EEE)")}</TableCell>
-                  <TableCell>
-                    <Dropdown>
-                      <DropdownTrigger>
-                        <button
-                          className="cursor-pointer"
-                          onClick={() => selectRow(c)}
-                        >
-                          <MdMoreVert size={24} />
-                        </button>
-                      </DropdownTrigger>
-                      <DropdownMenu onAction={(key) => handleDropdown(key)}>
-                        <DropdownItem key="view">View class</DropdownItem>
-                        <DropdownItem key="delete">Delete class</DropdownItem>
-                      </DropdownMenu>
-                    </Dropdown>
-                  </TableCell>
-                </TableRow>
-              );
-            })}
-          </TableBody>
-        </Table>
+        <div className="overflow-x-scroll">
+          <Table
+            removeWrapper
+            classNames={tableClassNames}
+            sortDescriptor={sortDescriptor}
+            onSortChange={setSortDescriptor}
+          >
+            <TableHeader>
+              <TableColumn>Class</TableColumn>
+              <TableColumn>Status</TableColumn>
+              <TableColumn>Capacity</TableColumn>
+              <TableColumn key="date" allowsSorting>
+                Date
+              </TableColumn>
+              <TableColumn></TableColumn>
+            </TableHeader>
+            <TableBody>
+              {classItems.map((c) => {
+                return (
+                  <TableRow key={c.id}>
+                    <TableCell>{c.name}</TableCell>
+                    <TableCell>
+                      <Chip classNames={chipClassNames[c.status]}>
+                        {chipTypes[c.status].message}
+                      </Chip>
+                    </TableCell>
+                    <TableCell>{`${c.bookedCapacity}/${c.maxCapacity}`}</TableCell>
+                    <TableCell>
+                      {format(c.date, "d/MM/y HH:mm (EEE)")}
+                    </TableCell>
+                    <TableCell>
+                      <Dropdown>
+                        <DropdownTrigger>
+                          <button
+                            className="cursor-pointer"
+                            onClick={() => selectRow(c)}
+                          >
+                            <MdMoreVert size={24} />
+                          </button>
+                        </DropdownTrigger>
+                        <DropdownMenu onAction={(key) => handleDropdown(key)}>
+                          <DropdownItem key="view">View class</DropdownItem>
+                          <DropdownItem key="delete">Delete class</DropdownItem>
+                        </DropdownMenu>
+                      </Dropdown>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
+        </div>
         <div className="flex flex-row justify-center">
           <Pagination
             showControls

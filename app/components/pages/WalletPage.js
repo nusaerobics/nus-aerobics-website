@@ -229,13 +229,13 @@ export default function WalletPage({ session }) {
             <PageTitle title="Wallet" />
             <button
               onClick={onOpen}
-              className="h-[36px] rounded-[30px] px-[20px] bg-[#1F4776] text-white text-sm cursor-pointer" // PREVIOUSLY: py-[10px]
+              className="h-[36px] rounded-[30px] px-[20px] bg-a-navy text-white text-sm cursor-pointer"
             >
               Credit accounts
             </button>
           </div>
-          <div className="w-full flex flex-col rounded-[20px] border border-a-black/10 p-5 bg-white gap-y-2.5">
-            <div className="flex flex-row justify-end items-center gap-x-2.5">
+          <div className="md:h-full md:w-full flex flex-col rounded-[20px] border border-a-black/10 p-5 bg-white gap-y-2.5">
+            <div className="flex flex-row md:justify-end items-center gap-x-2.5">
               <p>{filters}</p>
               <Dropdown>
                 <DropdownTrigger>
@@ -258,7 +258,7 @@ export default function WalletPage({ session }) {
                   </DropdownSection>
                 </DropdownMenu>
               </Dropdown>
-              <div className="w-1/4">
+              <div className="md:w-1/4">
                 <Input
                   placeholder="Search"
                   value={searchInput}
@@ -269,35 +269,37 @@ export default function WalletPage({ session }) {
                 />
               </div>
             </div>
-            <Table
-              removeWrapper
-              classNames={tableClassNames}
-              sortDescriptor={sortDescriptor}
-              onSortChange={setSortDescriptor}
-            >
-              <TableHeader>
-                <TableColumn key="createdAt" allowsSorting>
-                  Date
-                </TableColumn>
-                <TableColumn>Amount</TableColumn>
-                <TableColumn>User</TableColumn>
-                <TableColumn>Description</TableColumn>
-              </TableHeader>
-              <TableBody>
-                {transactionItems.map((transaction) => {
-                  return (
-                    <TableRow key={transaction.id}>
-                      <TableCell>
-                        {format(transaction.createdAt, "d/MM/y HH:mm")}
-                      </TableCell>
-                      <TableCell>{transaction.amount}</TableCell>
-                      <TableCell>{transaction.user.name}</TableCell>
-                      <TableCell>{transaction.description}</TableCell>
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
+            <div className="overflow-x-scroll">
+              <Table
+                removeWrapper
+                classNames={tableClassNames}
+                sortDescriptor={sortDescriptor}
+                onSortChange={setSortDescriptor}
+              >
+                <TableHeader>
+                  <TableColumn key="createdAt" allowsSorting>
+                    Date
+                  </TableColumn>
+                  <TableColumn>Amount</TableColumn>
+                  <TableColumn>User</TableColumn>
+                  <TableColumn>Description</TableColumn>
+                </TableHeader>
+                <TableBody>
+                  {transactionItems.map((transaction) => {
+                    return (
+                      <TableRow key={transaction.id}>
+                        <TableCell>
+                          {format(transaction.createdAt, "d/MM/y HH:mm")}
+                        </TableCell>
+                        <TableCell>{transaction.amount}</TableCell>
+                        <TableCell>{transaction.user.name}</TableCell>
+                        <TableCell>{transaction.description}</TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </div>
             <div className="flex flex-row justify-center">
               <Pagination
                 showControls

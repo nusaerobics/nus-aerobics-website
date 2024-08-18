@@ -268,11 +268,11 @@ export default function UsersViewPage({ userId }) {
                 onClick={isEdit ? saveEdit : toggleIsEdit}
                 className="h-[36px] rounded-[30px] px-[20px] bg-a-navy text-white text-sm cursor-pointer" // PREVIOUSLY: py-[10px]
               >
-                {isEdit ? "Save changes" : "Edit user"}
+                {isEdit ? "Save" : "Edit profile"}
               </button>
             </div>
           </div>
-          <div className="flex flex-row gap-x-5">
+          <div className="flex flex-col md:flex-row gap-y-5 md:gap-x-5">
             <div className="flex flex-col gap-y-2.5 w-[265px]">
               <p className="text-a-black/50 text-sm">Full name</p>
               <Input
@@ -294,8 +294,8 @@ export default function UsersViewPage({ userId }) {
               />
             </div>
           </div>
-          <div className="flex flex-row gap-x-5">
-            <div className="flex flex-col gap-y-2.5 w-[265px]">
+          {/* <div className="flex flex-row gap-x-5"> */}
+          {/* <div className="flex flex-col gap-y-2.5 w-[265px]">
               <p className="text-a-black/50 text-sm">Balance</p>
               <Input
                 type="number"
@@ -306,9 +306,9 @@ export default function UsersViewPage({ userId }) {
                 size="xs"
                 classNames={inputClassNames}
               />
-            </div>
-            {/* TODO: Fix the status handling */}
-            <div className="flex flex-col gap-y-2.5 w-[265px]">
+            </div> */}
+          {/* TODO: Fix the status handling */}
+          {/* <div className="flex flex-col gap-y-2.5 w-[265px]">
               <p className="text-a-black/50 text-sm">Status</p>
               <Select
                 isDisabled={!isEdit}
@@ -322,52 +322,56 @@ export default function UsersViewPage({ userId }) {
                   </SelectItem>;
                 })}
               </Select>
-            </div>
-          </div>
+            </div> */}
+          {/* </div> */}
         </div>
         <div className="h-full flex flex-col rounded-[20px] border border-a-black/10 p-5 bg-white gap-y-2.5">
           <SectionTitle title="Bookings" />
-          <Table removeWrapper classNames={tableClassNames}>
-            <TableHeader>
-              <TableColumn>Class</TableColumn>
-              <TableColumn>Attendance</TableColumn>
-              <TableColumn>Class date</TableColumn>
-              <TableColumn>Booking date</TableColumn>
-              <TableColumn></TableColumn>
-            </TableHeader>
-            <TableBody>
-              {bookingItems.map((booking) => {
-                return (
-                  <TableRow key={booking.id}>
-                    <TableCell>{booking.class.name}</TableCell>
-                    <TableCell>{booking.attendance}</TableCell>
-                    <TableCell>
-                      {format(booking.class.date, "d/MM/y HH:mm (EEE)")}
-                    </TableCell>
-                    <TableCell>
-                      {format(booking.createdAt, "d/MM/y HH:mm")}
-                    </TableCell>
-                    <TableCell>
-                      <Dropdown>
-                        <DropdownTrigger>
-                          <button
-                            className="cursor-pointer"
-                            onClick={() => selectRow(booking)}
-                          >
-                            <MdMoreVert size={24} />
-                          </button>
-                        </DropdownTrigger>
-                        <DropdownMenu onAction={(key) => handleDropdown(key)}>
-                          <DropdownItem key="unbook">Unbook user</DropdownItem>
-                        </DropdownMenu>
-                      </Dropdown>
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
-              ;
-            </TableBody>
-          </Table>
+          <div className="overflow-x-scroll">
+            <Table removeWrapper classNames={tableClassNames}>
+              <TableHeader>
+                <TableColumn>Class</TableColumn>
+                <TableColumn>Attendance</TableColumn>
+                <TableColumn>Class date</TableColumn>
+                <TableColumn>Booking date</TableColumn>
+                <TableColumn></TableColumn>
+              </TableHeader>
+              <TableBody>
+                {bookingItems.map((booking) => {
+                  return (
+                    <TableRow key={booking.id}>
+                      <TableCell>{booking.class.name}</TableCell>
+                      <TableCell>{booking.attendance}</TableCell>
+                      <TableCell>
+                        {format(booking.class.date, "d/MM/y HH:mm (EEE)")}
+                      </TableCell>
+                      <TableCell>
+                        {format(booking.createdAt, "d/MM/y HH:mm")}
+                      </TableCell>
+                      <TableCell>
+                        <Dropdown>
+                          <DropdownTrigger>
+                            <button
+                              className="cursor-pointer"
+                              onClick={() => selectRow(booking)}
+                            >
+                              <MdMoreVert size={24} />
+                            </button>
+                          </DropdownTrigger>
+                          <DropdownMenu onAction={(key) => handleDropdown(key)}>
+                            <DropdownItem key="unbook">
+                              Unbook user
+                            </DropdownItem>
+                          </DropdownMenu>
+                        </Dropdown>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+                ;
+              </TableBody>
+            </Table>
+          </div>
           <div className="flex flex-row justify-center">
             <Pagination
               showControls

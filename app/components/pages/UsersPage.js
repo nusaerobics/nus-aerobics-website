@@ -239,7 +239,7 @@ export default function UsersPage() {
       <div className="w-full h-full flex flex-col gap-y-5 p-10 pt-20 overflow-y-scroll">
         <PageTitle title="Users" />
         <div className="flex flex-col rounded-[20px] border border-a-black/10 p-5 bg-white gap-y-2.5">
-          <div className="self-end w-1/4">
+          <div className="md:self-end md:w-1/4">
             <Input
               placeholder="Search"
               value={searchInput}
@@ -249,46 +249,50 @@ export default function UsersPage() {
               classNames={inputClassNames}
             />
           </div>
-          <Table removeWrapper classNames={tableClassNames}>
-            <TableHeader>
-              <TableColumn>Name</TableColumn>
-              <TableColumn>Status</TableColumn>
-              <TableColumn>Email</TableColumn>
-              <TableColumn>Wallet</TableColumn>
-              <TableColumn></TableColumn>
-            </TableHeader>
-            <TableBody>
-              {userItems.map((user) => {
-                return (
-                  <TableRow key={user.id}>
-                    <TableCell>{user.name}</TableCell>
-                    <TableCell>{user.permission}</TableCell>
-                    <TableCell>{user.email}</TableCell>
-                    <TableCell>{user.balance}</TableCell>
-                    <TableCell>
-                      <Dropdown>
-                        <DropdownTrigger>
-                          <button
-                            className="cursor-pointer"
-                            onClick={() => selectRow(user)}
-                          >
-                            <MdMoreVert size={24} />
-                          </button>
-                        </DropdownTrigger>
-                        <DropdownMenu onAction={(key) => handleDropdown(key)}>
-                          <DropdownItem key="view">View user</DropdownItem>
-                          <DropdownItem key="credit">
-                            Credit account
-                          </DropdownItem>
-                          <DropdownItem key="delete">Delete user</DropdownItem>
-                        </DropdownMenu>
-                      </Dropdown>
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
-            </TableBody>
-          </Table>
+          <div className="overflow-x-scroll">
+            <Table removeWrapper classNames={tableClassNames}>
+              <TableHeader>
+                <TableColumn>Name</TableColumn>
+                <TableColumn>Status</TableColumn>
+                <TableColumn>Email</TableColumn>
+                <TableColumn>Wallet</TableColumn>
+                <TableColumn></TableColumn>
+              </TableHeader>
+              <TableBody>
+                {userItems.map((user) => {
+                  return (
+                    <TableRow key={user.id}>
+                      <TableCell>{user.name}</TableCell>
+                      <TableCell>{user.permission}</TableCell>
+                      <TableCell>{user.email}</TableCell>
+                      <TableCell>{user.balance}</TableCell>
+                      <TableCell>
+                        <Dropdown>
+                          <DropdownTrigger>
+                            <button
+                              className="cursor-pointer"
+                              onClick={() => selectRow(user)}
+                            >
+                              <MdMoreVert size={24} />
+                            </button>
+                          </DropdownTrigger>
+                          <DropdownMenu onAction={(key) => handleDropdown(key)}>
+                            <DropdownItem key="view">View user</DropdownItem>
+                            <DropdownItem key="credit">
+                              Credit account
+                            </DropdownItem>
+                            <DropdownItem key="delete">
+                              Delete user
+                            </DropdownItem>
+                          </DropdownMenu>
+                        </Dropdown>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          </div>
           <div className="flex flex-row justify-center">
             <Pagination
               showControls
