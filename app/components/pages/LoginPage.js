@@ -56,15 +56,14 @@ export default function Page() {
         throw new Error(`Invalid values used for sign-up. Try again.`);
       }
 
-      const res = await fetch("/api/users", {
+      await fetch("/api/users", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name: name, email: email, password: password }),
       });
-      if (!res.ok) {
-        throw new Error("An internal error occurred. Try again later.");
-      }
-
+      // if (!res.ok) {
+      //   throw new Error("An internal error occurred. Try again later.");
+      // }
       handleChangeView(view);
       setName("");
       setEmail(email);

@@ -421,7 +421,7 @@ export default function AdminClassViewPage({ classId }) {
             />
           )}
         </div>
-        <div className="h-full w-full flex flex-col p-5 rounded-[20px] border border-a-black/10 bg-white gap-y-2.5">
+        <div className="md:h-full w-full flex flex-col p-5 rounded-[20px] border border-a-black/10 bg-white gap-y-2.5">
           <div className="flex flex-row justify-between">
             <SectionTitle title="Participants" />
             <button
@@ -435,6 +435,7 @@ export default function AdminClassViewPage({ classId }) {
               Add participant
             </button>
           </div>
+          <div className="overflow-x-scroll">
           <Table removeWrapper classNames={tableClassNames}>
             <TableHeader>
               <TableColumn>Name</TableColumn>
@@ -474,6 +475,7 @@ export default function AdminClassViewPage({ classId }) {
               })}
             </TableBody>
           </Table>
+          </div>
           <div className="flex flex-row justify-center">
             <Pagination
               showControls
