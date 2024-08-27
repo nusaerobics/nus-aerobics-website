@@ -266,6 +266,7 @@ export default function AdminClassLandingPage({ openCreate }) {
             </TableHeader>
             <TableBody>
               {classItems.map((c) => {
+                const href = `classes/${c.id}`
                 return (
                   <TableRow key={c.id}>
                     <TableCell>{c.name}</TableCell>
@@ -289,7 +290,7 @@ export default function AdminClassLandingPage({ openCreate }) {
                           </button>
                         </DropdownTrigger>
                         <DropdownMenu onAction={(key) => handleDropdown(key)}>
-                          <DropdownItem key="view">View class</DropdownItem>
+                          <DropdownItem key="view" href={href}>View class</DropdownItem>
                           <DropdownItem key="delete">Delete class</DropdownItem>
                         </DropdownMenu>
                       </Dropdown>
