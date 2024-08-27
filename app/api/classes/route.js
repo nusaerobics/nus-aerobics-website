@@ -9,13 +9,14 @@ function getStatus(c) {
     return "full";
   }
 
-  const utcClassDate = fromZonedTime(c.date, "Asia/Singapore");
-  const sgClassDate = toZonedTime(utcClassDate, "Asia/Singapore");
-  const sgCurrentDate = toZonedTime(new Date(), "Asia/Singapore");
-  if (sgClassDate < sgCurrentDate) {
-    return "closed";
-  }
+  // const utcClassDate = fromZonedTime(c.date, "Asia/Singapore");
+  // const sgClassDate = toZonedTime(utcClassDate, "Asia/Singapore");
+  // const sgCurrentDate = toZonedTime(new Date(), "Asia/Singapore");
+  // if (sgClassDate < sgCurrentDate) {
+  //   return "closed";
+  // }
   // should remain as closed or open otherwise
+  
   return c.status;
 };
 
