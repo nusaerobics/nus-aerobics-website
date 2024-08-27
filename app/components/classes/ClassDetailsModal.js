@@ -26,7 +26,6 @@ import { useEffect, useState } from "react";
 import { fromZonedTime, toZonedTime } from "date-fns-tz";
 import { SectionTitle } from "../utils/Titles";
 import Toast from "../Toast";
-
 export default function ClassDetailsModal({
   selectedClass,
   selectedBooking,
@@ -132,17 +131,6 @@ export default function ClassDetailsModal({
      * 4. Create new transaction
      */
     setModalType("loading");
-    if (selectedClass.bookedCapacity >= selectedClass.maxCapacity) {
-      setModalType("result");
-      setResult({
-        isSuccess: false,
-        header: "Booking unsuccessful",
-        message:
-          "Unable to book class because it is full. Try booking a different class.",
-      });
-      return;
-    }
-
     if (user.balance <= 0) {
       setModalType("result");
       setResult({
@@ -155,20 +143,37 @@ export default function ClassDetailsModal({
     }
 
     try {
-      const newBookedCapacity = selectedClass.bookedCapacity + 1;
+      const classRes = await fetch(`/api/classes?id=${selectedClass.id}`);
+      if (!classRes.ok) {
+        throw new Error("Unable to get latest class");
+      }
+      const latestSelectedClass = await classRes.json();
+      console.log(latestSelectedClass);
+      if (latestSelectedClass.bookedCapacity >= 19) {
+        setModalType("result");
+        setResult({
+          isSuccess: false,
+          header: "Booking unsuccessful",
+          message:
+            "Unable to book class because it is full. Try booking a different class.",
+        });
+        return;
+      }
+
+      const newBookedCapacity = latestSelectedClass.bookedCapacity + 1;
 
       // 2. Update class bookedCapacity
       const updatedClass = {
-        id: selectedClass.id,
-        name: selectedClass.name,
-        description: selectedClass.description,
-        date: selectedClass.date,
-        maxCapacity: selectedClass.maxCapacity,
+        id: latestSelectedClass.id,
+        name: latestSelectedClass.name,
+        description: latestSelectedClass.description,
+        date: latestSelectedClass.date,
+        maxCapacity: latestSelectedClass.maxCapacity,
         bookedCapacity: newBookedCapacity,
         status:
-          newBookedCapacity == selectedClass.maxCapacity
+          newBookedCapacity == latestSelectedClass.maxCapacity
             ? "full"
-            : selectedClass.status,
+            : latestSelectedClass.status,
       };
       const res1 = await fetch("/api/classes", {
         method: "PUT",
@@ -176,11 +181,12 @@ export default function ClassDetailsModal({
         body: JSON.stringify(updatedClass),
       });
       if (!res1.ok) {
-        throw new Error(`Unable to update class ${selectedClass.id}`);
+        throw new Error(`Unable to update class ${latestSelectedClass.id}`);
       }
+      console.log(updatedClass);
 
       // 3. Create new booking
-      const newBooking = { classId: selectedClass.id, userId: userId };
+      const newBooking = { classId: latestSelectedClass.id, userId: userId };
       const res2 = await fetch("/api/bookings", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -191,7 +197,7 @@ export default function ClassDetailsModal({
         const revert1 = await fetch("/api/classes", {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(selectedClass),
+          body: JSON.stringify(latestSelectedClass),
         });
         if (!revert1.ok) {
           throw new Error("Unable to revert previous class update");
@@ -260,8 +266,8 @@ export default function ClassDetailsModal({
       setResult({
         isSuccess: false,
         header: "Booking unsuccessful",
-        message:
-          "An error occurred while trying to book this class. Try again later.",
+        message: `${error.message}`,
+        // "An error occurred while trying to book this class. Try again later.",
       });
       setModalType("result");
       console.log(error);
@@ -279,7 +285,12 @@ export default function ClassDetailsModal({
     // TODO: Based on reverts, should I do delete last?
     setModalType("loading");
     try {
-      const newBookedCapacity = selectedBooking.class.bookedCapacity - 1;
+      const classRes = await fetch(`/api/classes?id=${selectedClass.id}`);
+      if (!classRes.ok) {
+        throw new Error("Unable to get latest class");
+      }
+      const latestSelectedClass = await classRes.json();
+      const newBookedCapacity = latestSelectedClass.bookedCapacity - 1;
 
       // 1. Delete booking
       const res1 = await fetch("/api/bookings", {
@@ -288,18 +299,19 @@ export default function ClassDetailsModal({
         body: JSON.stringify({ id: selectedBooking.id }),
       });
       if (!res1.ok) {
-        throw new Error(`Unable to delete booking ${selectedBooking.id}`);
+        throw new Error(`Unable to delete booking ${latestSelectedClass.id}`);
       }
 
       // 2. Update class bookedCapacity
       const updatedClass = {
-        id: selectedClass.id,
-        name: selectedClass.name,
-        description: selectedClass.description,
-        date: selectedClass.date,
-        maxCapacity: selectedClass.maxCapacity,
+        id: latestSelectedClass.id,
+        name: latestSelectedClass.name,
+        description: latestSelectedClass.description,
+        date: latestSelectedClass.date,
+        maxCapacity: latestSelectedClass.maxCapacity,
         bookedCapacity: newBookedCapacity,
-        status: newBookedCapacity < selectedClass.maxCapacity ? "open" : "full", // NOTE: Don't know when unbooking a class would make it still full?
+        status:
+          newBookedCapacity < latestSelectedClass.maxCapacity ? "open" : "full", // NOTE: Don't know when unbooking a class would make it still full?
       };
       const res2 = await fetch("/api/classes", {
         method: "PUT",
@@ -308,7 +320,7 @@ export default function ClassDetailsModal({
       });
       if (!res2.ok) {
         // TODO: Handle reverts - Putting back the booking after being deleted
-        throw new Error(`Unable to update class ${selectedClass.id}`);
+        throw new Error(`Unable to update class ${latestSelectedClass.id}`);
       }
 
       // 3. Update user's balance
@@ -332,7 +344,7 @@ export default function ClassDetailsModal({
         userId: selectedBooking.userId,
         amount: 1,
         type: "refund",
-        description: `Refunded '${selectedClass.name}'`,
+        description: `Refunded '${latestSelectedClass.name}'`,
       };
       const res4 = await fetch("/api/transactions", {
         method: "POST",
@@ -410,7 +422,9 @@ export default function ClassDetailsModal({
                         </div>
                         <div className="flex flex-row items-center gap-2.5">
                           <MdPersonOutline size={24} color={"#1F4776"} />
-                          <p className="text-a-black text-sm md:text-base">Alpha Fitness</p>
+                          <p className="text-a-black text-sm md:text-base">
+                            Alpha Fitness
+                          </p>
                         </div>
                       </div>
                       <div>
@@ -485,7 +499,9 @@ export default function ClassDetailsModal({
                         <MdOutlineCancel size={84} color={"#9E2A2A"} />
                       )}
                       <SectionTitle title={result.header} />
-                      <p className="text-a-black text-sm md:text-base">{result.message}</p>
+                      <p className="text-a-black text-sm md:text-base">
+                        {result.message}
+                      </p>
                     </div>
                   </ModalBody>
                 ) : (

@@ -12,13 +12,40 @@ function getStatus(c) {
   // const utcClassDate = fromZonedTime(c.date, "Asia/Singapore");
   // const sgClassDate = toZonedTime(utcClassDate, "Asia/Singapore");
   // const sgCurrentDate = toZonedTime(new Date(), "Asia/Singapore");
+
   // if (sgClassDate < sgCurrentDate) {
   //   return "closed";
   // }
   // should remain as closed or open otherwise
-  
+
+  // if (searchParams.get("isToday") != undefined) {
+  //   const todayClasses = classes.filter((c) => {
+  //     const utcClassDate = fromZonedTime(c.date, "Asia/Singapore");
+  //     const sgClassDate = toZonedTime(utcClassDate, "Asia/Singapore");
+  //     const sgCurrentDate = toZonedTime(new Date(), "Asia/Singapore");
+
+  //     const sgClassYear = sgClassDate.getFullYear();
+  //     const sgClassMonth = sgClassDate.getMonth();
+  //     const sgClassDay = sgClassDate.getDate();
+
+  //     const sgCurrentYear = sgCurrentDate.getFullYear();
+  //     const sgCurrentMonth = sgCurrentDate.getMonth();
+  //     const sgCurrentDay = sgCurrentDate.getDate();
+
+  //     return (
+  //       sgClassYear == sgCurrentYear &&
+  //       sgClassMonth == sgCurrentMonth &&
+  //       sgClassDay == sgCurrentDay
+  //     );
+
   return c.status;
-};
+}
+
+// async function getCapacity(c) {
+//   const res = await fetch(`https://aerobics.nussportsclub.org/api/bookings?isCount=true&classId=${c.id}`);
+//   const bookedCapacity = res.json();
+//   return bookedCapacity;
+// };
 
 export async function GET(request) {
   try {
@@ -35,7 +62,7 @@ export async function GET(request) {
       targetClass.status = getStatus(targetClass);
       return NextResponse.json(targetClass, { status: 200 });
     }
-    
+
     const classes = await Class.findAll();
 
     // getTodayClasses /api/classes?isToday=true
@@ -59,15 +86,16 @@ export async function GET(request) {
           sgClassDay == sgCurrentDay
         );
       });
-      todayClasses.forEach(c => {
+      todayClasses.forEach((c) => {
         c.status = getStatus(c);
       });
       return NextResponse.json(todayClasses, { status: 200 });
     }
 
     // getClasses
-    classes.forEach(c => {
+    classes.forEach((c) => {
       c.status = getStatus(c);
+      // console.log(c.id, getCapacity(c));
     });
     return NextResponse.json(classes, { status: 200 });
   } catch (error) {

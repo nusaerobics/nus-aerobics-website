@@ -25,7 +25,7 @@ export async function GET(request) {
       const userId = searchParams.get("userId");
       const userBookings = await Booking.findAll({
         where: { userId: userId },
-        order: [[{ model: Class, as: "class" }, 'date', 'ASC' ]],
+        order: [[{ model: Class, as: "class" }, "date", "ASC"]],
         include: [
           {
             model: Class,
@@ -66,7 +66,7 @@ export async function GET(request) {
     if (searchParams.get("isCountByUser") != undefined) {
       const userId = searchParams.get("isCountByUser");
       const number = await Booking.count({
-        where: { userId: userId }
+        where: { userId: userId },
       });
       if (number == null) {
         return NextResponse.json(0, { status: 200 });
@@ -167,7 +167,7 @@ export async function DELETE(request) {
         { status: 200 }
       );
     }
-    
+
     const id = body.id;
     await Booking.destroy({ where: { id: id } });
     return NextResponse.json(
