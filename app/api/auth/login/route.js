@@ -22,6 +22,7 @@ export async function POST(request) {
         { status: 400 }
       );
     }
+    // NOTE: Adding trim() to when new accounts are created
     const isMatchingPassword = await bcrypt.compare(password, user.password);
     if (!isMatchingPassword) {
       return NextResponse.json(

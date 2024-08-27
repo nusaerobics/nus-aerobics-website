@@ -42,13 +42,13 @@ export async function GET(request) {
 
     // getNumberOfCreditsUnused
     if (searchParams.get("isCountCredits") != undefined) {
-      const number = await User.sum('balance');
+      const number = await User.sum("balance");
       if (number == null) {
         return NextResponse.json(0, { status: 200 });
       }
       return NextResponse.json(number, { status: 200 });
     }
-    
+
     // getUsers
     const users = await User.findAll();
     return NextResponse.json(users, { status: 200 });
@@ -65,19 +65,19 @@ export async function GET(request) {
 export async function POST(request) {
   try {
     const body = await request.json();
-    console.log(body);
     const { name, email, password } = body;
 
-    const isExistingEmail = await User.findOne({ where: { email: email } });
-    if (isExistingEmail) {
-      return NextResponse.json(
-        { error: "Email already registered" },
-        { status: 400 }
-      );
-    }
+    // const isExistingEmail = await User.findOne({ where: { email: email } });
+    // if (isExistingEmail) {
+    //   return NextResponse.json(
+    //     { error: "Email already registered" },
+    //     { status: 400 }
+    //   );
+    // }
 
+    const passwordStripped = password.trim();
     const saltRounds = 10;
-    const hashedPassword = await bcrypt.hash(password, saltRounds);
+    const hashedPassword = await bcrypt.hash(passwordStripped, saltRounds);
 
     const data = await User.create({
       name: name,
@@ -120,7 +120,8 @@ export async function PUT(request) {
     if (body.newPassword != undefined) {
       const newPassword = body.newPassword;
 
-      if (body.currentPassword != undefined) {  // If changing password in Profile
+      if (body.currentPassword != undefined) {
+        // If changing password in Profile
         const currentPassword = body.currentPassword;
         const existingPassword = user.password;
 

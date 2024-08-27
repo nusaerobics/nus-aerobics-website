@@ -92,7 +92,7 @@ export default function UserClassLandingPage({ userId }) {
       } catch (error) {
         setToast({
           isSuccess: false,
-          header: "Unable to geet bookings",
+          header: "Unable to get bookings",
           message: `Unable to get bookings for user ${userId}. Try again later.`,
         });
         setShowToast(true);

@@ -56,14 +56,24 @@ export default function Page() {
         throw new Error(`Invalid values used for sign-up. Try again.`);
       }
 
-      await fetch("/api/users", {
+      const res1 = await fetch(`/api/users?email=${email}`);
+      if (res1.ok) {
+        // user with email exists, not unique email
+        throw new Error(
+          `A user already exists for ${email}. Try again with a unqiue email.`
+        );
+      }
+
+      const res2 = await fetch("/api/users", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name: name, email: email, password: password }),
       });
-      // if (!res.ok) {
-      //   throw new Error("An internal error occurred. Try again later.");
-      // }
+      if (!res2.ok) {
+        throw new Error(
+          "An internal error occurred. Refresh the page and try again in a few minutes."
+        );
+      }
       handleChangeView(view);
       setName("");
       setEmail(email);
