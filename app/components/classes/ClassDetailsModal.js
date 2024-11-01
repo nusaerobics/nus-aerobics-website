@@ -149,7 +149,7 @@ export default function ClassDetailsModal({
       }
       const latestSelectedClass = await classRes.json();
       console.log(latestSelectedClass);
-      if (latestSelectedClass.bookedCapacity >= 19) {
+      if (latestSelectedClass.bookedCapacity >= latestSelectedClass.maxCapacity) {
         setModalType("result");
         setResult({
           isSuccess: false,
