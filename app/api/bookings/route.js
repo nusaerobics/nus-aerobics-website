@@ -89,17 +89,6 @@ export async function GET(request) {
 // createBooking
 export async function POST(request) {
   /**
-   * Handle checking if at moment of createBooking, if class
-   * booked_capacity < max_capacity (Have to check especially if multiple
-   * people book at the same time) - need to check request timing?
-   */
-
-  /**
-   * error - Your booking could not be made as the class has reached max
-   * capacity
-   */
-
-  /**
    * When user books class request,
    * 1. Check if booked_capacity < max_capacity
    * 2. Update class booked_capapcity += 1
