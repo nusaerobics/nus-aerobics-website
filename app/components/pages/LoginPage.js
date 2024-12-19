@@ -1,29 +1,25 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Input } from "@nextui-org/react";
-import { MdVisibility, MdVisibilityOff } from "react-icons/md";
-import { inputClassNames } from "../utils/ClassNames";
-import { useRouter } from "next/navigation";
-import { z } from "zod";
+import {useEffect, useMemo, useState} from "react";
+import {Input} from "@nextui-org/react";
+import {MdVisibility, MdVisibilityOff} from "react-icons/md";
+import {inputClassNames} from "../utils/ClassNames";
+import {useRouter} from "next/navigation";
 import Toast from "../Toast";
 
-var random = require("random-string-generator");
+let random = require("random-string-generator");
 
 export default function Page() {
   const router = useRouter();
-  const [isSubmit, setIsSubmit] = useState(false);
   const [showToast, setShowToast] = useState(false);
   const [toast, setToast] = useState({});
 
   async function handleLogin() {
     try {
-      setIsSubmit(true);
-      validateEmail();
       const res = await fetch("/api/auth/login", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: email, password: password }),
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({email: email, password: password}),
       });
       if (!res.ok) {
         setEmail("");
@@ -31,7 +27,6 @@ export default function Page() {
         throw new Error("Incorrect email or password. Try again.");
       }
       router.push("/dashboard");
-      setIsSubmit(false);
     } catch (error) {
       setEmail("");
       setPassword("");
@@ -47,39 +42,37 @@ export default function Page() {
 
   async function handleSignUp() {
     try {
-      setIsSubmit(true);
-      validateEmail();
-      validateName();
-      validatePW();
-      validateCPW();
       if (isInvalidEmail || isInvalidName || isInvalidPW || isInvalidCPW) {
         throw new Error(`Invalid values used for sign-up. Try again.`);
       }
 
       const res1 = await fetch(`/api/users?email=${email}`);
       if (res1.ok) {
-        // user with email exists, not unique email
-        throw new Error(
-          `A user already exists for ${email}. Try again with a unqiue email.`
-        );
+        throw new Error(`A user already exists for ${email}. Try again with a unique email.`);
       }
 
       const res2 = await fetch("/api/users", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: name, email: email, password: password }),
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({name: name, email: email, password: password}),
       });
       if (!res2.ok) {
-        throw new Error(
-          "An internal error occurred. Refresh the page and try again in a few minutes."
-        );
+        throw new Error("An internal error occurred. Refresh the page and try again in a few minutes.");
       }
+
       handleChangeView(view);
       setName("");
       setEmail(email);
       setPassword("");
       setConfirmPassword("");
-      setIsSubmit(false);
+
+      setToast({
+        isSuccess: true,
+        header: "Successfully signed up",
+        message: "Login with your newly created account.",
+      });
+      setShowToast(true);
+
     } catch (error) {
       setToast({
         isSuccess: false,
@@ -109,21 +102,21 @@ export default function Page() {
       // 3. Update user with new temporary password
       const res2 = await fetch("/api/users", {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: user.id, newPassword: tempPassword }),
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({id: user.id, newPassword: tempPassword}),
       });
       if (!res2.ok) {
         throw new Error("An internal error occurred. Try again later.");
       }
 
-      // 4. Send email with temporary password to login with
+      // 4. Send email with temporary password to log in with
       const res3 = await fetch("/api/mail", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {"Content-Type": "application/json"},
         body: JSON.stringify({
           user: user,
           type: "forgot",
-          details: { tempPassword: tempPassword },
+          details: {tempPassword: tempPassword},
         }),
       });
       if (!res3.ok) {
@@ -138,7 +131,6 @@ export default function Page() {
       setShowToast(true);
       handleChangeView(view);
       setEmail("");
-      setIsSubmit(false);
     } catch (error) {
       setToast({
         isSuccess: false,
@@ -158,24 +150,24 @@ export default function Page() {
   const [bottomButton, setBottomButton] = useState("Sign-up"); // Sign-up || Login || login
 
   const handleChangeView = (currentView) => {
-    if (currentView == "login") {
+    if (currentView === "login") {
       changeView("signup");
     } else {
       changeView("login");
     }
   };
   const changeView = (view) => {
-    if (view == "login") {
+    if (view === "login") {
       setMessage("Welcome back");
       setButton("Login");
       setBottomAction("Don't have an account?");
       setBottomButton("Sign-up");
-    } else if (view == "signup") {
+    } else if (view === "signup") {
       setMessage("Create an account");
       setButton("Sign-up");
       setBottomAction("Already have an account?");
       setBottomButton("Login");
-    } else if (view == "forgot") {
+    } else if (view === "forgot") {
       setMessage("Forgot password");
       setButton("Continue");
       setBottomAction("Back to");
@@ -223,49 +215,34 @@ export default function Page() {
     setIsCPWVisible(!isCPWVisible);
   };
 
-  const [isInvalidEmail, setIsInvalidEmail] = useState(false);
-  const [isInvalidName, setIsInvalidName] = useState(false);
-  const [isInvalidPW, setIsInvalidPW] = useState(false);
-  const [isInvalidCPW, setIsInvalidCPW] = useState(false);
+  const validateEmail = (value) => value.match(/^[A-Z0-9._%+-]+@u.nus.edu$/i);
+  const isInvalidEmail = useMemo(() => {
+    if (email === "") return false;
+    return !validateEmail(email);
+  }, [email]);
 
-  const validateEmail = () => {
-    const emailSchema = z.string().email();
-    try {
-      emailSchema.parse(email);
-      setIsInvalidEmail(false);
-    } catch (error) {
-      setIsInvalidEmail(true);
-      console.log(error);
-    }
-  };
-  const validateName = () => {
-    const nameSchema = z.string().refine((str) => /^[a-zA-Z ]+$/.test(str));
-    try {
-      nameSchema.parse(name);
-      setIsInvalidName(false);
-    } catch (error) {
-      console.log(error);
-      setIsInvalidName(true);
-    }
-  };
-  const validatePW = () => {
-    const PWSchema = z.string().min(5);
-    try {
-      PWSchema.parse(password);
-      setIsInvalidPW(false);
-    } catch (error) {
-      console.log(error);
-      setIsInvalidPW(true);
-    }
-  };
-  const validateCPW = () => {
-    setIsInvalidCPW(password != confirmPassword);
-  };
+  const validateName = (value) => value.match(/^[a-zA-Z]+$/i);
+  const isInvalidName = useMemo(() => {
+    if (name === "") return false;
+    return !validateName(name);
+  }, [name]);
+
+  const validatePW = (value) => value.length >= 5;
+  const isInvalidPW = useMemo(() => {
+    if (password === "") return false;
+    return !validatePW(password);
+  }, [password]);
+
+  const isInvalidCPW = useMemo(() => {
+    if (confirmPassword === "") return false;
+    return confirmPassword !== password;
+  }, [confirmPassword, password]);
 
   return (
     <>
       <div className="w-screen h-screen flex flex-row justify-center p-8 bg-a-pink/80">
-        <div className="w-[400px] h-full flex flex-col overflow-y-scroll justify-center p-5 gap-y-5 rounded-[20px] border border-a-black/10 bg-white">
+        <div
+          className="w-[400px] h-full flex flex-col overflow-y-scroll justify-center p-5 gap-y-5 rounded-[20px] border border-a-black/10 bg-white">
           <div className="w-full flex flex-col items-center gap-y-5">
             <img
               src="/images/logo.png"
@@ -279,12 +256,12 @@ export default function Page() {
             </p>
           </div>
           <div className="w-full flex flex-col gap-y-2.5">
-            {view == "signup" ? (
+            {view === "signup" ? (
               <Input
                 label="Full name"
                 value={name}
                 onValueChange={setName}
-                isInvalid={isSubmit && isInvalidName}
+                isInvalid={isInvalidName}
                 errorMessage="Please enter a valid name"
                 isRequired
                 variant="bordered"
@@ -298,14 +275,14 @@ export default function Page() {
               label="Email"
               value={email}
               onValueChange={setEmail}
-              isInvalid={isSubmit && isInvalidEmail}
-              errorMessage="Please enter a valid email"
+              isInvalid={view === "signup" && isInvalidEmail}
+              errorMessage="Please enter a valid NUS email"
               isRequired
               variant="bordered"
               size="sm"
               classNames={inputClassNames}
             />
-            {view != "forgot" ? (
+            {view !== "forgot" ? (
               <Input
                 label="Password"
                 value={password}
@@ -318,13 +295,13 @@ export default function Page() {
                     onClick={togglePWVisible}
                   >
                     {isPWVisible ? (
-                      <MdVisibilityOff className="text-2xl text-a-black/50 pointer-events-none" />
+                      <MdVisibilityOff className="text-2xl text-a-black/50 pointer-events-none"/>
                     ) : (
-                      <MdVisibility className="text-2xl text-a-black/50 pointer-events-none" />
+                      <MdVisibility className="text-2xl text-a-black/50 pointer-events-none"/>
                     )}
                   </button>
                 }
-                isInvalid={view != "login" && isSubmit && isInvalidPW}
+                isInvalid={view === "signup" && isInvalidPW}
                 errorMessage="Password should be at least 5 characters"
                 isRequired
                 variant="bordered"
@@ -334,7 +311,7 @@ export default function Page() {
             ) : (
               <></>
             )}
-            {view == "signup" ? (
+            {view === "signup" ? (
               <Input
                 label="Confirm password"
                 value={confirmPassword}
@@ -347,13 +324,13 @@ export default function Page() {
                     onClick={toggleCPWVisible}
                   >
                     {isCPWVisible ? (
-                      <MdVisibilityOff className="text-2xl text-a-black/50 pointer-events-none" />
+                      <MdVisibilityOff className="text-2xl text-a-black/50 pointer-events-none"/>
                     ) : (
-                      <MdVisibility className="text-2xl text-a-black/50 pointer-events-none" />
+                      <MdVisibility className="text-2xl text-a-black/50 pointer-events-none"/>
                     )}
                   </button>
                 }
-                isInvalid={isSubmit && isInvalidCPW}
+                isInvalid={isInvalidCPW}
                 errorMessage="Passwords do not match"
                 isRequired
                 variant="bordered"
@@ -363,7 +340,7 @@ export default function Page() {
             ) : (
               <></>
             )}
-            {view == "login" ? (
+            {view === "login" ? (
               <button
                 className="text-end text-sm text-a-navy font-bold underline cursor-pointer"
                 onClick={() => changeView("forgot")}
@@ -376,12 +353,22 @@ export default function Page() {
           </div>
 
           <div className="w-full flex flex-col gap-y-2.5">
-            <button
-              className="rounded-[30px] px-[20px] py-[10px] bg-a-navy text-sm text-white cursor-pointer"
-              onClick={handleClick}
-            >
-              {button}
-            </button>
+            {view === "signup" && (isInvalidName || isInvalidEmail || isInvalidPW || isInvalidCPW) ? (
+              < button
+                className="rounded-[30px] px-[20px] py-[10px] bg-[#1F477620] text-white text-sm cursor-not-allowed"
+                disabled
+              >
+                {button}
+              </button>
+            ) : (
+              <button
+                className="rounded-[30px] px-[20px] py-[10px] bg-a-navy text-sm text-white cursor-pointer"
+                onClick={handleClick}
+              >
+                {button}
+              </button>
+            )
+            }
             <div className="w-full flex flex-row justify-center gap-x-1">
               <p className="text-sm text-a-black bottom-action">
                 {bottomAction}
