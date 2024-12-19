@@ -1,7 +1,7 @@
 "use client";
 
 import Head from "next/head";
-import "../styles/globals.css";
+import "./globals.css";
 import Providers from "./providers";
 import { noto_serif_display, poppins } from "./components/utils/Font";
 
