@@ -1,5 +1,3 @@
-// TODO: Remove comment after build bugfix resolved
-
 import Layout from "../components/layout";
 import "../styles/global.css";
 
