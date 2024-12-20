@@ -26,6 +26,7 @@ db.classes = require("../models/class.model")(sequelize, Sequelize);
 db.users = require("../models/user.model")(sequelize, Sequelize);
 db.bookings = require("../models/booking.model")(sequelize, Sequelize);
 db.transactions = require("../models/transaction.model")(sequelize, Sequelize);
+db.submissions = require("../models/submission.model")(sequelize, Sequelize);
 
 db.classes.hasMany(db.bookings, { as: "bookings" });
 db.bookings.belongsTo(db.classes, { as: "class" });
