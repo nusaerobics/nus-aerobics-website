@@ -1,17 +1,17 @@
-import { fromZonedTime, toZonedTime } from "date-fns-tz";
+import {fromZonedTime, toZonedTime} from "date-fns-tz";
 import PropTypes from "prop-types";
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
+import {useCallback, useEffect, useMemo, useState} from "react";
+import {useRouter} from "next/navigation";
 
-import { PageTitle } from "../utils/Titles";
+import {PageTitle} from "../utils/Titles";
 import {
   chipClassNames,
   chipTypes,
   inputClassNames,
   tableClassNames,
 } from "../utils/ClassNames";
-import { format } from "date-fns";
-import { MdMoreVert, MdOutlineFilterAlt } from "react-icons/md";
+import {format} from "date-fns";
+import {MdMoreVert, MdOutlineFilterAlt} from "react-icons/md";
 import {
   Dropdown,
   DropdownItem,
@@ -27,10 +27,10 @@ import {
   TableRow,
   TableCell,
 } from "@nextui-org/table";
-import { Chip, Input, Pagination } from "@nextui-org/react";
+import {Chip, Input, Pagination} from "@nextui-org/react";
 import Toast from "../Toast";
 
-export default function AdminClassLandingPage({ openCreate }) {
+export default function AdminClassLandingPage({openCreate}) {
   const router = useRouter();
 
   const [classes, setClasses] = useState([]);
@@ -53,6 +53,7 @@ export default function AdminClassLandingPage({ openCreate }) {
       const data = await res.json();
       setClasses(data);
     };
+    // TODO: fix for useEffect, handling the promises without using async due to destroy() error.
     fetchClasses();
   }, []);
 
@@ -172,8 +173,8 @@ export default function AdminClassLandingPage({ openCreate }) {
 
       const res1 = await fetch("/api/bookings", {
         method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ classId: selectedClass.id }),
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({classId: selectedClass.id}),
       });
       if (!res1.ok) {
         // TODO: Restore bookings for class
@@ -206,7 +207,7 @@ export default function AdminClassLandingPage({ openCreate }) {
   return (
     <>
       <div className="flex flex-row items-center justify-between">
-        <PageTitle title="Classes" />
+        <PageTitle title="Classes"/>
         <button
           onClick={openCreate}
           className="h-[36px] rounded-[30px] px-[20px] bg-a-navy text-white text-sm cursor-pointer"
@@ -220,7 +221,7 @@ export default function AdminClassLandingPage({ openCreate }) {
           <Dropdown>
             <DropdownTrigger>
               <button className="cursor-pointer">
-                <MdOutlineFilterAlt color="#393E46" size={24} />
+                <MdOutlineFilterAlt color="#393E46" size={24}/>
               </button>
             </DropdownTrigger>
             <DropdownMenu
@@ -286,7 +287,7 @@ export default function AdminClassLandingPage({ openCreate }) {
                             className="cursor-pointer"
                             onClick={() => selectRow(c)}
                           >
-                            <MdMoreVert size={24} />
+                            <MdMoreVert size={24}/>
                           </button>
                         </DropdownTrigger>
                         <DropdownMenu onAction={(key) => handleDropdown(key)}>
