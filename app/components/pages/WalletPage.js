@@ -1,10 +1,10 @@
 "use client";
 
-import { format } from "date-fns";
+import {format} from "date-fns";
 import PropTypes from "prop-types";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import {useCallback, useEffect, useMemo, useState} from "react";
 
-import { MdOutlineFilterAlt } from "react-icons/md";
+import {MdOutlineFilterAlt} from "react-icons/md";
 import {
   Dropdown,
   DropdownItem,
@@ -13,13 +13,6 @@ import {
   DropdownTrigger,
 } from "@nextui-org/dropdown";
 import {
-  Modal,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  useDisclosure,
-} from "@nextui-org/modal";
-import {
   Table,
   TableHeader,
   TableBody,
@@ -27,22 +20,19 @@ import {
   TableRow,
   TableCell,
 } from "@nextui-org/table";
-import { Input, Pagination } from "@nextui-org/react";
-import { PageTitle, SectionTitle } from "../utils/Titles";
+import {Input, Pagination} from "@nextui-org/react";
+import {PageTitle, SectionTitle} from "../utils/Titles";
 import {
   inputClassNames,
-  modalClassNames,
   tableClassNames,
 } from "../utils/ClassNames";
 import Toast from "../Toast";
 
-export default function WalletPage({ session }) {
+export default function WalletPage({session}) {
   const [balance, setBalance] = useState(0);
   const [isAdmin, setIsAdmin] = useState(false);
   const [searchInput, setSearchInput] = useState("");
   const [transactions, setTransactions] = useState([]);
-  const [file, setFile] = useState();
-  const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const [sortDescriptor, setSortDescriptor] = useState({
     column: "createdAt",
     direction: "ascending",
@@ -216,31 +206,20 @@ export default function WalletPage({ session }) {
     return filteredTransactions.slice(start, end);
   }, [page, sortedTransactions, searchInput, filters]);
 
-  function creditAccounts() {
-    // TODO: Implement CSV function
-    return;
-  }
-
   return (
     <>
       {isAdmin ? (
         <div className="w-full h-full flex flex-col gap-y-5 p-5 md:p-10 pt-20 overflow-y-scroll">
           <div className="flex flex-row items-center justify-between">
-            <PageTitle title="Wallet" />
-            {/* <button
-              onClick={onOpen}
-              className="h-[36px] rounded-[30px] px-[20px] bg-a-navy text-white text-sm cursor-pointer"
-            >
-              Credit accounts
-            </button> */}
+            <PageTitle title="Wallet"/>
           </div>
-          <div className="md:h-full md:w-full flex flex-col rounded-[20px] border border-a-black/10 p-5 bg-white gap-y-2.5">
+          <div
+            className="md:h-full md:w-full flex flex-col rounded-[20px] border border-a-black/10 p-5 bg-white gap-y-2.5">
             <div className="flex flex-row md:justify-end items-center gap-x-2.5">
-              <p>{filters}</p>
               <Dropdown>
                 <DropdownTrigger>
                   <button className="cursor-pointer">
-                    <MdOutlineFilterAlt color="#393E46" size={24} />
+                    <MdOutlineFilterAlt color="#393E46" size={24}/>
                   </button>
                 </DropdownTrigger>
                 <DropdownMenu
@@ -313,50 +292,10 @@ export default function WalletPage({ session }) {
               />
             </div>
           </div>
-          <Modal
-            isOpen={isOpen}
-            onOpenChange={onOpenChange}
-            size="md"
-            backdrop="opaque"
-            classNames={modalClassNames}
-          >
-            <ModalContent>
-              {(onClose) => (
-                <>
-                  <ModalHeader>
-                    <div className="flex flex-row items-center gap-x-2.5">
-                      <SectionTitle title="Credit accounts" />
-                    </div>
-                  </ModalHeader>
-                  <ModalBody>
-                    <div className="md:w-1/3 flex flex-col gap-y-[5px]">
-                      <p className="text-a-black/50 text-sm">CSV file *</p>
-                      <Input
-                        value={file}
-                        onValueChange={setFile}
-                        isRequired
-                        variant="bordered"
-                        size="xs"
-                        classNames={inputClassNames}
-                      />
-                    </div>
-                    <div className="flex justify-end">
-                      <button
-                        onClick={creditAccounts}
-                        className="rounded-[30px] px-[20px] py-[10px] bg-[#1F4776] text-white cursor-pointer"
-                      >
-                        Credit
-                      </button>
-                    </div>
-                  </ModalBody>
-                </>
-              )}
-            </ModalContent>
-          </Modal>
         </div>
       ) : (
         <div className="w-full h-full flex flex-col gap-y-5 p-5 md:p-10 pt-20 overflow-y-scroll">
-          <PageTitle title="Wallet" />
+          <PageTitle title="Wallet"/>
           <div className="h-1/4 flex flex-row gap-x-5">
             <div className="w-1/2 rounded-[20px] border border-a-black/10 p-5 bg-white">
               <p className="font-poppins font-bold text-a-navy text-2xl md:text-3xl">
@@ -376,7 +315,7 @@ export default function WalletPage({ session }) {
             </div>
           </div>
           <div className="w-full flex flex-col rounded-[20px] border border-a-black/10 p-5 bg-white gap-y-2.5">
-            <SectionTitle title="All transactions" />
+            <SectionTitle title="All transactions"/>
             <Table
               removeWrapper
               classNames={tableClassNames}

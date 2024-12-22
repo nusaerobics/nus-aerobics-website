@@ -103,7 +103,7 @@ export default function Page() {
       const res2 = await fetch("/api/users", {
         method: "PUT",
         headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({id: user.id, newPassword: tempPassword}),
+        body: JSON.stringify({ id: user.id, newPassword: tempPassword }),
       });
       if (!res2.ok) {
         throw new Error("An internal error occurred. Try again later.");
@@ -114,9 +114,10 @@ export default function Page() {
         method: "POST",
         headers: {"Content-Type": "application/json"},
         body: JSON.stringify({
-          user: user,
-          type: "forgot",
-          details: {tempPassword: tempPassword},
+          name: user.name,
+          email: email,
+          type: "forgot-password",
+          details: { tempPassword: tempPassword },
         }),
       });
       if (!res3.ok) {

@@ -1,15 +1,15 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import {useEffect, useMemo, useState} from "react";
 
-import { useRouter } from "next/navigation";
+import {useRouter} from "next/navigation";
 import {
   Dropdown,
   DropdownTrigger,
   DropdownMenu,
   DropdownItem,
 } from "@nextui-org/dropdown";
-import { Input } from "@nextui-org/input";
+import {Input} from "@nextui-org/input";
 import {
   Modal,
   ModalContent,
@@ -26,19 +26,19 @@ import {
   TableRow,
   TableCell,
 } from "@nextui-org/table";
-import { Pagination } from "@nextui-org/react";
-import { MdMoreVert } from "react-icons/md";
+import {Pagination} from "@nextui-org/react";
+import {MdMoreVert} from "react-icons/md";
 import {
   inputClassNames,
   modalClassNames,
   tableClassNames,
 } from "../utils/ClassNames";
-import { PageTitle, SectionTitle } from "../utils/Titles";
+import {PageTitle, SectionTitle} from "../utils/Titles";
 import Toast from "../Toast";
 
 export default function UsersPage() {
   const router = useRouter();
-  const { isOpen, onOpen, onOpenChange } = useDisclosure();
+  const {isOpen, onOpen, onOpenChange} = useDisclosure();
 
   const [users, setUsers] = useState([]);
   const [page, setPage] = useState(1);
@@ -47,6 +47,7 @@ export default function UsersPage() {
   const [toast, setToast] = useState({});
   const [credits, setCredits] = useState(0);
   const [searchInput, setSearchInput] = useState("");
+  const [csv, setCsv] = useState([]);
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -104,6 +105,7 @@ export default function UsersPage() {
     return () => clearTimeout(timer);
   }, [showToast]);
 
+  const [modalType, setModalType] = useState("individual");  // individual = credit acc, multiple = credit accs
   const selectRow = (rowData) => {
     setSelectedUser(rowData);
   };
@@ -112,19 +114,35 @@ export default function UsersPage() {
       case "view":
         return router.push(`users/${selectedUser.id}`);
       case "credit":
+        setModalType("individual");
         return onOpen();
       case "delete":
         return deleteUser(selectedUser);
     }
   };
 
+  const handleCreditUsers = () => {
+    setModalType("multiple");
+    return onOpen();
+  }
+  const handleFileUpload = (event) => {
+    const file = event.target.files[0];
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const text = event.target.result;
+      const rows = text.split("\n").map((row) => row.split(','));
+      setCsv(rows);
+    }
+    reader.readAsText(file);
+  }
+
   async function creditUser() {
     try {
       const newBalance = parseInt(selectedUser.balance) + parseInt(credits);
       const res = await fetch("/api/users", {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: selectedUser.id, balance: newBalance }),
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({id: selectedUser.id, balance: newBalance}),
       });
       if (!res.ok) {
         setToast({
@@ -144,7 +162,7 @@ export default function UsersPage() {
       };
       const res2 = await fetch("/api/transactions", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {"Content-Type": "application/json"},
         body: JSON.stringify(newTransaction),
       });
       if (!res2.ok) {
@@ -154,7 +172,7 @@ export default function UsersPage() {
       // Update users
       const updatedUsers = users.map((originalUser) => {
         if (originalUser.id == selectedUser.id) {
-          return { ...originalUser, balance: newBalance };
+          return {...originalUser, balance: newBalance};
         }
         return originalUser;
       });
@@ -178,6 +196,61 @@ export default function UsersPage() {
     }
   }
 
+  async function creditUsers() {
+    let creditCount = 0;
+    let hasSubmissionError = false;
+    let hasEmailError = false;
+
+    for (let i = 2; i < csv.length; i++) {
+      const row = csv[i];
+      const submissionId = row[0];
+      const name = row[22];
+      const email = row[24];
+      const totalCredits = parseInt(row[32]) + (parseInt(row[33]) * 5) + (parseInt(row[34]) * 10);
+
+      try {
+        const res1 = await fetch("/api/submissions", {
+          method: "POST",
+          headers: {"Content-Type": "application/json"},
+          body: JSON.stringify({
+            submissionId: submissionId,
+            name: name,
+            email: email,
+            totalCredits: totalCredits,
+          })
+        })
+        if (!res1.ok) {
+          hasSubmissionError = true;
+          throw new Error(`Unable to handle submission ${submissionId}: ${res1.status}`);
+        }
+        creditCount += 1;
+
+        const res2 = await fetch("/api/mail", {
+          method: "POST",
+          headers: {"Content-Type": "application/json"},
+          body: JSON.stringify({
+            name: name,
+            email: email,
+            type: "handle-submission",
+          })
+        });
+        if (!res2.ok) {
+          hasEmailError = true;
+          throw new Error(`Unable to email update for submission ${submissionId}: ${res2.status}`);
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    }
+    setToast({
+      isSuccess: true,
+      header: "Credited accounts",
+      message: `Successfully credited ${creditCount} account(s).`,
+    });
+    setShowToast(true);
+    onOpenChange();
+  }
+
   async function deleteUser(selectedUser) {
     try {
       const originalTransactions = await fetch(
@@ -199,8 +272,8 @@ export default function UsersPage() {
 
       const res1 = await fetch("/api/transactions", {
         method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId: selectedUser.id }),
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({userId: selectedUser.id}),
       });
       if (!res1.ok) {
         // TODO: Restore transactions for user
@@ -211,8 +284,8 @@ export default function UsersPage() {
 
       const res2 = await fetch("/api/bookings", {
         method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId: selectedUser.id }),
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({userId: selectedUser.id}),
       });
       if (!res2.ok) {
         // TODO: Restore transactions and bookings for user
@@ -221,8 +294,8 @@ export default function UsersPage() {
 
       const res3 = await fetch("/api/users", {
         method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: selectedUser.id }),
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({id: selectedUser.id}),
       });
       if (!res3.ok) {
         // TODO: Restore transactions and bookings for user
@@ -250,10 +323,20 @@ export default function UsersPage() {
     }
   }
 
+
   return (
     <>
       <div className="w-full h-full flex flex-col gap-y-5 p-5 md:p-10  pt-20 overflow-y-scroll">
-        <PageTitle title="Users" />
+        <div className="flex flex-row items-center justify-between">
+          <PageTitle title="Users"/>
+          <button
+            onClick={handleCreditUsers}
+            className="h-[36px] rounded-[30px] px-[20px] bg-a-navy text-white text-sm cursor-pointer"
+          >
+            Credit users
+          </button>
+        </div>
+
         <div className="flex flex-col rounded-[20px] border border-a-black/10 p-5 bg-white gap-y-2.5">
           <div className="md:self-end md:w-1/4">
             <Input
@@ -289,13 +372,13 @@ export default function UsersPage() {
                               className="cursor-pointer"
                               onClick={() => selectRow(user)}
                             >
-                              <MdMoreVert size={24} />
+                              <MdMoreVert size={24}/>
                             </button>
                           </DropdownTrigger>
                           <DropdownMenu onAction={(key) => handleDropdown(key)}>
                             <DropdownItem key="view">View user</DropdownItem>
                             <DropdownItem key="credit">
-                              Credit account
+                              Credit user
                             </DropdownItem>
                             <DropdownItem key="delete">
                               Delete user
@@ -330,43 +413,79 @@ export default function UsersPage() {
         backdrop="opaque"
         classNames={modalClassNames}
       >
-        <ModalContent>
-          {(onClose) => (
-            <>
-              <ModalHeader>
-                <div className="flex flex-row items-center gap-x-2.5">
-                  <SectionTitle title="Credit user" />
-                </div>
-              </ModalHeader>
-              <ModalBody>
-                <div className="flex flex-col gap-y-[5px]">
-                  <p className="text-a-black/50 text-sm">
-                    Enter number of credits *
-                  </p>
-                  <div className="md:w-1/3">
-                    <Input
-                      type="number"
-                      value={credits}
-                      onValueChange={setCredits}
-                      isRequired
-                      variant="bordered"
-                      size="xs"
-                      classNames={inputClassNames}
-                    />
+        {modalType === "multiple" ?
+          (<ModalContent>
+            {(onClose) => (
+              <>
+                <ModalHeader>
+                  <div className="flex flex-row items-center gap-x-2.5">
+                    <SectionTitle title="Credit users"/>
                   </div>
-                </div>
-              </ModalBody>
-              <ModalFooter>
-                <button
-                  onClick={creditUser}
-                  className="rounded-[30px] px-[20px] py-[10px] bg-a-navy text-white cursor-pointer"
-                >
-                  Credit user
-                </button>
-              </ModalFooter>
-            </>
-          )}
-        </ModalContent>
+                </ModalHeader>
+                <ModalBody>
+                  <div className="flex flex-col gap-y-[5px]">
+                    <p className="text-a-black/50 text-sm">
+                      Upload CSV file *
+                    </p>
+                    <div className="md:w-1/3">
+                      <input
+                        type="file"
+                        onChange={handleFileUpload}
+                        accept=".csv"/>
+                    </div>
+                  </div>
+                </ModalBody>
+                <ModalFooter>
+                  <button
+                    onClick={creditUsers}
+                    className="rounded-[30px] px-[20px] py-[10px] bg-a-navy text-white cursor-pointer"
+                  >
+                    Credit
+                  </button>
+                </ModalFooter>
+              </>
+            )}
+          </ModalContent>) : (
+            <ModalContent>
+              {(onClose) => (
+                <>
+                  <ModalHeader>
+                    <div className="flex flex-row items-center gap-x-2.5">
+                      <SectionTitle title="Credit user"/>
+                    </div>
+                  </ModalHeader>
+                  <ModalBody>
+                    <div className="flex flex-col gap-y-[5px]">
+                      <p className="text-a-black/50 text-sm">
+                        Enter number of credits *
+                      </p>
+                      <div className="md:w-1/3">
+                        <Input
+                          type="number"
+                          value={credits}
+                          onValueChange={setCredits}
+                          isRequired
+                          variant="bordered"
+                          size="xs"
+                          classNames={inputClassNames}
+                        />
+                      </div>
+                    </div>
+                  </ModalBody>
+                  <ModalFooter>
+                    <button
+                      onClick={creditUser}
+                      className="rounded-[30px] px-[20px] py-[10px] bg-a-navy text-white cursor-pointer"
+                    >
+                      Credit
+                    </button>
+                  </ModalFooter>
+                </>
+              )}
+            </ModalContent>
+          )
+        }
+
       </Modal>
       {showToast ? (
         <div onClick={toggleShowToast}>

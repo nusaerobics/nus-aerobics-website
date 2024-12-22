@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
-var nodemailer = require('nodemailer');
-var transporter = nodemailer.createTransport({
+const nodemailer = require('nodemailer');
+const transporter = nodemailer.createTransport({
   host: "smtp.gmail.com",
   port: 465,
   secure: true,
@@ -12,49 +12,17 @@ var transporter = nodemailer.createTransport({
   },
 });
 
-// var Mailgen = require('mailgen');
-// var mailGenerator = new Mailgen({
-//   theme: "default",
-//   product: {
-//     name: "NUS Aerobics",
-//     link: "https://aerobics.nussportsclub.org",
-//   },
-// });
-
 export async function POST(request) {
   try {
     const body = await request.json();
-    const { user, type, details } = body;
-    // TODO: Fix mailgen - Currently facing "invalid theme" error
-    // var email = {
-    //   body: {
-    //     name: user.name,
-    //     intro: "We received a request to reset your password on NUS Aerobics.",
-    //     action: [
-    //       {
-    //         instructions:
-    //           "Login with your temporary password and reset your password in the Profile page.",
-    //       },
-    //       {
-    //         instructions: `Temporary password: ${details.tempPassword}`,
-    //         button: {
-    //           color: "#1F4776",
-    //           text: "Login",
-    //           link: "https://aerobics.nussportsclub.org/login",
-    //         },
-    //       },
-    //     ],
-    //   },
-    // };
-    // var emailHTML = mailGenerator.generate(email);
-    // var emailText = mailGenerator.generatePlaintext(email);
+    const { name, email, type, details } = body;
 
     let emailHTML;
     let subject;
-    if (type == "forgot") {
+    if (type === "forgot-password") {
       subject = "Forgot your password?";
       emailHTML = `
-      Hi ${user.name}!
+      Hi ${name}!
       <br>We received a request to reset your password on NUS Aerobics.
       <br>
       <br>Login with your temporary password and reset your password in the Profile page.
@@ -63,16 +31,28 @@ export async function POST(request) {
       <br>If you have any questions or problems, please contact us at: aerobics@nussportsclub.org.
       <br>Kindest regards,
       <br>NUS Aerobics`;
+    } else if (type === "handle-submission") {
+      subject = "Update to your account balance";
+      emailHTML = `
+      Hi ${name}!
+      <br>We have processed your form submission and have credited your account.
+      <br>
+      <br>If you have an existing account, you may log in with your existing details to see the updated balance.
+      <br>If you had not created an account yet, we have created one for you. Please log in with your email address and your temporary password is set to your email address. After logging in, reset your password in the Profile page.
+      <br>
+      <br>If you have any questions or problems, please contact us at: aerobics@nussportsclub.org.
+      <br>Kindest regards,
+      <br>NUS Aerobics`;
     }
 
     const mailOptions = {
       from: process.env.EMAIL_USER,
-      to: user.email,
+      to: email,
       subject: subject,
       html: emailHTML,
     };
 
-    transporter.sendMail(mailOptions, function (error, info) {
+    await transporter.sendMail(mailOptions, function (error, info) {
       if (error) {
         console.log(error);
       } else {
