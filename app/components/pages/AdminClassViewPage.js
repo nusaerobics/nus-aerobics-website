@@ -1,10 +1,9 @@
 import clsx from "clsx";
-import { format } from "date-fns";
+import {format} from "date-fns";
 import PropTypes from "prop-types";
-import { useEffect, useMemo, useState } from "react";
-import { z } from "zod";
+import {useEffect, useMemo, useState} from "react";
 
-import { useRouter } from "next/navigation";
+import {useRouter} from "next/navigation";
 import {
   Dropdown,
   DropdownTrigger,
@@ -19,7 +18,7 @@ import {
   ModalFooter,
   useDisclosure,
 } from "@nextui-org/modal";
-import { Chip, Input, Pagination, Spinner } from "@nextui-org/react";
+import {Chip, Input, Pagination, Spinner} from "@nextui-org/react";
 import {
   Table,
   TableHeader,
@@ -43,12 +42,12 @@ import {
   modalClassNames,
   tableClassNames,
 } from "../utils/ClassNames";
-import { PageTitle, SectionTitle } from "../utils/Titles";
+import {PageTitle, SectionTitle} from "../utils/Titles";
 import Toast from "../Toast";
 
-export default function AdminClassViewPage({ classId }) {
+export default function AdminClassViewPage({classId}) {
   const router = useRouter();
-  const { isOpen, onOpen, onOpenChange } = useDisclosure();
+  const {isOpen, onOpen, onOpenChange} = useDisclosure();
 
   const [selectedClass, setSelectedClass] = useState({
     name: "",
@@ -114,7 +113,7 @@ export default function AdminClassViewPage({ classId }) {
       }
     };
     fetchBookings();
-  }, []);
+  }, [modalType]);
 
   const rowsPerPage = 10;
   const bookingPages = Math.ceil(bookings.length / rowsPerPage);
@@ -141,13 +140,13 @@ export default function AdminClassViewPage({ classId }) {
   const selectRow = (rowData) => {
     setSelectedBooking(rowData);
   };
-  const handleDropdown = (key) => {
+  const handleDropdown = async (key) => {
     switch (key) {
       case "mark":
-        markPresent(selectedBooking);
+        await markPresent(selectedBooking);
         return;
       case "unbook":
-        unbookUser(selectedBooking);
+        await unbookUser(selectedBooking);
         return;
     }
   };
@@ -158,98 +157,37 @@ export default function AdminClassViewPage({ classId }) {
   const toggleIsEdit = () => {
     setIsEdit(!isEdit);
   };
-  const validateEmail = (email) => {
-    const emailSchema = z.string().email();
-    try {
-      emailSchema.parse(email);
-      return true;
-    } catch (error) {
-      console.log(error);
-      return false;
-    }
-  };
+
+  const validateEmail = (value) => value.match(/^[A-Z0-9._%+-]+@u.nus.edu$/i);
   const isInvalidEmail = useMemo(() => {
-    if (email != "") {
-      return !validateEmail(email);
-    }
-    return false;
-  });
+    if (email == "") return false;
+    return !validateEmail(email);
+  }, [email]);
 
   async function bookUser() {
     setModalType("loading");
     try {
-      // 1. Find user by email
       const res1 = await fetch(`/api/users?email=${email}`);
       if (!res1.ok) {
-        setResult({
-          isSuccess: false,
-          header: "User not found",
-          message: `No user exists for ${email}. Try again with a registered email.`,
-        });
-        setModalType("result");
-        return;
-        // throw new Error(`Unable to find user by ${email}: ${res1.status}`);
+        throw new Error(`Unable to find user: No user exists for ${email}. Try again with a registered email.`);
       }
       const user = await res1.json();
+      if (user.balance <= 0) {
+        throw new Error("Insufficient credits available. Unable to create booking.");
+      }
 
-      // 2. Create new booking for user
       const res2 = await fetch("/api/bookings", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ classId: selectedClass.id, userId: user.id }),
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify(
+          {
+            classId: selectedClass.id,
+            userId: user.id,
+          }),
       });
       if (!res2.ok) {
-        throw new Error("Unable to create booking");
+        throw new Error(`Unable to create booking. Try again later.`);
       }
-
-      // 3. Update user's balance
-      const res3 = await fetch("/api/users", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: user.id, balance: user.balance - 1 }),
-      });
-      if (!res3.ok) {
-        throw new Error("Unable to update user");
-      }
-
-      // 4. Create new transaction
-      const newTransaction = {
-        userId: user.id,
-        amount: -1,
-        type: "book",
-        description: `Booked '${selectedClass.name}'`,
-      };
-      const res4 = await fetch("/api/transactions", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(newTransaction),
-      });
-      if (!res4.ok) {
-        throw new Error("Unable to create transaction");
-      }
-
-      // Update bookings
-      const fetchBookings = async () => {
-        try {
-          const res = await fetch(`/api/bookings?classId=${classId}`);
-          if (!res.ok) {
-            throw new Error(
-              `Unable to get updated bookings for class ${classId}: ${res.status}`
-            );
-          }
-          const data = await res.json();
-          setBookings(data);
-        } catch (error) {
-          setToast({
-            isSuccess: false,
-            header: "Unable to get updated bookings for class",
-            message: `Unable to get updated bookings for class ${classId}. Try again later.`,
-          });
-          setShowToast(true);
-          console.log(error);
-        }
-      };
-      fetchBookings();
 
       setResult({
         isSuccess: true,
@@ -258,84 +196,35 @@ export default function AdminClassViewPage({ classId }) {
       });
       setModalType("result");
     } catch (error) {
+      console.log(error);
       setResult({
         isSuccess: false,
         header: "Booking unsuccessful",
-        message: `An error occurred while trying to book ${selectedClass.name}. Try again later.`,
+        message: `${error.message}`,
       });
       setModalType("result");
-      console.log(error);
     }
   }
 
   async function unbookUser(booking) {
     try {
-      const newBookedCapacity = selectedClass.bookedCapacity - 1;
-
-      // 1. Delete booking
-      const res1 = await fetch("/api/bookings", {
+      const res = await fetch("/api/bookings", {
         method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: booking.id }),
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify(
+          {
+            bookingId: booking.id,
+            classId: selectedClass.id,
+            userId: booking.userId,
+          }),
       });
-      if (!res1.ok) {
-        throw new Error(`Unable to delete booking ${booking.id}`);
+      if (!res.ok) {
+        throw new Error(`Unable to delete booking. Try again later.`);
       }
 
-      // 2. Update class bookedCapacity
-      const updatedClass = {
-        id: selectedClass.id,
-        name: selectedClass.name,
-        description: selectedClass.description,
-        date: selectedClass.date,
-        maxCapacity: selectedClass.maxCapacity,
-        bookedCapacity: newBookedCapacity,
-        status: newBookedCapacity < selectedClass.maxCapacity ? "open" : "full",
-      };
-      const res2 = await fetch("/api/classes", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(updatedClass),
-      });
-      if (!res2.ok) {
-        throw new Error(`Unable to update class ${selectedClass.id}`);
-      }
-
-      // 3. Update user's balance
-      const newBalance = selectedBooking.user.balance + 1;
-      const res3 = await fetch("/api/users", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          id: selectedBooking.userId,
-          balance: newBalance,
-        }),
-      });
-      if (!res3.ok) {
-        throw new Error(
-          `Unable to update user ${selectedBooking.userId}'s balance`
-        );
-      }
-
-      // 4. Create new transaction
-      const newTransaction = {
-        userId: booking.userId,
-        amount: 1,
-        type: "refund",
-        description: `Refunded '${selectedClass.name}'`,
-      };
-      const res4 = await fetch("/api/transactions", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(newTransaction),
-      });
-      if (!res4.ok) {
-        throw new Error("Unable to create transaction");
-      }
-
-      // Update bookings
+      // update bookings list
       const updatedBookings = bookings.filter((originalBooking) => {
-        return originalBooking.id != booking.id;
+        return originalBooking.id !== booking.id;
       });
       setBookings(updatedBookings);
 
@@ -349,7 +238,7 @@ export default function AdminClassViewPage({ classId }) {
       setToast({
         isSuccess: false,
         header: "Unable to cancel booking",
-        message: `Unable to cancel booking for ${selectedClass.name}. Try again later.`,
+        message: `${error.message}`,
       });
       setShowToast(true);
       console.log(error);
@@ -361,17 +250,17 @@ export default function AdminClassViewPage({ classId }) {
       const updatedBooking = { id: booking.id, attendance: "present" };
       const res = await fetch("/api/bookings", {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        headers: {"Content-Type": "application/json"},
         body: JSON.stringify(updatedBooking),
       });
       if (!res.ok) {
-        throw new Error("Unable to update booking");
+        throw new Error(`Unable to mark ${selectedBooking.user.name} as present in ${selectedClass.name}. Try again later.`);
       }
 
-      // Update bookings
+      // update bookings list
       const updatedBookings = bookings.map((originalBooking) => {
         if (originalBooking.id == booking.id) {
-          return { ...originalBooking, attendance: "present" };
+          return {...originalBooking, attendance: "present"};
         }
         return originalBooking;
       });
@@ -387,7 +276,7 @@ export default function AdminClassViewPage({ classId }) {
       setToast({
         isSuccess: false,
         header: "Unable to mark present",
-        message: `Unable to mark ${selectedBooking.user.name} as present in ${selectedClass.name}. Try again later.`,
+        message: `${error.message}`,
       });
       setShowToast(true);
       console.log(error);
@@ -399,9 +288,9 @@ export default function AdminClassViewPage({ classId }) {
       <div className="w-full h-full flex flex-col gap-y-5 p-5 md:p-10 pt-20 overflow-y-scroll">
         <div className="flex flex-row items-center gap-x-2.5">
           <button onClick={() => router.back()} className="cursor-pointer">
-            <MdChevronLeft color="#1F4776" size={42} />
+            <MdChevronLeft color="#1F4776" size={42}/>
           </button>
-          <PageTitle title={selectedClass.name} />
+          <PageTitle title={selectedClass.name}/>
           <Chip classNames={chipClassNames[selectedClass.status]}>
             {chipTypes[selectedClass.status].message}
           </Chip>
@@ -423,7 +312,7 @@ export default function AdminClassViewPage({ classId }) {
         </div>
         <div className="md:h-full w-full flex flex-col p-5 rounded-[20px] border border-a-black/10 bg-white gap-y-2.5">
           <div className="flex flex-row justify-between">
-            <SectionTitle title="Participants" />
+            <SectionTitle title="Participants"/>
             <button
               onClick={onOpen}
               disabled={isEdit}
@@ -436,45 +325,45 @@ export default function AdminClassViewPage({ classId }) {
             </button>
           </div>
           <div className="overflow-x-scroll">
-          <Table removeWrapper classNames={tableClassNames}>
-            <TableHeader>
-              <TableColumn>Name</TableColumn>
-              <TableColumn>Email</TableColumn>
-              <TableColumn>Attendance</TableColumn>
-              <TableColumn>Booking date</TableColumn>
-              <TableColumn></TableColumn>
-            </TableHeader>
-            <TableBody>
-              {bookingItems.map((booking) => {
-                return (
-                  <TableRow key={booking.id}>
-                    <TableCell>{booking.user.name}</TableCell>
-                    <TableCell>{booking.user.email}</TableCell>
-                    <TableCell>{booking.attendance}</TableCell>
-                    <TableCell>
-                      {format(booking.createdAt, "d/MM/y HH:mm")}
-                    </TableCell>
-                    <TableCell>
-                      <Dropdown>
-                        <DropdownTrigger>
-                          <button
-                            className="cursor-pointer"
-                            onClick={() => selectRow(booking)}
-                          >
-                            <MdMoreVert size={24} />
-                          </button>
-                        </DropdownTrigger>
-                        <DropdownMenu onAction={(key) => handleDropdown(key)}>
-                          <DropdownItem key="mark">Mark present</DropdownItem>
-                          <DropdownItem key="unbook">Unbook user</DropdownItem>
-                        </DropdownMenu>
-                      </Dropdown>
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
-            </TableBody>
-          </Table>
+            <Table removeWrapper classNames={tableClassNames}>
+              <TableHeader>
+                <TableColumn>Name</TableColumn>
+                <TableColumn>Email</TableColumn>
+                <TableColumn>Attendance</TableColumn>
+                <TableColumn>Booking date</TableColumn>
+                <TableColumn></TableColumn>
+              </TableHeader>
+              <TableBody>
+                {bookingItems.map((booking) => {
+                  return (
+                    <TableRow key={booking.id}>
+                      <TableCell>{booking.user.name}</TableCell>
+                      <TableCell>{booking.user.email}</TableCell>
+                      <TableCell>{booking.attendance}</TableCell>
+                      <TableCell>
+                        {format(booking.createdAt, "d/MM/y HH:mm")}
+                      </TableCell>
+                      <TableCell>
+                        <Dropdown>
+                          <DropdownTrigger>
+                            <button
+                              className="cursor-pointer"
+                              onClick={() => selectRow(booking)}
+                            >
+                              <MdMoreVert size={24}/>
+                            </button>
+                          </DropdownTrigger>
+                          <DropdownMenu onAction={(key) => handleDropdown(key)}>
+                            <DropdownItem key="mark">Mark present</DropdownItem>
+                            <DropdownItem key="unbook">Unbook user</DropdownItem>
+                          </DropdownMenu>
+                        </Dropdown>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
           </div>
           <div className="flex flex-row justify-center">
             <Pagination
@@ -519,12 +408,19 @@ export default function AdminClassViewPage({ classId }) {
                     />
                   </ModalBody>
                   <ModalFooter>
-                    <button
+                    { isInvalidEmail || (email == "") ? (
+                      < button
+                        className="rounded-[30px] px-[20px] py-[10px] bg-[#1F477620] text-white text-sm cursor-not-allowed"
+                        disabled
+                      >
+                        Book user
+                      </button>
+                    ) : (<button
                       onClick={bookUser}
                       className="h-[36px] rounded-[30px] px-[20px] bg-a-navy text-white text-sm cursor-pointer"
                     >
                       Book user
-                    </button>
+                    </button>)}
                   </ModalFooter>
                 </>
               ) : (
@@ -533,7 +429,7 @@ export default function AdminClassViewPage({ classId }) {
               {modalType == "loading" ? (
                 <ModalBody>
                   <div className="flex flex-col items-center justify-center gap-y-5 p-20">
-                    <Spinner color="primary" size="lg" />
+                  <Spinner color="primary" size="lg"/>
                     <p className="text-a-black">Booking user...</p>
                   </div>
                 </ModalBody>
@@ -544,11 +440,11 @@ export default function AdminClassViewPage({ classId }) {
                 <ModalBody>
                   <div className="flex flex-col items-center justify-center gap-y-2.5 p-5 md:p-10">
                     {result.isSuccess ? (
-                      <MdCheckCircleOutline size={84} color={"#2A9E2F"} />
+                      <MdCheckCircleOutline size={84} color={"#2A9E2F"}/>
                     ) : (
-                      <MdOutlineCancel size={84} color={"#9E2A2A"} />
+                      <MdOutlineCancel size={84} color={"#9E2A2A"}/>
                     )}
-                    <SectionTitle title={result.header} />
+                    <SectionTitle title={result.header}/>
                     <p className="text-a-black">{result.message}</p>
                   </div>
                 </ModalBody>
