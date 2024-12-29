@@ -26,7 +26,7 @@ export async function GET(request) {
       const userId = searchParams.get("userId");
       const userBookings = await Booking.findAll({
         where: { userId: userId },
-        order: [ [ { model: Class, as: "class" }, "date", "ASC" ] ],
+        order: [[{ model: Class, as: "class" }, "date", "ASC"]],
         include: [
           {
             model: Class,
@@ -93,16 +93,23 @@ export async function POST(request) {
   try {
     // NOTE: check for sufficient funds done before request sent
     const body = await request.json();
-    const { classId, userId } = body;
+    const { classId, userId, isForced } = body;  // NOTE: isForced = TRUE when admin makes the booking
 
     // 1. find user and class.
-    const bookedClass = await Class.findOne({ where: { id: classId } }, { t });
+    const selectedClass = await Class.findOne({ where: { id: classId } }, { t });
     const user = await User.findOne(
       { where: { id: userId } },
       { t },
     );
 
-    // 2. create booking for user.
+    // 2. check class capacity.
+    if (!isForced) {
+      if (selectedClass.bookedCapacity >= selectedClass.maxCapacity) {
+        throw new Error(`Unable to book class ${ classId } because it is full.`);
+      }
+    }
+
+    // 3. create booking for user.
     const newBooking = await Booking.create(
       {
         userId: userId,
@@ -121,7 +128,7 @@ export async function POST(request) {
 
     // 4. update class' booked capacity.
     await Class.update(
-      { bookedCapacity: bookedClass.bookedCapacity + 1 },
+      { bookedCapacity: selectedClass.bookedCapacity + 1 },
       { where: { id: classId }, transaction: t });
 
     // 5. create new transaction.
@@ -129,7 +136,7 @@ export async function POST(request) {
       userId: user.id,
       amount: -1,
       type: "book",
-      description: `Booked '${ bookedClass.name }'`,
+      description: `Booked '${ selectedClass.name }'`,
     }, { transaction: t });
 
     await t.commit();

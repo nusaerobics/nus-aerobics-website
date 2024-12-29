@@ -1,9 +1,9 @@
 import clsx from "clsx";
-import {format} from "date-fns";
+import { format } from "date-fns";
 import PropTypes from "prop-types";
-import {useEffect, useMemo, useState} from "react";
+import { useEffect, useMemo, useState } from "react";
 
-import {useRouter} from "next/navigation";
+import { useRouter } from "next/navigation";
 import {
   Dropdown,
   DropdownTrigger,
@@ -18,7 +18,7 @@ import {
   ModalFooter,
   useDisclosure,
 } from "@nextui-org/modal";
-import {Chip, Input, Pagination, Spinner} from "@nextui-org/react";
+import { Chip, Input, Pagination, Spinner } from "@nextui-org/react";
 import {
   Table,
   TableHeader,
@@ -42,12 +42,12 @@ import {
   modalClassNames,
   tableClassNames,
 } from "../utils/ClassNames";
-import {PageTitle, SectionTitle} from "../utils/Titles";
+import { PageTitle, SectionTitle } from "../utils/Titles";
 import Toast from "../Toast";
 
-export default function AdminClassViewPage({classId}) {
+export default function AdminClassViewPage({ classId }) {
   const router = useRouter();
-  const {isOpen, onOpen, onOpenChange} = useDisclosure();
+  const { isOpen, onOpen, onOpenChange } = useDisclosure();
 
   const [selectedClass, setSelectedClass] = useState({
     name: "",
@@ -73,9 +73,9 @@ export default function AdminClassViewPage({classId}) {
     // getClass
     const fetchClass = async () => {
       try {
-        const res = await fetch(`/api/classes?id=${classId}`);
+        const res = await fetch(`/api/classes?id=${ classId }`);
         if (!res.ok) {
-          throw new Error(`Unable to get class ${classId}: ${res.status}`);
+          throw new Error(`Unable to get class ${ classId }: ${ res.status }`);
         }
         const data = await res.json();
         setSelectedClass(data);
@@ -83,7 +83,7 @@ export default function AdminClassViewPage({classId}) {
         setToast({
           isSuccess: false,
           header: "Unable to get class",
-          message: `Unable to get class ${classId}. Try again later.`,
+          message: `Unable to get class ${ classId }. Try again later.`,
         });
         setShowToast(true);
         console.log(error);
@@ -94,10 +94,10 @@ export default function AdminClassViewPage({classId}) {
     // getBookingsByClass
     const fetchBookings = async () => {
       try {
-        const res = await fetch(`/api/bookings?classId=${classId}`);
+        const res = await fetch(`/api/bookings?classId=${ classId }`);
         if (!res.ok) {
           throw new Error(
-            `Unable to get bookings for class ${classId}: ${res.status}`
+            `Unable to get bookings for class ${ classId }: ${ res.status }`
           );
         }
         const data = await res.json();
@@ -106,7 +106,7 @@ export default function AdminClassViewPage({classId}) {
         setToast({
           isSuccess: false,
           header: "Unable to get bookings for class",
-          message: `Unable to get bookings for class ${classId}. Try again later.`,
+          message: `Unable to get bookings for class ${ classId }. Try again later.`,
         });
         setShowToast(true);
         console.log(error);
@@ -167,9 +167,9 @@ export default function AdminClassViewPage({classId}) {
   async function bookUser() {
     setModalType("loading");
     try {
-      const res1 = await fetch(`/api/users?email=${email}`);
+      const res1 = await fetch(`/api/users?email=${ email }`);
       if (!res1.ok) {
-        throw new Error(`Unable to find user: No user exists for ${email}. Try again with a registered email.`);
+        throw new Error(`Unable to find user: No user exists for ${ email }. Try again with a registered email.`);
       }
       const user = await res1.json();
       if (user.balance <= 0) {
@@ -178,11 +178,12 @@ export default function AdminClassViewPage({classId}) {
 
       const res2 = await fetch("/api/bookings", {
         method: "POST",
-        headers: {"Content-Type": "application/json"},
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(
           {
             classId: selectedClass.id,
             userId: user.id,
+            isForced: true,
           }),
       });
       if (!res2.ok) {
@@ -192,7 +193,7 @@ export default function AdminClassViewPage({classId}) {
       setResult({
         isSuccess: true,
         header: "Booking successful",
-        message: `${user.name} has been successfully booked for ${selectedClass.name}.`,
+        message: `${ user.name } has been successfully booked for ${ selectedClass.name }.`,
       });
       setModalType("result");
     } catch (error) {
@@ -200,7 +201,7 @@ export default function AdminClassViewPage({classId}) {
       setResult({
         isSuccess: false,
         header: "Booking unsuccessful",
-        message: `${error.message}`,
+        message: `${ error.message }`,
       });
       setModalType("result");
     }
@@ -210,7 +211,7 @@ export default function AdminClassViewPage({classId}) {
     try {
       const res = await fetch("/api/bookings", {
         method: "DELETE",
-        headers: {"Content-Type": "application/json"},
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(
           {
             bookingId: booking.id,
@@ -231,14 +232,14 @@ export default function AdminClassViewPage({classId}) {
       setToast({
         isSuccess: true,
         header: "Cancelled booking",
-        message: `Successfully cancelled booking of ${selectedClass.name} for ${selectedBooking.user.name}.`,
+        message: `Successfully cancelled booking of ${ selectedClass.name } for ${ selectedBooking.user.name }.`,
       });
       setShowToast(true);
     } catch (error) {
       setToast({
         isSuccess: false,
         header: "Unable to cancel booking",
-        message: `${error.message}`,
+        message: `${ error.message }`,
       });
       setShowToast(true);
       console.log(error);
@@ -250,17 +251,17 @@ export default function AdminClassViewPage({classId}) {
       const updatedBooking = { id: booking.id, attendance: "present" };
       const res = await fetch("/api/bookings", {
         method: "PUT",
-        headers: {"Content-Type": "application/json"},
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(updatedBooking),
       });
       if (!res.ok) {
-        throw new Error(`Unable to mark ${selectedBooking.user.name} as present in ${selectedClass.name}. Try again later.`);
+        throw new Error(`Unable to mark ${ selectedBooking.user.name } as present in ${ selectedClass.name }. Try again later.`);
       }
 
       // update bookings list
       const updatedBookings = bookings.map((originalBooking) => {
         if (originalBooking.id == booking.id) {
-          return {...originalBooking, attendance: "present"};
+          return { ...originalBooking, attendance: "present" };
         }
         return originalBooking;
       });
@@ -269,14 +270,14 @@ export default function AdminClassViewPage({classId}) {
       setToast({
         isSuccess: true,
         header: "Marked present",
-        message: `Successfully marked ${selectedBooking.user.name} as present in ${selectedClass.name}.`,
+        message: `Successfully marked ${ selectedBooking.user.name } as present in ${ selectedClass.name }.`,
       });
       setShowToast(true);
     } catch (error) {
       setToast({
         isSuccess: false,
         header: "Unable to mark present",
-        message: `${error.message}`,
+        message: `${ error.message }`,
       });
       setShowToast(true);
       console.log(error);
@@ -287,45 +288,46 @@ export default function AdminClassViewPage({classId}) {
     <>
       <div className="w-full h-full flex flex-col gap-y-5 p-5 md:p-10 pt-20 overflow-y-scroll">
         <div className="flex flex-row items-center gap-x-2.5">
-          <button onClick={() => router.back()} className="cursor-pointer">
-            <MdChevronLeft color="#1F4776" size={42}/>
+          <button onClick={ () => router.back() } className="cursor-pointer">
+            <MdChevronLeft color="#1F4776" size={ 42 }/>
           </button>
-          <PageTitle title={selectedClass.name}/>
-          <Chip classNames={chipClassNames[selectedClass.status]}>
-            {chipTypes[selectedClass.status].message}
+          <PageTitle title={ selectedClass.name }/>
+          {/* TODO: bugfix/routes - need to fix how class' status is set (force booking despite overbooked class causes undefined classname) */ }
+          <Chip classNames={ chipClassNames[selectedClass.status] }>
+            { chipTypes[selectedClass.status].message }
           </Chip>
         </div>
 
         <div className="h-full w-full flex flex-col gap-y-5 p-5 rounded-[20px] border border-a-black/10 bg-white">
-          {isEdit ? (
+          { isEdit ? (
             <ClassForm
-              isCreate={false}
-              selectedClass={selectedClass}
-              toggleIsEdit={toggleIsEdit}
+              isCreate={ false }
+              selectedClass={ selectedClass }
+              toggleIsEdit={ toggleIsEdit }
             />
           ) : (
             <ClassDetails
-              selectedClass={selectedClass}
-              toggleIsEdit={toggleIsEdit}
+              selectedClass={ selectedClass }
+              toggleIsEdit={ toggleIsEdit }
             />
-          )}
+          ) }
         </div>
         <div className="md:h-full w-full flex flex-col p-5 rounded-[20px] border border-a-black/10 bg-white gap-y-2.5">
           <div className="flex flex-row justify-between">
             <SectionTitle title="Participants"/>
             <button
-              onClick={onOpen}
-              disabled={isEdit}
-              className={clsx("h-[36px] rounded-[30px] px-[20px] text-sm", {
+              onClick={ onOpen }
+              disabled={ isEdit }
+              className={ clsx("h-[36px] rounded-[30px] px-[20px] text-sm", {
                 "bg-a-navy text-white cursor-pointer": !isEdit,
                 "bg-a-navy/20 text-white cursor-not-allowed": isEdit,
-              })}
+              }) }
             >
               Add participant
             </button>
           </div>
           <div className="overflow-x-scroll">
-            <Table removeWrapper classNames={tableClassNames}>
+            <Table removeWrapper classNames={ tableClassNames }>
               <TableHeader>
                 <TableColumn>Name</TableColumn>
                 <TableColumn>Email</TableColumn>
@@ -334,26 +336,26 @@ export default function AdminClassViewPage({classId}) {
                 <TableColumn></TableColumn>
               </TableHeader>
               <TableBody>
-                {bookingItems.map((booking) => {
+                { bookingItems.map((booking) => {
                   return (
-                    <TableRow key={booking.id}>
-                      <TableCell>{booking.user.name}</TableCell>
-                      <TableCell>{booking.user.email}</TableCell>
-                      <TableCell>{booking.attendance}</TableCell>
+                    <TableRow key={ booking.id }>
+                      <TableCell>{ booking.user.name }</TableCell>
+                      <TableCell>{ booking.user.email }</TableCell>
+                      <TableCell>{ booking.attendance }</TableCell>
                       <TableCell>
-                        {format(booking.createdAt, "d/MM/y HH:mm")}
+                        { format(booking.createdAt, "d/MM/y HH:mm") }
                       </TableCell>
                       <TableCell>
                         <Dropdown>
                           <DropdownTrigger>
                             <button
                               className="cursor-pointer"
-                              onClick={() => selectRow(booking)}
+                              onClick={ () => selectRow(booking) }
                             >
-                              <MdMoreVert size={24}/>
+                              <MdMoreVert size={ 24 }/>
                             </button>
                           </DropdownTrigger>
-                          <DropdownMenu onAction={(key) => handleDropdown(key)}>
+                          <DropdownMenu onAction={ (key) => handleDropdown(key) }>
                             <DropdownItem key="mark">Mark present</DropdownItem>
                             <DropdownItem key="unbook">Unbook user</DropdownItem>
                           </DropdownMenu>
@@ -361,7 +363,7 @@ export default function AdminClassViewPage({classId}) {
                       </TableCell>
                     </TableRow>
                   );
-                })}
+                }) }
               </TableBody>
             </Table>
           </div>
@@ -371,25 +373,25 @@ export default function AdminClassViewPage({classId}) {
               isCompact
               color="primary"
               size="sm"
-              loop={true}
-              page={page}
-              total={bookingPages}
-              onChange={(page) => setPage(page)}
+              loop={ true }
+              page={ page }
+              total={ bookingPages }
+              onChange={ (page) => setPage(page) }
             />
           </div>
         </div>
       </div>
       <Modal
-        isOpen={isOpen}
-        onOpenChange={onCloseModal}
+        isOpen={ isOpen }
+        onOpenChange={ onCloseModal }
         size="md"
         backdrop="opaque"
-        classNames={modalClassNames}
+        classNames={ modalClassNames }
       >
         <ModalContent>
-          {(onClose) => (
+          { (onClose) => (
             <>
-              {modalType == "view" ? (
+              { modalType == "view" ? (
                 <>
                   <ModalHeader>
                     <p className="text-a-navy">Add participant</p>
@@ -397,14 +399,14 @@ export default function AdminClassViewPage({classId}) {
                   <ModalBody>
                     <Input
                       label="Email"
-                      value={email}
-                      onValueChange={setEmail}
-                      isInvalid={isInvalidEmail}
+                      value={ email }
+                      onValueChange={ setEmail }
+                      isInvalid={ isInvalidEmail }
                       errorMessage="Please enter a valid email"
                       isRequired
                       variant="bordered"
                       size="sm"
-                      classNames={inputClassNames}
+                      classNames={ inputClassNames }
                     />
                   </ModalBody>
                   <ModalFooter>
@@ -416,56 +418,56 @@ export default function AdminClassViewPage({classId}) {
                         Book user
                       </button>
                     ) : (<button
-                      onClick={bookUser}
+                      onClick={ bookUser }
                       className="h-[36px] rounded-[30px] px-[20px] bg-a-navy text-white text-sm cursor-pointer"
                     >
                       Book user
-                    </button>)}
+                    </button>) }
                   </ModalFooter>
                 </>
               ) : (
                 <></>
-              )}
-              {modalType == "loading" ? (
+              ) }
+              { modalType == "loading" ? (
                 <ModalBody>
                   <div className="flex flex-col items-center justify-center gap-y-5 p-20">
-                  <Spinner color="primary" size="lg"/>
+                    <Spinner color="primary" size="lg"/>
                     <p className="text-a-black">Booking user...</p>
                   </div>
                 </ModalBody>
               ) : (
                 <></>
-              )}
-              {modalType == "result" ? (
+              ) }
+              { modalType == "result" ? (
                 <ModalBody>
                   <div className="flex flex-col items-center justify-center gap-y-2.5 p-5 md:p-10">
-                    {result.isSuccess ? (
-                      <MdCheckCircleOutline size={84} color={"#2A9E2F"}/>
+                    { result.isSuccess ? (
+                      <MdCheckCircleOutline size={ 84 } color={ "#2A9E2F" }/>
                     ) : (
-                      <MdOutlineCancel size={84} color={"#9E2A2A"}/>
-                    )}
-                    <SectionTitle title={result.header}/>
-                    <p className="text-a-black">{result.message}</p>
+                      <MdOutlineCancel size={ 84 } color={ "#9E2A2A" }/>
+                    ) }
+                    <SectionTitle title={ result.header }/>
+                    <p className="text-a-black">{ result.message }</p>
                   </div>
                 </ModalBody>
               ) : (
                 <></>
-              )}
+              ) }
             </>
-          )}
+          ) }
         </ModalContent>
       </Modal>
-      {showToast ? (
-        <div onClick={toggleShowToast}>
+      { showToast ? (
+        <div onClick={ toggleShowToast }>
           <Toast
-            isSuccess={toast.isSuccess}
-            header={toast.header}
-            message={toast.message}
+            isSuccess={ toast.isSuccess }
+            header={ toast.header }
+            message={ toast.message }
           />
         </div>
       ) : (
         <></>
-      )}
+      ) }
     </>
   );
 }
