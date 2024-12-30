@@ -1,11 +1,20 @@
 "use client";
 
-import {Navbar, NavbarBrand, NavbarContent, NavbarItem, NavbarMenuToggle, NavbarMenu, NavbarMenuItem, Link, Button} from "@nextui-org/react";
+import {
+  Navbar,
+  NavbarBrand,
+  NavbarContent,
+  NavbarItem,
+  NavbarMenuToggle,
+  NavbarMenu,
+  NavbarMenuItem,
+  Link,
+  Button
+} from "@nextui-org/react";
 import { useState } from "react";
 
 export default function MobileSideBar() {
-  const [isMenuOpen, setIsMenuOpen] = useState(true);
-
+  const [ isMenuOpen, setIsMenuOpen ] = useState(true);
   const menuItems = [
     "Dashboard",
     "Classes",
@@ -15,14 +24,14 @@ export default function MobileSideBar() {
   ];
 
   return (
-    <Navbar onMenuOpenChange={setIsMenuOpen}>
+    <Navbar onMenuOpenChange={ setIsMenuOpen }>
       <NavbarContent>
         <NavbarMenuToggle
-          aria-label={isMenuOpen ? "Close menu" : "Open menu"}
+          aria-label={ isMenuOpen ? "Close menu" : "Open menu" }
           className="sm:hidden"
         />
         <NavbarBrand>
-        <img
+          <img
             src="/images/logo.png"
             alt="NUS Aerobics"
             width="189"
@@ -55,14 +64,14 @@ export default function MobileSideBar() {
           <Link href="#">Login</Link>
         </NavbarItem>
         <NavbarItem>
-          <Button as={Link} color="primary" href="#" variant="flat">
+          <Button as={ Link } color="primary" href="#" variant="flat">
             Sign Up
           </Button>
         </NavbarItem>
       </NavbarContent>
       <NavbarMenu>
-        {menuItems.map((item, index) => (
-          <NavbarMenuItem key={`${item}-${index}`}>
+        { menuItems.map((item, index) => (
+          <NavbarMenuItem key={ `${ item }-${ index }` }>
             <Link
               color={
                 index === 2 ? "primary" : index === menuItems.length - 1 ? "danger" : "foreground"
@@ -71,10 +80,10 @@ export default function MobileSideBar() {
               href="#"
               size="lg"
             >
-              {item}
+              { item }
             </Link>
           </NavbarMenuItem>
-        ))}
+        )) }
       </NavbarMenu>
     </Navbar>
   );

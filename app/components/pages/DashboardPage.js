@@ -59,7 +59,7 @@ export default function DashboardPage({ session }) {
         try {
           const res = await fetch("/api/classes?isToday=true");
           if (!res.ok) {
-            throw new Error(`Unable to get classes: ${res.status}`);
+            throw new Error(`Unable to get classes: ${ res.status }`);
           }
           const data = await res.json();
           setClasses(data);
@@ -157,10 +157,10 @@ export default function DashboardPage({ session }) {
     } else {
       const fetchBalance = async () => {
         try {
-          const res = await fetch(`/api/users?id=${session.userId}`);
+          const res = await fetch(`/api/users?id=${ session.userId }`);
           if (!res.ok) {
             throw new Error(
-              `Unable to get user ${session.userId}: ${res.status}`
+              `Unable to get user ${ session.userId }: ${ res.status }`
             );
           }
           const data = await res.json();
@@ -173,10 +173,10 @@ export default function DashboardPage({ session }) {
 
       const fetchTransactions = async () => {
         try {
-          const res = await fetch(`/api/transactions?userId=${session.userId}`);
+          const res = await fetch(`/api/transactions?userId=${ session.userId }`);
           if (!res.ok) {
             throw new Error(
-              `Unable to get transactions for user ${session.userId}: ${res.status}`
+              `Unable to get transactions for user ${ session.userId }: ${ res.status }`
             );
           }
           const data = await res.json();
@@ -186,7 +186,7 @@ export default function DashboardPage({ session }) {
           setToast({
             isSuccess: false,
             header: "Unable to get transactions for user",
-            message: `Unable to get transactions for user ${session.userId}. Try again later.`,
+            message: `Unable to get transactions for user ${ session.userId }. Try again later.`,
           });
           setShowToast(true);
           console.log(error);
@@ -196,10 +196,10 @@ export default function DashboardPage({ session }) {
 
       const fetchBookings = async () => {
         try {
-          const res = await fetch(`/api/bookings?userId=${session.userId}`);
+          const res = await fetch(`/api/bookings?userId=${ session.userId }`);
           if (!res.ok) {
             throw new Error(
-              `Unable to get bookings for user ${session.userId}: ${res.status}`
+              `Unable to get bookings for user ${ session.userId }: ${ res.status }`
             );
           }
           const data = await res.json();
@@ -221,7 +221,7 @@ export default function DashboardPage({ session }) {
           setToast({
             isSuccess: false,
             header: "Unable to get bookings",
-            message: `Unable to get bookings for user ${session.userId}. Try again later.`,
+            message: `Unable to get bookings for user ${ session.userId }. Try again later.`,
           });
           setShowToast(true);
           console.log(error);
@@ -232,35 +232,35 @@ export default function DashboardPage({ session }) {
   }, []);
 
   const handleClick = (rowData) => {
-    router.push(`/dashboard/classes/${rowData.id}`);
+    router.push(`/dashboard/classes/${ rowData.id }`);
   };
 
   return (
     <>
-      {isAdmin ? (
+      { isAdmin ? (
         <div className="w-full h-full flex flex-col gap-y-5 p-5 md:p-10  pt-20 overflow-y-scroll">
-          <PageTitle title="Dashboard" />
+          <PageTitle title="Dashboard"/>
           <div className="h-full flex md:flex-row sm:flex-col gap-x-5 sm:gap-y-5">
-            <div className="w-full md:w-2/3 flex flex-col p-5 gap-y-2.5 bg-white rounded-[20px] border border-a-black/10">
-              <SectionTitle title="Today's classes" />
-              {classes.length == 0 ? (
+            <div
+              className="w-full md:w-2/3 flex flex-col p-5 gap-y-2.5 bg-white rounded-[20px] border border-a-black/10">
+              <SectionTitle title="Today's classes"/>
+              { classes.length == 0 ? (
                 <p>No classes today</p>
               ) : (
                 <>
-                  {classes.map((c) => {
+                  { classes.map((c) => {
                     return (
                       <div
-                        key={c.id}
+                        key={ c.id }
                         className="flex flex-col gap-y-2.5 p-2.5 rounded-[20px] border-l-[4px] border-l-a-navy bg-a-navy/10"
                       >
                         <div className="flex flex-col">
-                          <p className="font-bold text-base">{c.name}</p>
-                          <p>{format(c.date, "d/MM/y HH:mm (EEE)")}</p>
+                          <p className="font-bold text-base">{ c.name }</p>
+                          <p>{ format(c.date, "d/MM/y HH:mm (EEE)") }</p>
                         </div>
                         <div className="flex justify-end">
-                          {/* TODO: Check implementation */}
                           <button
-                            onClick={() => handleClick(c)}
+                            onClick={ () => handleClick(c) }
                             className="rounded-[30px] px-[20px] py-[10px] bg-a-navy text-white cursor-pointer"
                           >
                             View details
@@ -268,17 +268,17 @@ export default function DashboardPage({ session }) {
                         </div>
                       </div>
                     );
-                  })}
+                  }) }
                 </>
-              )}
+              ) }
             </div>
             <div className="w-full md:w-1/3 flex flex-col gap-y-5">
-              <div className="md:h-1/4 flex flex-col justify-center p-5 bg-white rounded-[20px] border border-a-black/10">
+              <div
+                className="md:h-1/4 flex flex-col justify-center p-5 bg-white rounded-[20px] border border-a-black/10">
                 <div className="flex flex-row items-end gap-x-1">
                   <p className="font-poppins font-bold text-a-navy md:text-3xl sm:text-2xl">
-                    {deposits}
+                    { deposits }
                   </p>
-                  {/* TODO: Update actual amount */}
                   <p className="font-bold text-a-navy md:text-xl sm:text-lg">
                     / 3000
                   </p>
@@ -287,18 +287,20 @@ export default function DashboardPage({ session }) {
                   deposits
                 </p>
               </div>
-              <div className="md:h-1/4 flex flex-col justify-center p-5 bg-white rounded-[20px] border border-a-black/10">
+              <div
+                className="md:h-1/4 flex flex-col justify-center p-5 bg-white rounded-[20px] border border-a-black/10">
                 <p className="font-poppins font-bold text-a-navy md:text-3xl sm:text-2xl">
-                  {creditsUnused}
+                  { creditsUnused }
                 </p>
                 <p className="font-poppins text-a-navy md:text-xl sm:text-lg">
                   credits unused
                 </p>
               </div>
-              <div className="md:h-1/4 flex flex-col justify-center p-5 bg-white rounded-[20px] border border-a-black/10">
+              <div
+                className="md:h-1/4 flex flex-col justify-center p-5 bg-white rounded-[20px] border border-a-black/10">
                 <div className="flex flex-row items-end gap-x-1">
                   <p className="font-poppins font-bold text-a-navy md:text-3xl sm:text-2xl">
-                    {slotsBooked}
+                    { slotsBooked }
                   </p>
                   <p className="font-bold text-a-navy md:text-xl sm:text-lg">
                     / 2584
@@ -308,9 +310,10 @@ export default function DashboardPage({ session }) {
                   slots booked
                 </p>
               </div>
-              <div className="md:h-1/4 flex flex-col justify-center p-5 bg-white rounded-[20px] border border-a-black/10">
+              <div
+                className="md:h-1/4 flex flex-col justify-center p-5 bg-white rounded-[20px] border border-a-black/10">
                 <p className="font-poppins font-bold text-a-navy md:text-3xl sm:text-2xl">
-                  {members}
+                  { members }
                 </p>
                 <p className="font-poppins text-a-navy md:text-xl sm:text-lg">
                   members
@@ -321,63 +324,65 @@ export default function DashboardPage({ session }) {
         </div>
       ) : (
         <div className="w-full h-full flex flex-col gap-y-5 p-5 md:p-10  pt-20 overflow-y-scroll">
-          <PageTitle title="Dashboard" />
+          <PageTitle title="Dashboard"/>
           <div className="h-full flex md:flex-row sm:flex-col gap-x-5 sm:gap-y-5">
-            <div className="w-full md:w-2/3 flex flex-col p-5 gap-y-2.5 bg-white rounded-[20px] border border-a-black/10">
-              <SectionTitle title="Upcoming bookings" />
-              {bookings.length == 0 ? (
+            <div
+              className="w-full md:w-2/3 flex flex-col p-5 gap-y-2.5 bg-white rounded-[20px] border border-a-black/10">
+              <SectionTitle title="Upcoming bookings"/>
+              { bookings.length == 0 ? (
                 <p>No upcoming bookings</p>
               ) : (
                 <>
-                  {bookings.map((booking) => {
-                    return <ClassCard key={booking.id} booking={booking} />;
-                  })}
+                  { bookings.map((booking) => {
+                    return <ClassCard key={ booking.id } booking={ booking }/>;
+                  }) }
                 </>
-              )}
+              ) }
             </div>
             <div className="w-full md:w-1/3 flex flex-col gap-y-5">
-              <div className="md:h-1/4 flex flex-col justify-center p-5 bg-white rounded-[20px] border border-a-black/10">
+              <div
+                className="md:h-1/4 flex flex-col justify-center p-5 bg-white rounded-[20px] border border-a-black/10">
                 <p className="font-poppins font-bold text-a-navy md:text-5xl text-3xl">
-                  {balance}
+                  { balance }
                 </p>
                 <p className="font-poppins text-a-navy md:text-2xl text-base">
                   credits remaining
                 </p>
               </div>
               <div className="md:h-3/4 flex flex-col p-5 bg-white rounded-[20px] border border-a-black/10">
-                <SectionTitle title="Recent transactions" />
-                <Table removeWrapper classNames={tableClassNames}>
+                <SectionTitle title="Recent transactions"/>
+                <Table removeWrapper classNames={ tableClassNames }>
                   <TableHeader>
                     <TableColumn>Description</TableColumn>
                     <TableColumn>Amount</TableColumn>
                   </TableHeader>
                   <TableBody>
-                    {transactions.map((transaction) => {
+                    { transactions.map((transaction) => {
                       return (
-                        <TableRow key={transaction.id}>
-                          <TableCell>{transaction.description}</TableCell>
-                          <TableCell>{transaction.amount}</TableCell>
+                        <TableRow key={ transaction.id }>
+                          <TableCell>{ transaction.description }</TableCell>
+                          <TableCell>{ transaction.amount }</TableCell>
                         </TableRow>
                       );
-                    })}
+                    }) }
                   </TableBody>
                 </Table>
               </div>
             </div>
           </div>
         </div>
-      )}
-      {showToast ? (
-        <div onClick={toggleShowToast}>
+      ) }
+      { showToast ? (
+        <div onClick={ toggleShowToast }>
           <Toast
-            isSuccess={toast.isSuccess}
-            header={toast.header}
-            message={toast.message}
+            isSuccess={ toast.isSuccess }
+            header={ toast.header }
+            message={ toast.message }
           />
         </div>
       ) : (
         <></>
-      )}
+      ) }
     </>
   );
 }

@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 const db = require("../../config/sequelize");
 const Class = db.classes;
 const Booking = db.bookings;
+const Transaction = db.transactions;
 const User = db.users;
 
 export async function GET(request) {
@@ -15,7 +16,7 @@ export async function GET(request) {
       const id = searchParams.get("id");
       const booking = await Booking.findOne({ where: { id: id } }); // NOTE: When would I need a booking by ID?
       if (!booking) {
-        throw new Error(`Booking ${id} does not exist`);
+        throw new Error(`Booking ${ id } does not exist`);
       }
       return NextResponse.json(booking, { status: 200 });
     }
@@ -80,7 +81,7 @@ export async function GET(request) {
   } catch (error) {
     console.log(error);
     return NextResponse.json(
-      { message: `Error getting booking(s): ${error}` },
+      { message: `Error getting booking(s): ${ error }` },
       { status: 500 }
     );
   }
@@ -88,27 +89,63 @@ export async function GET(request) {
 
 // createBooking
 export async function POST(request) {
-  /**
-   * When user books class request,
-   * 1. Check if booked_capacity < max_capacity
-   * 2. Update class booked_capapcity += 1
-   * 3. Create new booking
-   * 4. Update class for status if needed
-   */
-
+  const t = await db.sequelize.transaction();
   try {
+    // NOTE: check for sufficient funds done before request sent
     const body = await request.json();
-    console.log(body);
-    const { classId, userId } = body;
-    const data = await Booking.create({
-      userId: userId,
-      classId: classId,
-    });
-    return NextResponse.json(data, { status: 200 });
+    const { classId, userId, isForced } = body;  // NOTE: isForced = TRUE when admin makes the booking
+
+    // 1. Find user and class.
+    const selectedClass = await Class.findOne({ where: { id: classId } }, { t });
+    const user = await User.findOne(
+      { where: { id: userId } },
+      { t },
+    );
+
+    // 2. Check class capacity.
+    if (!isForced) {
+      if (selectedClass.bookedCapacity >= selectedClass.maxCapacity) {
+        throw new Error(`Class ${ classId } is fully booked.`);
+      }
+    }
+
+    // 3. Create booking for user.
+    const newBooking = await Booking.create(
+      {
+        userId: userId,
+        classId: classId,
+      },
+      { transaction: t },
+    );
+
+    // 3. Update user's balance.
+    await User.update(
+      { balance: user.balance - 1 },
+      {
+        where: { id: userId },
+        transaction: t,
+      });
+
+    // 4. Update class' booked capacity.
+    await Class.update(
+      { bookedCapacity: selectedClass.bookedCapacity + 1 },
+      { where: { id: classId }, transaction: t });
+
+    // 5. Create new transaction.
+    await Transaction.create({
+      userId: user.id,
+      amount: -1,
+      type: "book",
+      description: `Booked '${ selectedClass.name }'`,
+    }, { transaction: t });
+
+    await t.commit();
+    return NextResponse.json(newBooking, { status: 200 });
   } catch (error) {
     console.log(error);
+    await t.rollback();
     return NextResponse.json(
-      { message: `Error creating booking: ${error}` },
+      { message: `Error creating booking: ${ error.message }` },
       { status: 500 }
     );
   }
@@ -127,46 +164,63 @@ export async function PUT(request) {
   } catch (error) {
     console.log(error);
     return NextResponse.json(
-      { message: `Error updating booking: ${error}` },
+      { message: `Error updating booking: ${ error }` },
       { status: 500 }
     );
   }
 }
 
+// deleteBooking
 export async function DELETE(request) {
+  const t = await db.sequelize.transaction();
   try {
     const body = await request.json();
+    const { bookingId, classId, userId } = body;
 
-    // deleteBookingsByUser
-    if (body.userId != undefined) {
-      const userId = body.userId;
-      await Booking.destroy({ where: { userId: userId } });
-      return NextResponse.json(
-        { json: `Bookings for user ${userId} deleted successfully` },
-        { status: 200 }
-      );
-    }
+    // 1. Delete booking.
+    await Booking.destroy(
+      {
+        where: { id: bookingId },
+        transaction: t
+      }
+    );
 
-    // deleteBookingsByClass
-    if (body.classId != undefined) {
-      const classId = body.classId;
-      await Booking.destroy({ where: { classId: classId } });
-      return NextResponse.json(
-        { json: `Bookings for class ${classId} deleted successfully` },
-        { status: 200 }
-      );
-    }
+    // 2. Update class' booked capacity.
+    const bookedClass = await Class.findOne(
+      { where: { id: classId } },
+      { t }
+    );
+    await Class.update(
+      {
+        bookedCapacity: bookedClass.bookedCapacity - 1
+      },
+      { where: { id: classId }, transaction: t });
 
-    const id = body.id;
-    await Booking.destroy({ where: { id: id } });
+    // 3. Update user's balance.
+    const user = await User.findOne({ where: { id: userId } }, { t });
+    await User.update(
+      { balance: user.balance + 1 },
+      { where: { id: userId }, transaction: t }
+    );
+
+    // 4. Create new transaction.
+    await Transaction.create({
+      userId: userId,
+      amount: 1,
+      type: "refund",
+      description: `Refunded '${ bookedClass.name }'`,
+    }, { transaction: t });
+
+    await t.commit();
     return NextResponse.json(
-      { json: `Booking ${id} deleted successfully` },
+      { json: `Booking ${ bookingId } deleted successfully` },
       { status: 200 }
     );
   } catch (error) {
     console.log(error);
+    await t.rollback();
     return NextResponse.json(
-      { message: `Error deleting booking: ${error}` },
+      { message: `Error deleting booking: ${ error }` },
       { status: 500 }
     );
   }
