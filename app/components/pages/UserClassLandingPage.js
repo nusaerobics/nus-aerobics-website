@@ -1,7 +1,6 @@
 "use client";
 
 import { format } from "date-fns";
-import { fromZonedTime, toZonedTime } from "date-fns-tz";
 import PropTypes from "prop-types";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
@@ -56,12 +55,12 @@ export default function UserClassLandingPage({ userId }) {
         }
       : { column: "bookingDate", direction: "ascending" }
   );
-  const [filters, setFilters] = useState(new Set(["open", "upcoming"]));
+  const [filters, setFilters] = useState(new Set(["open"]));
 
-  useEffect(() => {
+  useMemo(() => {
     const fetchClasses = async () => {
       try {
-        const res = await fetch("/api/classes");
+        const res = await fetch("/api/classes?isUpcoming=true");
         if (!res.ok) {
           throw new Error(`Unable to get classes: ${res.status}`);
         }
@@ -138,16 +137,6 @@ export default function UserClassLandingPage({ userId }) {
         }
         return true;
       })
-      .filter((c) => {
-        if (filters.has("upcoming")) {
-          const utcClassDate = fromZonedTime(c.date, "Asia/Singapore");
-          const sgClassDate = toZonedTime(utcClassDate, "Asia/Singapore");
-          const sgCurrentDate = toZonedTime(new Date(), "Asia/Singapore");
-
-          return sgClassDate > sgCurrentDate;
-        }
-        return true;
-      });
     return Math.ceil(filteredClasses.length / rowsPerPage);
   }, [sortedClasses, classQ, filters]);
 
@@ -169,16 +158,6 @@ export default function UserClassLandingPage({ userId }) {
         }
         return true;
       })
-      .filter((c) => {
-        if (filters.has("upcoming")) {
-          const utcClassDate = fromZonedTime(c.date, "Asia/Singapore");
-          const sgClassDate = toZonedTime(utcClassDate, "Asia/Singapore");
-          const sgCurrentDate = toZonedTime(new Date(), "Asia/Singapore");
-
-          return sgClassDate > sgCurrentDate;
-        }
-        return true;
-      });
     return filteredClasses.slice(start, end);
   }, [page, sortedClasses, classQ, filters]);
 
@@ -298,7 +277,6 @@ export default function UserClassLandingPage({ userId }) {
                     >
                       <DropdownSection title="Filter classes">
                         <DropdownItem key="open">Open for booking</DropdownItem>
-                        <DropdownItem key="upcoming">Upcoming</DropdownItem>
                       </DropdownSection>
                     </DropdownMenu>
                   </Dropdown>
