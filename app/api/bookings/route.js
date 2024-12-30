@@ -95,21 +95,21 @@ export async function POST(request) {
     const body = await request.json();
     const { classId, userId, isForced } = body;  // NOTE: isForced = TRUE when admin makes the booking
 
-    // 1. find user and class.
+    // 1. Find user and class.
     const selectedClass = await Class.findOne({ where: { id: classId } }, { t });
     const user = await User.findOne(
       { where: { id: userId } },
       { t },
     );
 
-    // 2. check class capacity.
+    // 2. Check class capacity.
     if (!isForced) {
       if (selectedClass.bookedCapacity >= selectedClass.maxCapacity) {
         throw new Error(`Class ${ classId } is fully booked.`);
       }
     }
 
-    // 3. create booking for user.
+    // 3. Create booking for user.
     const newBooking = await Booking.create(
       {
         userId: userId,
@@ -118,7 +118,7 @@ export async function POST(request) {
       { transaction: t },
     );
 
-    // 3. update user's balance.
+    // 3. Update user's balance.
     await User.update(
       { balance: user.balance - 1 },
       {
@@ -126,12 +126,12 @@ export async function POST(request) {
         transaction: t,
       });
 
-    // 4. update class' booked capacity.
+    // 4. Update class' booked capacity.
     await Class.update(
       { bookedCapacity: selectedClass.bookedCapacity + 1 },
       { where: { id: classId }, transaction: t });
 
-    // 5. create new transaction.
+    // 5. Create new transaction.
     await Transaction.create({
       userId: user.id,
       amount: -1,
@@ -175,22 +175,9 @@ export async function DELETE(request) {
   const t = await db.sequelize.transaction();
   try {
     const body = await request.json();
-
-    // TODO: delete because will be handled by delete user and delete class routes instead to clear
-    // // deleteBookingsByUser
-    // if (body.userId !== undefined) {
-    //   const userId = body.userId;
-    //   await Booking.destroy({ where: { userId: userId } });
-    //   return NextResponse.json(
-    //     { json: `Bookings for user ${userId} deleted successfully` },
-    //     { status: 200 }
-    //   );
-    // }
-
-    // deleteBooking
     const { bookingId, classId, userId } = body;
 
-    // 1. delete booking.
+    // 1. Delete booking.
     await Booking.destroy(
       {
         where: { id: bookingId },
@@ -198,7 +185,7 @@ export async function DELETE(request) {
       }
     );
 
-    // 2. update class' booked capacity.
+    // 2. Update class' booked capacity.
     const bookedClass = await Class.findOne(
       { where: { id: classId } },
       { t }
@@ -209,14 +196,14 @@ export async function DELETE(request) {
       },
       { where: { id: classId }, transaction: t });
 
-    // 3. update user's balance.
+    // 3. Update user's balance.
     const user = await User.findOne({ where: { id: userId } }, { t });
     await User.update(
       { balance: user.balance + 1 },
       { where: { id: userId }, transaction: t }
     );
 
-    // 4. create new transaction.
+    // 4. Create new transaction.
     await Transaction.create({
       userId: userId,
       amount: 1,

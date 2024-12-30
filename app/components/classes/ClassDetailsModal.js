@@ -183,7 +183,7 @@ export default function ClassDetailsModal({
       });
       if (!res.ok) {
         const response = await res.json();
-        throw new Error(`${ response.message }`)
+        throw new Error(`${ response.error }`)
       }
       setModalType("result");
       setResult({

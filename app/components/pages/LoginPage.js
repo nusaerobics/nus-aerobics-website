@@ -1,13 +1,11 @@
 "use client";
 
-import {useEffect, useMemo, useState} from "react";
-import {Input} from "@nextui-org/react";
-import {MdVisibility, MdVisibilityOff} from "react-icons/md";
-import {inputClassNames} from "../utils/ClassNames";
-import {useRouter} from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
+import { Input } from "@nextui-org/react";
+import { MdVisibility, MdVisibilityOff } from "react-icons/md";
+import { inputClassNames } from "../utils/ClassNames";
+import { useRouter } from "next/navigation";
 import Toast from "../Toast";
-
-let random = require("random-string-generator");
 
 export default function Page() {
   const router = useRouter();
@@ -18,8 +16,8 @@ export default function Page() {
     try {
       const res = await fetch("/api/auth/login", {
         method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({email: email, password: password}),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: email, password: password }),
       });
       if (!res.ok) {
         setEmail("");
@@ -28,15 +26,15 @@ export default function Page() {
       }
       router.push("/dashboard");
     } catch (error) {
+      console.log(error);
       setEmail("");
       setPassword("");
       setToast({
         isSuccess: false,
         header: "Unable to login",
-        message: `${error.message}`,
+        message: `${ error.message }`,
       });
       setShowToast(true);
-      console.log(error);
     }
   }
 
@@ -46,18 +44,14 @@ export default function Page() {
         throw new Error(`Invalid values used for sign-up. Try again.`);
       }
 
-      const res1 = await fetch(`/api/users?email=${email}`);
-      if (res1.ok) {
-        throw new Error(`A user already exists for ${email}. Try again with a unique email.`);
-      }
-
-      const res2 = await fetch("/api/users", {
+      const res = await fetch("/api/users", {
         method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({name: name, email: email, password: password}),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: name, email: email, password: password }),
       });
-      if (!res2.ok) {
-        throw new Error("An internal error occurred. Refresh the page and try again in a few minutes.");
+      if (!res.ok) {
+        const response = await res.json();
+        throw new Error(`${ response.error }`);
       }
 
       handleChangeView(view);
@@ -74,72 +68,44 @@ export default function Page() {
       setShowToast(true);
 
     } catch (error) {
+      console.log(error);
       setToast({
         isSuccess: false,
         header: "Unable to sign-up",
-        message: `${error.message}`,
+        message: `${ error.message }`,
       });
       setShowToast(true);
-      console.log(error);
     }
   }
 
-  // STARRED: How to display error messages in Toasts
   async function handleForgotPassword() {
     try {
-      // 1. Check if entered email exists
-      const res1 = await fetch(`/api/users?email=${email}`);
-      if (!res1.ok) {
-        throw new Error(
-          `No user exists for ${email}. Try again with a registered email.`
-        );
-      }
-      const user = await res1.json();
-
-      // 2. Generate temporary password
-      const tempPassword = random(5, "upper");
-
-      // 3. Update user with new temporary password
-      const res2 = await fetch("/api/users", {
+      const res = await fetch("/api/users/forgot-password", {
         method: "PUT",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({ id: user.id, newPassword: tempPassword }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: email }),
       });
-      if (!res2.ok) {
-        throw new Error("An internal error occurred. Try again later.");
+      if (!res.ok) {
+        const response = await res.json();
+        throw new Error(`${ response.error }`);
       }
 
-      // 4. Send email with temporary password to log in with
-      const res3 = await fetch("/api/mail", {
-        method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({
-          name: user.name,
-          email: email,
-          type: "forgot-password",
-          details: { tempPassword: tempPassword },
-        }),
-      });
-      if (!res3.ok) {
-        throw new Error(`Unable to send email to ${email}. Try again later.`);
-      }
-      // 5. When user logs in, they have to go to profile and update their password
       setToast({
         isSuccess: true,
         header: "Requested password reset",
-        message: `An email has been sent to ${email} with instructions to reset your password.`,
+        message: `An email has been sent to ${ email } with instructions to reset your password.`,
       });
       setShowToast(true);
       handleChangeView(view);
       setEmail("");
     } catch (error) {
+      console.log(error);
       setToast({
         isSuccess: false,
         header: "Unable to reset password",
-        message: `${error.message}`,
+        message: `${ error.message }`,
       });
       setShowToast(true);
-      console.log(error);
     }
   }
 
@@ -222,7 +188,7 @@ export default function Page() {
     return !validateEmail(email);
   }, [email]);
 
-  const validateName = (value) => value.match(/^[a-zA-Z]+$/i);
+  const validateName = (value) => value.match(/^[a-zA-Z ]+$/i);
   const isInvalidName = useMemo(() => {
     if (name === "") return false;
     return !validateName(name);
@@ -253,148 +219,148 @@ export default function Page() {
               className="self-center"
             />
             <p className="font-poppins font-bold text-lg text-a-black">
-              {message}
+              { message }
             </p>
           </div>
           <div className="w-full flex flex-col gap-y-2.5">
-            {view === "signup" ? (
+            { view === "signup" ? (
               <Input
                 label="Full name"
-                value={name}
-                onValueChange={setName}
-                isInvalid={isInvalidName}
+                value={ name }
+                onValueChange={ setName }
+                isInvalid={ isInvalidName }
                 errorMessage="Please enter a valid name"
                 isRequired
                 variant="bordered"
                 size="sm"
-                classNames={inputClassNames}
+                classNames={ inputClassNames }
               />
             ) : (
               <></>
-            )}
+            ) }
             <Input
               label="Email"
-              value={email}
-              onValueChange={setEmail}
-              isInvalid={view === "signup" && isInvalidEmail}
+              value={ email }
+              onValueChange={ setEmail }
+              isInvalid={ view === "signup" && isInvalidEmail }
               errorMessage="Please enter a valid NUS email"
               isRequired
               variant="bordered"
               size="sm"
-              classNames={inputClassNames}
+              classNames={ inputClassNames }
             />
-            {view !== "forgot" ? (
+            { view !== "forgot" ? (
               <Input
                 label="Password"
-                value={password}
-                onValueChange={setPassword}
-                type={isPWVisible ? "text" : "password"}
+                value={ password }
+                onValueChange={ setPassword }
+                type={ isPWVisible ? "text" : "password" }
                 endContent={
                   <button
                     className="focus:outline-none cursor-pointer"
                     type="button"
-                    onClick={togglePWVisible}
+                    onClick={ togglePWVisible }
                   >
-                    {isPWVisible ? (
+                    { isPWVisible ? (
                       <MdVisibilityOff className="text-2xl text-a-black/50 pointer-events-none"/>
                     ) : (
                       <MdVisibility className="text-2xl text-a-black/50 pointer-events-none"/>
-                    )}
+                    ) }
                   </button>
                 }
-                isInvalid={view === "signup" && isInvalidPW}
+                isInvalid={ view === "signup" && isInvalidPW }
                 errorMessage="Password should be at least 5 characters"
                 isRequired
                 variant="bordered"
                 size="sm"
-                classNames={inputClassNames}
+                classNames={ inputClassNames }
               />
             ) : (
               <></>
-            )}
-            {view === "signup" ? (
+            ) }
+            { view === "signup" ? (
               <Input
                 label="Confirm password"
-                value={confirmPassword}
-                onValueChange={setConfirmPassword}
-                type={isCPWVisible ? "text" : "password"}
+                value={ confirmPassword }
+                onValueChange={ setConfirmPassword }
+                type={ isCPWVisible ? "text" : "password" }
                 endContent={
                   <button
                     className="focus:outline-none cursor-pointer"
                     type="button"
-                    onClick={toggleCPWVisible}
+                    onClick={ toggleCPWVisible }
                   >
-                    {isCPWVisible ? (
+                    { isCPWVisible ? (
                       <MdVisibilityOff className="text-2xl text-a-black/50 pointer-events-none"/>
                     ) : (
                       <MdVisibility className="text-2xl text-a-black/50 pointer-events-none"/>
-                    )}
+                    ) }
                   </button>
                 }
-                isInvalid={isInvalidCPW}
+                isInvalid={ isInvalidCPW }
                 errorMessage="Passwords do not match"
                 isRequired
                 variant="bordered"
                 size="sm"
-                classNames={inputClassNames}
+                classNames={ inputClassNames }
               />
             ) : (
               <></>
-            )}
-            {view === "login" ? (
+            ) }
+            { view === "login" ? (
               <button
                 className="text-end text-sm text-a-navy font-bold underline cursor-pointer"
-                onClick={() => changeView("forgot")}
+                onClick={ () => changeView("forgot") }
               >
                 Forgot password?
               </button>
             ) : (
               <></>
-            )}
+            ) }
           </div>
 
           <div className="w-full flex flex-col gap-y-2.5">
-            {view === "signup" && (isInvalidName || isInvalidEmail || isInvalidPW || isInvalidCPW) ? (
+            { view === "signup" && (isInvalidName || isInvalidEmail || isInvalidPW || isInvalidCPW) ? (
               < button
                 className="rounded-[30px] px-[20px] py-[10px] bg-[#1F477620] text-white text-sm cursor-not-allowed"
                 disabled
               >
-                {button}
+                { button }
               </button>
             ) : (
               <button
                 className="rounded-[30px] px-[20px] py-[10px] bg-a-navy text-sm text-white cursor-pointer"
-                onClick={handleClick}
+                onClick={ handleClick }
               >
-                {button}
+                { button }
               </button>
             )
             }
             <div className="w-full flex flex-row justify-center gap-x-1">
               <p className="text-sm text-a-black bottom-action">
-                {bottomAction}
+                { bottomAction }
               </p>
               <button
                 className="text-end text-sm text-a-navy font-bold underline cursor-pointer bottom-button"
-                onClick={() => handleChangeView(view)}
+                onClick={ () => handleChangeView(view) }
               >
-                {bottomButton}
+                { bottomButton }
               </button>
             </div>
           </div>
         </div>
       </div>
-      {showToast ? (
-        <div onClick={toggleShowToast}>
+      { showToast ? (
+        <div onClick={ toggleShowToast }>
           <Toast
-            isSuccess={toast.isSuccess}
-            header={toast.header}
-            message={toast.message}
+            isSuccess={ toast.isSuccess }
+            header={ toast.header }
+            message={ toast.message }
           />
         </div>
       ) : (
         <></>
-      )}
+      ) }
     </>
   );
 }
