@@ -105,7 +105,7 @@ export async function POST(request) {
     // 2. check class capacity.
     if (!isForced) {
       if (selectedClass.bookedCapacity >= selectedClass.maxCapacity) {
-        throw new Error(`Unable to book class ${ classId } because it is full.`);
+        throw new Error(`Class ${ classId } is fully booked.`);
       }
     }
 
