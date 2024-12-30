@@ -7,7 +7,7 @@ const Class = db.classes;
 const User = db.users;
 
 function getStatus(c) {
-  if (c.bookedCapacity == c.maxCapacity) {
+  if (c.bookedCapacity >= c.maxCapacity) {
     return "full";
   }
 
@@ -82,11 +82,7 @@ export async function GET(request) {
         const sgCurrentMonth = sgCurrentDate.getMonth();
         const sgCurrentDay = sgCurrentDate.getDate();
 
-        return (
-          sgClassYear == sgCurrentYear &&
-          sgClassMonth == sgCurrentMonth &&
-          sgClassDay == sgCurrentDay
-        );
+        return (sgClassYear == sgCurrentYear && sgClassMonth == sgCurrentMonth && sgClassDay == sgCurrentDay);
       });
       todayClasses.forEach((c) => {
         c.status = getStatus(c);
@@ -102,10 +98,7 @@ export async function GET(request) {
     return NextResponse.json(classes, { status: 200 });
   } catch (error) {
     console.log(error);
-    return NextResponse.json(
-      { message: `Error getting class(es): ${ error }` },
-      { status: 500 }
-    );
+    return NextResponse.json({ message: `Error getting class(es): ${ error }` }, { status: 500 });
   }
 }
 
@@ -116,18 +109,12 @@ export async function POST(request) {
     console.log(body);
     const { name, description, date, status } = body;
     const data = await Class.create({
-      name: name,
-      description: description,
-      date: date,
-      status: status,
+      name: name, description: description, date: date, status: status,
     });
     return NextResponse.json(data, { status: 200 });
   } catch (error) {
     console.log(error);
-    return NextResponse.json(
-      { message: `Error creating class: ${ error }` },
-      { status: 500 }
-    );
+    return NextResponse.json({ message: `Error creating class: ${ error }` }, { status: 500 });
   }
 }
 
@@ -136,26 +123,19 @@ export async function PUT(request) {
   // All values have to be inputted in request - either the unchanged values or updated values
   try {
     const body = await request.json();
-    const { id, name, description, date, maxCapacity, bookedCapacity, status } =
-      body;
-    const data = await Class.update(
-      {
-        name: name,
-        description: description,
-        date: date,
-        maxCapacity: maxCapacity,
-        bookedCapacity: bookedCapacity,
-        status: status,
-      },
-      { where: { id: id } }
-    );
+    const { id, name, description, date, maxCapacity, bookedCapacity, status } = body;
+    const data = await Class.update({
+      name: name,
+      description: description,
+      date: date,
+      maxCapacity: maxCapacity,
+      bookedCapacity: bookedCapacity,
+      status: status,
+    }, { where: { id: id } });
     return NextResponse.json(data, { status: 200 });
   } catch (error) {
     console.log(error);
-    return NextResponse.json(
-      { message: `Error updating class: ${ error }` },
-      { status: 500 }
-    );
+    return NextResponse.json({ message: `Error updating class: ${ error }` }, { status: 500 });
   }
 }
 
@@ -184,16 +164,10 @@ export async function DELETE(request) {
     await Class.destroy({ where: { id: id }, transaction: t });
 
     await t.commit();
-    return NextResponse.json(
-      { json: `Class ${ id } deleted successfully` },
-      { status: 200 }
-    );
+    return NextResponse.json({ json: `Class ${ id } deleted successfully` }, { status: 200 });
   } catch (error) {
     console.log(error);
     await t.rollback();
-    return NextResponse.json(
-      { message: `Error deleting class: ${ error }` },
-      { status: 500 }
-    );
+    return NextResponse.json({ message: `Error deleting class: ${ error }` }, { status: 500 });
   }
 }

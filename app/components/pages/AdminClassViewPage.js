@@ -292,7 +292,6 @@ export default function AdminClassViewPage({ classId }) {
             <MdChevronLeft color="#1F4776" size={ 42 }/>
           </button>
           <PageTitle title={ selectedClass.name }/>
-          {/* TODO: bugfix/routes - need to fix how class' status is set (force booking despite overbooked class causes undefined classname) */ }
           <Chip classNames={ chipClassNames[selectedClass.status] }>
             { chipTypes[selectedClass.status].message }
           </Chip>

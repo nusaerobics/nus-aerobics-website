@@ -30,10 +30,10 @@ export default function ProfilePage({ session }) {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const res = await fetch(`/api/users?id=${session.userId}`);
+        const res = await fetch(`/api/users?id=${ session.userId }`);
         if (!res.ok) {
           throw new Error(
-            `Unable to get user ${session.userId}: ${res.status}`
+            `Unable to get user ${ session.userId }: ${ res.status }`
           );
         }
         const data = await res.json();
@@ -84,7 +84,7 @@ export default function ProfilePage({ session }) {
         body: JSON.stringify(updatedUser),
       });
       if (!res.ok) {
-        throw new Error(`Unable to update user ${session.userId}.`);
+        throw new Error(`Unable to update user ${ session.userId }.`);
       }
       toggleIsEdit();
       setToast({
@@ -126,7 +126,7 @@ export default function ProfilePage({ session }) {
         body: JSON.stringify(updatedUser),
       });
       if (!res.ok) {
-        throw new Error(`Unable to reset password for user ${session.userId}.`);
+        throw new Error(`Unable to reset password for user ${ session.userId }.`);
       }
       toggleIsReset();
       setCurrentPW("");
@@ -152,85 +152,85 @@ export default function ProfilePage({ session }) {
   return (
     <>
       <div className="w-full h-full flex flex-col gap-y-5 p-5 md:p-10 pt-20 overflow-y-scroll">
-        <PageTitle title="Profile" />
+        <PageTitle title="Profile"/>
         <div className="flex flex-col rounded-[20px] border border-a-black/10 p-5 bg-white gap-y-2.5">
           <div className="flex flex-row justify-between items-center gap-x-2.5">
-            <SectionTitle title="User details" />
+            <SectionTitle title="User details"/>
             <div className="flex flex-row gap-x-2.5">
-              {isEdit ? (
+              { isEdit ? (
                 <button
-                  onClick={toggleIsEdit}
+                  onClick={ toggleIsEdit }
                   className="rounded-[30px] px-[10px] md:px-[20px] bg-a-navy/10 text-a-navy text-xs md:text-sm cursor-pointer"
                 >
                   Cancel
                 </button>
               ) : (
                 <></>
-              )}
+              ) }
               <button
-                onClick={isEdit ? saveEdit : toggleIsEdit}
-                disabled={isReset}
-                className={clsx(
+                onClick={ isEdit ? saveEdit : toggleIsEdit }
+                disabled={ isReset }
+                className={ clsx(
                   "rounded-[30px] px-[10px] md:px-[20px] py-[10px] text-xs md:text-sm text-white",
                   {
                     "bg-a-navy  cursor-pointer": !isReset,
                     "bg-a-navy/20  cursor-not-allowed": isReset,
                   }
-                )}
+                ) }
               >
-                {isEdit ? "Save" : "Edit profile"}
+                { isEdit ? "Save" : "Edit profile" }
               </button>
             </div>
           </div>
           <div className="flex flex-col gap-y-2.5 w-[265px]">
             <p className="text-a-black/50 text-xs md:text-sm">Full name</p>
             <Input
-              value={name}
-              onValueChange={setName}
-              isDisabled={!isEdit}
+              value={ name }
+              onValueChange={ setName }
+              isDisabled={ !isEdit }
               variant="bordered"
               size="xs"
-              classNames={inputClassNames}
+              classNames={ inputClassNames }
             />
           </div>
           <div className="flex flex-col gap-y-2.5 w-[265px]">
             <p className="text-a-black/50 text-xs md:text-sm">Email</p>
             <Input
-              value={email}
-              onValueChange={setEmail}
-              isDisabled={!isEdit}
+              value={ email }
+              onValueChange={ setEmail }
+              isDisabled={ !isEdit }
               variant="bordered"
               size="xs"
-              classNames={inputClassNames}
+              classNames={ inputClassNames }
             />
           </div>
         </div>
         <div className="flex flex-col rounded-[20px] border border-a-black/10 p-5 bg-white gap-y-2.5">
           <div className="flex flex-row justify-between items-center gap-x-2.5">
-            <SectionTitle title="Change password" />
+            <SectionTitle title="Change password"/>
             <div className="flex flex-row gap-x-2.5">
-              {isReset ? (
+              { isReset ? (
                 <button
-                  onClick={toggleIsReset}
+                  onClick={ toggleIsReset }
                   className="rounded-[30px] px-[20px] bg-a-navy/10 text-a-navy text-xs md:text-sm cursor-pointer"
                 >
                   Cancel
                 </button>
               ) : (
                 <></>
-              )}
+              ) }
               <button
-                onClick={isReset ? resetPassword : toggleIsReset}
-                disabled={isEdit}
-                className={clsx(
+                onClick={ isReset ? resetPassword : toggleIsReset }
+                disabled={ isEdit }
+                className={ clsx(
                   "rounded-[30px] px-[10px] md:px-[20px] py-[10px] text-xs md:text-sm text-white whitespace-nowrap",
                   {
                     "bg-a-navy cursor-pointer": !isEdit,
                     "bg-a-navy/20 cursor-not-allowed": isEdit,
                   }
-                )}
+                ) }
               >
-                {isReset ? "Save" : "Change password"}
+                { isReset ? "Save" : "Change password" }
               </button>
             </div>
           </div>
@@ -239,52 +239,52 @@ export default function ProfilePage({ session }) {
               Current password
             </p>
             <Input
-              value={currentPW}
-              onValueChange={setCurrentPW}
-              isDisabled={!isReset}
-              type={isCurrentPWVisible ? "text" : "password"}
+              value={ currentPW }
+              onValueChange={ setCurrentPW }
+              isDisabled={ !isReset }
+              type={ isCurrentPWVisible ? "text" : "password" }
               endContent={
                 <button
                   className="focus:outline-none cursor-pointer"
                   type="button"
-                  onClick={toggleCurrentPW}
+                  onClick={ toggleCurrentPW }
                 >
-                  {isCurrentPWVisible ? (
-                    <MdVisibilityOff className="text-2xl text-a-black/50 pointer-events-none" />
+                  { isCurrentPWVisible ? (
+                    <MdVisibilityOff className="text-2xl text-a-black/50 pointer-events-none"/>
                   ) : (
-                    <MdVisibility className="text-2xl text-a-black/50 pointer-events-none" />
-                  )}
+                    <MdVisibility className="text-2xl text-a-black/50 pointer-events-none"/>
+                  ) }
                 </button>
               }
               variant="bordered"
               size="sm"
-              classNames={inputClassNames}
+              classNames={ inputClassNames }
             />
           </div>
           <div className="flex flex-col md:flex-row gap-x-2.5 gap-y-2.5">
             <div className="flex flex-col gap-y-2.5 w-[265px]">
               <p className="text-a-black/50 text-xs md:text-sm">New password</p>
               <Input
-                value={newPW}
-                onValueChange={setNewPW}
-                isDisabled={!isReset}
-                type={isNewPWVisible ? "text" : "password"}
+                value={ newPW }
+                onValueChange={ setNewPW }
+                isDisabled={ !isReset }
+                type={ isNewPWVisible ? "text" : "password" }
                 endContent={
                   <button
                     className="focus:outline-none cursor-pointer"
                     type="button"
-                    onClick={toggleNewPW}
+                    onClick={ toggleNewPW }
                   >
-                    {isNewPWVisible ? (
-                      <MdVisibilityOff className="text-2xl text-a-black/50 pointer-events-none" />
+                    { isNewPWVisible ? (
+                      <MdVisibilityOff className="text-2xl text-a-black/50 pointer-events-none"/>
                     ) : (
-                      <MdVisibility className="text-2xl text-a-black/50 pointer-events-none" />
-                    )}
+                      <MdVisibility className="text-2xl text-a-black/50 pointer-events-none"/>
+                    ) }
                   </button>
                 }
                 variant="bordered"
                 size="sm"
-                classNames={inputClassNames}
+                classNames={ inputClassNames }
               />
             </div>
             <div className="flex flex-col gap-y-2.5 w-[265px]">
@@ -292,42 +292,42 @@ export default function ProfilePage({ session }) {
                 Confirm password
               </p>
               <Input
-                value={confirmPW}
-                onValueChange={setConfirmPW}
-                isDisabled={!isReset}
-                type={isConfirmPWVisible ? "text" : "password"}
+                value={ confirmPW }
+                onValueChange={ setConfirmPW }
+                isDisabled={ !isReset }
+                type={ isConfirmPWVisible ? "text" : "password" }
                 endContent={
                   <button
                     className="focus:outline-none cursor-pointer"
                     type="button"
-                    onClick={toggleConfirmPW}
+                    onClick={ toggleConfirmPW }
                   >
-                    {isConfirmPWVisible ? (
-                      <MdVisibilityOff className="text-2xl text-a-black/50 pointer-events-none" />
+                    { isConfirmPWVisible ? (
+                      <MdVisibilityOff className="text-2xl text-a-black/50 pointer-events-none"/>
                     ) : (
-                      <MdVisibility className="text-2xl text-a-black/50 pointer-events-none" />
-                    )}
+                      <MdVisibility className="text-2xl text-a-black/50 pointer-events-none"/>
+                    ) }
                   </button>
                 }
                 variant="bordered"
                 size="sm"
-                classNames={inputClassNames}
+                classNames={ inputClassNames }
               />
             </div>
           </div>
         </div>
       </div>
-      {showToast ? (
-        <div onClick={toggleShowToast}>
+      { showToast ? (
+        <div onClick={ toggleShowToast }>
           <Toast
-            isSuccess={toast.isSuccess}
-            header={toast.header}
-            message={toast.message}
+            isSuccess={ toast.isSuccess }
+            header={ toast.header }
+            message={ toast.message }
           />
         </div>
       ) : (
         <></>
-      )}
+      ) }
     </>
   );
 }

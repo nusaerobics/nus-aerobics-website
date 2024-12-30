@@ -192,7 +192,7 @@ export async function DELETE(request) {
     );
     await Class.update(
       {
-        bookedCapacity: bookedClass.bookedCapacity + 1
+        bookedCapacity: bookedClass.bookedCapacity - 1
       },
       { where: { id: classId }, transaction: t });
 
