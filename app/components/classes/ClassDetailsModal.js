@@ -202,6 +202,36 @@ export default function ClassDetailsModal({
     }
   }
 
+  async function joinWaitlist() {
+    setModalType("loading");
+    try {
+      const res = await fetch("/api/waitlists", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ classId: selectedClass.id, userId: userId }),
+      });
+      if (!res.ok) {
+        const response = await res.json();
+        throw new Error(`${ response.error }`);
+      }
+
+      setResult({
+        isSuccess: true,
+        header: "Successfully joined waitlist",
+        message: `Your spot on the waitlist for ${ selectedClass.name } has been confirmed. An email will be sent to you if a vacancy opens.`,
+      });
+      setModalType("result");
+    } catch (error) {
+      console.log(error);
+      setResult({
+        isSuccess: false,
+        header: "Join waitlist unsuccessful",
+        message: `Unable to join waitlist for ${ selectedClass.name }: ${ error.message }`,
+      });
+      setModalType("result");
+    }
+  }
+
   return (
     <>
       <Modal
@@ -222,15 +252,11 @@ export default function ClassDetailsModal({
                         <p className="text-a-navy">{ selectedClass.name }</p>
                         <Chip
                           classNames={
-                            chipClassNames[
-                              isBooked ? "booked" : selectedClass.status
-                              ]
+                            chipClassNames[isBooked ? "booked" : selectedClass.status]
                           }
                         >
                           {
-                            chipTypes[
-                              isBooked ? "booked" : selectedClass.status
-                              ].message
+                            chipTypes[isBooked ? "booked" : selectedClass.status].message
                           }
                         </Chip>
                       </div>
@@ -262,16 +288,17 @@ export default function ClassDetailsModal({
                         </p>
                       </div>
                     </ModalBody>
+
                     <ModalFooter>
                       <div className="flex justify-end">
                         { tab == "schedule" ? (
                           <>
-                            { !isBooked && selectedClass.status == "open" ? (
+                            { !isBooked ? (
                               <button
                                 onClick={ bookClass }
                                 className="rounded-[30px] px-[10px] md:px-[20px] py-[10px] text-xs md:text-sm bg-a-navy text-white cursor-pointer"
                               >
-                                Book class
+                                { selectedClass.status == "full" ? ("Join waitlist") : ("Book class") }
                               </button>
                             ) : (
                               <></>

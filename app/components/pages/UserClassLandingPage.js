@@ -3,7 +3,6 @@
 import { format } from "date-fns";
 import PropTypes from "prop-types";
 import { useCallback, useEffect, useMemo, useState } from "react";
-
 import { MdList, MdOpenInNew, MdOutlineFilterAlt } from "react-icons/md";
 import {
   Dropdown,
@@ -31,11 +30,13 @@ import {
   tabsClassNames,
 } from "../utils/ClassNames";
 import { PageTitle } from "../utils/Titles";
-import ClassDetailsModal from "../classes/ClassDetailsModal";
+import ScheduleModal from "../classes/modals/ScheduleModal";
 import Toast from "../Toast";
+import BookedModal from "../classes/modals/BookedModal";
 
 export default function UserClassLandingPage({ userId }) {
-  const { isOpen, onOpen, onOpenChange } = useDisclosure();
+  const scheduleModal = useDisclosure();
+  const bookedModal = useDisclosure();
 
   const [tab, setTab] = useState("schedule");
   const [classes, setClasses] = useState([]);
@@ -44,28 +45,51 @@ export default function UserClassLandingPage({ userId }) {
   const [selectedBooking, setSelectedBooking] = useState({});
   const [showToast, setShowToast] = useState(false);
   const [toast, setToast] = useState({});
-
-  const [classQ, setClassQ] = useState("");
+  const toggleShowToast = () => {
+    setShowToast(!showToast);
+  };
+  const [classQuery, setClassQuery] = useState("");
   const [bookingQ, setBookingQ] = useState("");
   const [sortDescriptor, setSortDescriptor] = useState(
     tab == "schedule"
       ? {
-          column: "date",
-          direction: "ascending",
-        }
+        column: "date",
+        direction: "ascending",
+      }
       : { column: "bookingDate", direction: "ascending" }
   );
   const [filters, setFilters] = useState(new Set(["open"]));
 
-  useMemo(() => {
+  useEffect(() => {
+    const fetchBookings = async () => {
+      try {
+        const res = await fetch(`/api/bookings?userId=${ userId }`);
+        if (!res.ok) {
+          throw new Error(
+            `Unable to get bookings for user ${ userId }: ${ res.status }`
+          );
+        }
+        const bookings = await res.json();
+        setBookings(bookings);
+      } catch (error) {
+        setToast({
+          isSuccess: false,
+          header: "Unable to get bookings",
+          message: `Unable to get bookings for user ${ userId }. Try again later.`,
+        });
+        setShowToast(true);
+        console.log(error);
+      }
+    };
+    fetchBookings();
     const fetchClasses = async () => {
       try {
-        const res = await fetch("/api/classes?isUpcoming=true");
+        const res = await fetch(`/api/classes?userId=${ userId }`);
         if (!res.ok) {
-          throw new Error(`Unable to get classes: ${res.status}`);
+          throw new Error(`Unable to get classes: ${ res.status }`);
         }
-        const data = await res.json();
-        setClasses(data);
+        const classes = await res.json();
+        setClasses(classes);
       } catch (error) {
         setToast({
           isSuccess: false,
@@ -77,35 +101,33 @@ export default function UserClassLandingPage({ userId }) {
       }
     };
     fetchClasses();
+  }, [bookedModal.isOpen, scheduleModal.isOpen]);
+  useEffect(() => {
+    let timer;
+    if (showToast) {
+      timer = setTimeout(() => {
+        setShowToast(false);
+      }, 5000);
+    }
+    return () => clearTimeout(timer);
+  }, [showToast]);
 
-    const fetchBookings = async () => {
-      try {
-        const res = await fetch(`/api/bookings?userId=${userId}`);
-        if (!res.ok) {
-          throw new Error(
-            `Unable to get bookings for user ${userId}: ${res.status}`
-          );
-        }
-        const data = await res.json();
-        setBookings(data);
-      } catch (error) {
-        setToast({
-          isSuccess: false,
-          header: "Unable to get bookings",
-          message: `Unable to get bookings for user ${userId}. Try again later.`,
-        });
-        setShowToast(true);
-        console.log(error);
-      }
-    };
-    fetchBookings();
-  }, [isOpen]);
+  function handleScheduleSelect(rowData) {
+    setSelectedClass(rowData);
+    scheduleModal.onOpen();
+  }
+
+  function handleBookedSelect(rowData) {
+    setSelectedBooking(rowData);
+    setSelectedClass(rowData.class);
+    bookedModal.onOpen();
+  }
 
   const [page, setPage] = useState(1);
   const rowsPerPage = 10;
 
-  const onClassQChange = useCallback((value) => {
-    setClassQ(value);
+  const onClassQueryChange = useCallback((value) => {
+    setClassQuery(value);
     setPage(1);
   });
   const onBookingQChange = useCallback((value) => {
@@ -121,12 +143,11 @@ export default function UserClassLandingPage({ userId }) {
       return sortDescriptor.direction == "descending" ? -compare : compare;
     });
   }, [sortDescriptor, classes]);
-
   const classPages = useMemo(() => {
     const filteredClasses = sortedClasses
       .filter((c) => {
         const className = c.name.toLowerCase();
-        const searchName = classQ.toLowerCase();
+        const searchName = classQuery.toLowerCase();
         return className.includes(searchName);
       })
       .filter((c) => {
@@ -138,8 +159,7 @@ export default function UserClassLandingPage({ userId }) {
         return true;
       })
     return Math.ceil(filteredClasses.length / rowsPerPage);
-  }, [sortedClasses, classQ, filters]);
-
+  }, [sortedClasses, classQuery, filters]);
   const classItems = useMemo(() => {
     const start = (page - 1) * rowsPerPage;
     const end = start + rowsPerPage;
@@ -147,7 +167,7 @@ export default function UserClassLandingPage({ userId }) {
     const filteredClasses = sortedClasses
       .filter((c) => {
         const className = c.name.toLowerCase();
-        const searchName = classQ.toLowerCase();
+        const searchName = classQuery.toLowerCase();
         return className.includes(searchName);
       })
       .filter((c) => {
@@ -159,7 +179,7 @@ export default function UserClassLandingPage({ userId }) {
         return true;
       })
     return filteredClasses.slice(start, end);
-  }, [page, sortedClasses, classQ, filters]);
+  }, [page, sortedClasses, classQuery, filters]);
 
   const sortedBookings = useMemo(() => {
     return [...bookings].sort((a, b) => {
@@ -176,7 +196,6 @@ export default function UserClassLandingPage({ userId }) {
       return sortDescriptor.direction == "descending" ? -compare : compare;
     });
   }, [sortDescriptor, bookings]);
-
   const bookingPages = useMemo(() => {
     if (bookingQ != "") {
       const bookingsSearch = sortedBookings.filter((booking) => {
@@ -188,7 +207,6 @@ export default function UserClassLandingPage({ userId }) {
     }
     return Math.ceil(sortedBookings.length / rowsPerPage);
   }, [sortedBookings, bookingQ]);
-
   const bookingItems = useMemo(() => {
     const start = (page - 1) * rowsPerPage;
     const end = start + rowsPerPage;
@@ -214,47 +232,23 @@ export default function UserClassLandingPage({ userId }) {
     }
   };
 
-  const selectRow = (rowData) => {
-    if (tab == "schedule") {
-      setSelectedClass(rowData);
-    } else {
-      setSelectedClass(rowData.class);
-      setSelectedBooking(rowData);
-    }
-    onOpen();
-  };
-
-  const toggleShowToast = () => {
-    setShowToast(!showToast);
-  };
-
-  useEffect(() => {
-    let timer;
-    if (showToast) {
-      timer = setTimeout(() => {
-        setShowToast(false);
-      }, 5000);
-    }
-    return () => clearTimeout(timer);
-  }, [showToast]);
-
   return (
     <>
       <div className="w-full h-full flex flex-col gap-y-5 p-5 md:p-10 pt-20 overflow-y-scroll">
-        <PageTitle title="Classes" />
+        <PageTitle title="Classes"/>
         <div className="w-full rounded-[20px] border border-a-black/10 bg-white gap-y-2.5">
           <Tabs
-            variant={"underlined"}
-            selectedKey={tab}
-            onSelectionChange={handleTabChange}
-            classNames={tabsClassNames}
+            variant={ "underlined" }
+            selectedKey={ tab }
+            onSelectionChange={ handleTabChange }
+            classNames={ tabsClassNames }
             fullWidth
           >
             <Tab
               key="schedule"
               title={
                 <div className="flex flex-row items-center gap-x-2">
-                  <MdList />
+                  <MdList/>
                   <p className="text-sm md:text-base">Class schedule</p>
                 </div>
               }
@@ -264,16 +258,16 @@ export default function UserClassLandingPage({ userId }) {
                   <Dropdown>
                     <DropdownTrigger>
                       <button className="cursor-pointer text-lg">
-                        <MdOutlineFilterAlt color="#393E46" />
+                        <MdOutlineFilterAlt color="#393E46"/>
                       </button>
                     </DropdownTrigger>
                     <DropdownMenu
                       aria-label="Filter classes"
                       variant="flat"
-                      closeOnSelect={false}
+                      closeOnSelect={ false }
                       selectionMode="multiple"
-                      selectedKeys={filters}
-                      onSelectionChange={setFilters}
+                      selectedKeys={ filters }
+                      onSelectionChange={ setFilters }
                     >
                       <DropdownSection title="Filter classes">
                         <DropdownItem key="open">Open for booking</DropdownItem>
@@ -283,20 +277,20 @@ export default function UserClassLandingPage({ userId }) {
                   <div className="self-end md:w-1/4">
                     <Input
                       placeholder="Search"
-                      value={classQ}
-                      onValueChange={onClassQChange}
+                      value={ classQuery }
+                      onValueChange={ onClassQueryChange }
                       variant="bordered"
                       size="xs"
-                      classNames={inputClassNames}
+                      classNames={ inputClassNames }
                     />
                   </div>
                 </div>
                 <div className="overflow-x-scroll">
                   <Table
                     removeWrapper
-                    classNames={tableClassNames}
-                    sortDescriptor={sortDescriptor}
-                    onSortChange={setSortDescriptor}
+                    classNames={ tableClassNames }
+                    sortDescriptor={ sortDescriptor }
+                    onSortChange={ setSortDescriptor }
                   >
                     <TableHeader>
                       <TableColumn>Class</TableColumn>
@@ -307,29 +301,29 @@ export default function UserClassLandingPage({ userId }) {
                       </TableColumn>
                     </TableHeader>
                     <TableBody>
-                      {classItems.map((c) => {
+                      { classItems.map((c) => {
                         return (
-                          <TableRow key={c.id}>
-                            <TableCell>{c.name}</TableCell>
+                          <TableRow key={ c.id }>
+                            <TableCell>{ c.name }</TableCell>
                             <TableCell>
                               <button
                                 className="cursor-pointer text-base md:text-lg"
-                                onClick={() => selectRow(c)}
+                                onClick={ () => handleScheduleSelect(c) }
                               >
-                                <MdOpenInNew color="#393E46" />
+                                <MdOpenInNew color="#393E46"/>
                               </button>
                             </TableCell>
                             <TableCell>
-                              <Chip classNames={chipClassNames[c.status]}>
-                                {chipTypes[c.status].message}
+                              <Chip classNames={ chipClassNames[c.status] }>
+                                { chipTypes[c.status].message }
                               </Chip>
                             </TableCell>
                             <TableCell>
-                              {format(c.date, "d/MM/y HH:mm (EEE)")}
+                              { format(c.date, "d/MM/y HH:mm (EEE)") }
                             </TableCell>
                           </TableRow>
                         );
-                      })}
+                      }) }
                     </TableBody>
                   </Table>
                 </div>
@@ -339,19 +333,26 @@ export default function UserClassLandingPage({ userId }) {
                     isCompact
                     color="primary"
                     size="sm"
-                    loop={true}
-                    page={page}
-                    total={classPages}
-                    onChange={(page) => setPage(page)}
+                    loop={ true }
+                    page={ page }
+                    total={ classPages }
+                    onChange={ (page) => setPage(page) }
                   />
                 </div>
               </div>
+              <ScheduleModal
+                selectedClass={ selectedClass }
+                userId={ userId }
+                isOpen={ scheduleModal.isOpen }
+                onOpen={ scheduleModal.onOpen }
+                onOpenChange={ scheduleModal.onOpenChange }
+              />
             </Tab>
             <Tab
               key="booked"
               title={
                 <div className="flex flex-row items-center gap-x-2">
-                  <MdList />
+                  <MdList/>
                   <p className="text-sm md:text-base">Booked classes</p>
                 </div>
               }
@@ -360,18 +361,18 @@ export default function UserClassLandingPage({ userId }) {
                 <div className="self-end md:w-1/4">
                   <Input
                     placeholder="Search"
-                    value={bookingQ}
-                    onValueChange={onBookingQChange}
+                    value={ bookingQ }
+                    onValueChange={ onBookingQChange }
                     variant="bordered"
                     size="xs"
-                    classNames={inputClassNames}
+                    classNames={ inputClassNames }
                   />
                 </div>
                 <Table
                   removeWrapper
-                  classNames={tableClassNames}
-                  sortDescriptor={sortDescriptor}
-                  onSortChange={setSortDescriptor}
+                  classNames={ tableClassNames }
+                  sortDescriptor={ sortDescriptor }
+                  onSortChange={ setSortDescriptor }
                 >
                   <TableHeader>
                     <TableColumn>Class</TableColumn>
@@ -385,32 +386,32 @@ export default function UserClassLandingPage({ userId }) {
                     </TableColumn>
                   </TableHeader>
                   <TableBody>
-                    {bookingItems.map((booking) => {
+                    { bookingItems.map((booking) => {
                       return (
-                        <TableRow key={booking.id}>
-                          <TableCell>{booking.class.name}</TableCell>
+                        <TableRow key={ booking.id }>
+                          <TableCell>{ booking.class.name }</TableCell>
                           <TableCell>
                             <button
                               className="cursor-pointer text-base md:text-lg"
-                              onClick={() => selectRow(booking)}
+                              onClick={ () => handleBookedSelect(booking) }
                             >
-                              <MdOpenInNew color="#393E46" />
+                              <MdOpenInNew color="#393E46"/>
                             </button>
                           </TableCell>
                           <TableCell>
-                            <Chip classNames={chipClassNames["booked"]}>
-                              {chipTypes["booked"].message}
+                            <Chip classNames={ chipClassNames["booked"] }>
+                              { chipTypes["booked"].message }
                             </Chip>
                           </TableCell>
                           <TableCell>
-                            {format(booking.class.date, "d/MM/y HH:mm (EEE)")}
+                            { format(booking.class.date, "d/MM/y HH:mm (EEE)") }
                           </TableCell>
                           <TableCell>
-                            {format(booking.createdAt, "d/MM/y HH:mm")}
+                            { format(booking.createdAt, "d/MM/y HH:mm") }
                           </TableCell>
                         </TableRow>
                       );
-                    })}
+                    }) }
                   </TableBody>
                 </Table>
                 <div className="flex flex-row justify-center">
@@ -419,37 +420,37 @@ export default function UserClassLandingPage({ userId }) {
                     isCompact
                     color="primary"
                     size="sm"
-                    loop={true}
-                    page={page}
-                    total={bookingPages}
-                    onChange={(page) => setPage(page)}
+                    loop={ true }
+                    page={ page }
+                    total={ bookingPages }
+                    onChange={ (page) => setPage(page) }
                   />
                 </div>
               </div>
+              <BookedModal
+
+                selectedBooking={ selectedBooking }
+                selectedClass={ selectedClass }
+                userId={ userId }
+                isOpen={ bookedModal.isOpen }
+                onOpen={ bookedModal.onOpen }
+                onOpenChange={ bookedModal.onOpenChange }
+              />
             </Tab>
           </Tabs>
         </div>
-        <ClassDetailsModal
-          selectedClass={selectedClass}
-          selectedBooking={tab == "schedule" ? {} : selectedBooking}
-          tab={tab}
-          userId={userId}
-          isOpen={isOpen}
-          onOpen={onOpen}
-          onOpenChange={onOpenChange}
-        />
       </div>
-      {showToast ? (
-        <div onClick={toggleShowToast}>
+      { showToast ? (
+        <div onClick={ toggleShowToast }>
           <Toast
-            isSuccess={toast.isSuccess}
-            header={toast.header}
-            message={toast.message}
+            isSuccess={ toast.isSuccess }
+            header={ toast.header }
+            message={ toast.message }
           />
         </div>
       ) : (
         <></>
-      )}
+      ) }
     </>
   );
 }

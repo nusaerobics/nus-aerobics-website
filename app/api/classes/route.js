@@ -47,28 +47,34 @@ export async function GET(request) {
       return NextResponse.json(todayClasses, { status: 200 });
     }
 
-    // getUpcomingClasses /api/classes?isUpcoming=true
-    if (searchParams.get("isUpcoming") != undefined) {
-      await Class.update({ status: "open" }, { where: { bookedCapacity: { [Op.lt]: 19 }}, transaction: t });
-      await Class.update({ status: "full" }, { where: { bookedCapacity: { [Op.gte]: 19 }}, transaction: t });
+    // getClassesByUser /api/classes?userId=
+    if (searchParams.get("userId") != undefined) {
+      const userId = searchParams.get("userId");
+      // await Class.update({ status: "open" }, { where: { bookedCapacity: { [Op.lt]: 19 }}, transaction: t });
+      // await Class.update({ status: "full" }, { where: { bookedCapacity: { [Op.gte]: 19 }}, transaction: t });
+      // const pastClasses = classes.filter((c) => {
+      //   const utcClassDate = fromZonedTime(c.date, "Asia/Singapore");
+      //   const sgClassDate = toZonedTime(utcClassDate, "Asia/Singapore");
+      //   const sgCurrentDate = toZonedTime(new Date(), "Asia/Singapore");
+      //   return sgClassDate < sgCurrentDate;
+      // })
+      // for (let i = 0; i < pastClasses.length; i++) {
+      //   const c = pastClasses[i];
+      //   await Class.update({ status: "closed" }, { where: { id: c.id }, transaction: t });
+      // }
 
-      const pastClasses = classes.filter((c) => {
-        const utcClassDate = fromZonedTime(c.date, "Asia/Singapore");
-        const sgClassDate = toZonedTime(utcClassDate, "Asia/Singapore");
-        const sgCurrentDate = toZonedTime(new Date(), "Asia/Singapore");
-        return sgClassDate < sgCurrentDate;
-      })
-      for (let i = 0; i < pastClasses.length; i++) {
-        const c = pastClasses[i];
-        await Class.update({ status: "closed" }, { where: { id: c.id }, transaction: t });
-      }
-      const upcomingClasses = classes.filter((c) => {
+      const bookedClassIds = await Booking.findAll({
+        where: { userId: userId },
+        attributes: ['classId'],
+        transaction: t,
+      }).then((bookings) => bookings.map((booking) => booking.classId));
+      const filteredClasses = await Class.findAll({ where: { id: { [Op.notIn]: bookedClassIds } }, transaction: t });
+      const upcomingClasses = filteredClasses.filter((c) => {
         const utcClassDate = fromZonedTime(c.date, "Asia/Singapore");
         const sgClassDate = toZonedTime(utcClassDate, "Asia/Singapore");
         const sgCurrentDate = toZonedTime(new Date(), "Asia/Singapore");
         return sgClassDate > sgCurrentDate;
       })
-
       await t.commit();
       return NextResponse.json(upcomingClasses, { status: 200 });
     }
