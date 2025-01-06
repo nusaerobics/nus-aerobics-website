@@ -202,36 +202,6 @@ export default function ClassDetailsModal({
     }
   }
 
-  async function joinWaitlist() {
-    setModalType("loading");
-    try {
-      const res = await fetch("/api/waitlists", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ classId: selectedClass.id, userId: userId }),
-      });
-      if (!res.ok) {
-        const response = await res.json();
-        throw new Error(`${ response.error }`);
-      }
-
-      setResult({
-        isSuccess: true,
-        header: "Successfully joined waitlist",
-        message: `Your spot on the waitlist for ${ selectedClass.name } has been confirmed. An email will be sent to you if a vacancy opens.`,
-      });
-      setModalType("result");
-    } catch (error) {
-      console.log(error);
-      setResult({
-        isSuccess: false,
-        header: "Join waitlist unsuccessful",
-        message: `Unable to join waitlist for ${ selectedClass.name }: ${ error.message }`,
-      });
-      setModalType("result");
-    }
-  }
-
   return (
     <>
       <Modal

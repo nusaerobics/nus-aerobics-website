@@ -4,6 +4,35 @@ const db = require("../../config/sequelize");
 const Waitlist = db.waitlists;
 const Class = db.classes;
 
+export async function GET(request) {
+  try {
+    const url = new URL(request.url);
+    const searchParams = new URLSearchParams(url.searchParams);
+
+    // getWaitlistsByUser
+    if (searchParams.get("userId") !== undefined) {
+      const userId = searchParams.get("userId");
+      const userWaitlists = await Waitlist.findAll({
+        where: { userId: userId },
+        include: [
+          {
+            model: Class,
+            required: true,
+            as: "class",
+          }
+        ],
+      });
+      return NextResponse.json(userWaitlists, { status: 200 });
+    }
+  } catch (error) {
+    console.log(error);
+    return NextResponse.json(
+      { message: `Error getting waitlist(s): ${ error }` },
+      { status: 500 }
+    );
+  }
+}
+
 export async function POST(request) {
   const t = await db.sequelize.transaction();
   try {

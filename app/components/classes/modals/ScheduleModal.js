@@ -128,7 +128,7 @@ export default function ScheduleModal({
       }
       setResult({
         isSuccess: true,
-        header: "Successfully joined waitlist",
+        header: "Joined waitlist",
         message: `Your spot on the waitlist for ${ selectedClass.name } has been confirmed. An email will be sent to you if a vacancy opens.`,
       });
       setModalType("result");
