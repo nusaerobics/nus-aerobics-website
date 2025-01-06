@@ -21,14 +21,14 @@ import { useEffect, useMemo, useState } from "react";
 import { fromZonedTime, toZonedTime } from "date-fns-tz";
 import clsx from "clsx";
 
-export default function BookedModal({
-                                      selectedBooking,
-                                      selectedClass,
-                                      userId,
-                                      isOpen,
-                                      onOpen,
-                                      onOpenChange,
-                                    }) {
+export default function BookingModal({
+                                       selectedBooking,
+                                       selectedClass,
+                                       userId,
+                                       isOpen,
+                                       onOpen,
+                                       onOpenChange,
+                                     }) {
   const [user, setUser] = useState({});
   const [isCancel, setIsCancel] = useState(true);
   const [modalType, setModalType] = useState("view"); // Either: "view", "loading", or "result"
@@ -93,7 +93,7 @@ export default function BookedModal({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           bookingId: selectedBooking.id,
-          classId: selectedClass.id,
+          classId: selectedBooking.class.id,
           userId: userId,
         }),
       });
@@ -105,7 +105,7 @@ export default function BookedModal({
       setResult({
         isSuccess: true,
         header: "Cancellation successful",
-        message: `Your booking for ${ selectedClass.name } has been cancelled.`,
+        message: `Your booking for ${ selectedBooking.class.name } has been cancelled.`,
       });
     } catch (error) {
       console.log(error);
@@ -113,7 +113,7 @@ export default function BookedModal({
       setResult({
         isSuccess: false,
         header: "Cancellation unsuccessful",
-        message: `Unable to cancel booking for ${ selectedClass.name }: ${ error.message }`,
+        message: `Unable to cancel booking for ${ selectedBooking.class.name }: ${ error.message }`,
       });
     }
   }
@@ -134,7 +134,7 @@ export default function BookedModal({
                 <>
                   <ModalHeader>
                     <div className="flex flex-row gap-x-5">
-                      <p className="text-a-navy">{ selectedClass.name }</p>
+                      <p className="text-a-navy">{ selectedBooking.class.name }</p>
                       <Chip
                         classNames={
                           chipClassNames["booked"]
@@ -151,7 +151,7 @@ export default function BookedModal({
                       <div className="flex flex-row items-center gap-2.5">
                         <MdOutlineCalendarMonth size={ 24 } color={ "#1F4776" }/>
                         <p className="text-a-black text-sm md:text-base">
-                          { format(selectedClass.date, "d/MM/y HH:mm (EEE)") }
+                          { format(selectedBooking.class.date, "d/MM/y HH:mm (EEE)") }
                         </p>
                       </div>
                       <div className="flex flex-row items-center gap-2.5">
@@ -169,7 +169,7 @@ export default function BookedModal({
                     </div>
                     <div>
                       <p className="text-a-black text-sm md:text-base">
-                        { selectedClass.description }
+                        { selectedBooking.class.description }
                       </p>
                     </div>
                   </ModalBody>
