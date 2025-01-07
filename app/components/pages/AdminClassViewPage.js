@@ -171,6 +171,7 @@ export default function AdminClassViewPage({ classId }) {
       if (!res1.ok) {
         throw new Error(`Unable to find user: No user exists for ${ email }. Try again with a registered email.`);
       }
+      // TODO: Remove balance check since handled in route and edit error messages
       const user = await res1.json();
       if (user.balance <= 0) {
         throw new Error("Insufficient credits available. Unable to create booking.");

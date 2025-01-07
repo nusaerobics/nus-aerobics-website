@@ -4,11 +4,12 @@ import { PageTitle } from "../utils/Titles";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Input, Pagination, Tab, Tabs } from "@nextui-org/react";
 import { inputClassNames, tableClassNames, tabsClassNames } from "../utils/ClassNames";
-import { MdAvTimer, MdCheckCircleOutline, MdOpenInNew, MdOutlineFilterAlt } from "react-icons/md";
+import { MdAvTimer, MdCheckCircleOutline, MdOpenInNew } from "react-icons/md";
 import { Table, TableBody, TableCell, TableColumn, TableHeader, TableRow } from "@nextui-org/table";
 import { format } from "date-fns";
 import { useDisclosure } from "@nextui-org/modal";
 import BookingModal from "../classes/modals/BookingModal";
+import WaitlistModal from "../classes/modals/WaitlistModal";
 
 export default function ReservationsPage({ userId }) {
   const bookingModal = useDisclosure();
@@ -169,8 +170,6 @@ export default function ReservationsPage({ userId }) {
     }
     return sortedWaitlists.slice(start, end);
   }, [page, sortedWaitlists, waitlistQuery]);
-
-  // TODO: add in sorted, pages, and items for waitlist
 
   function handleBookingSelect(rowData) {
     setSelectedBooking(rowData);
@@ -351,6 +350,14 @@ export default function ReservationsPage({ userId }) {
                   />
                 </div>
               </div>
+              <WaitlistModal
+                selectedWaitlist={ selectedWaitlist }
+                selectedClass={ selectedClass }
+                userId={ userId }
+                isOpen={ waitlistModal.isOpen }
+                onOpen={ waitlistModal.onOpen }
+                onOpenChange={ waitlistModal.onOpenChange }
+              />
             </Tab>
           </Tabs>
         </div>

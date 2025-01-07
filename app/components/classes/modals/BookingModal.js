@@ -28,7 +28,6 @@ export default function BookingModal({
                                        onOpen,
                                        onOpenChange,
                                      }) {
-  const [user, setUser] = useState({});
   const [isCancel, setIsCancel] = useState(true);
   const [modalType, setModalType] = useState("view"); // Either: "view", "loading", or "result"
   const [result, setResult] = useState({}); // {  isSuccess: boolean, header: string, message: string }
@@ -54,27 +53,6 @@ export default function BookingModal({
   useEffect(() => {
     setModalType("view");
   }, [isOpen]);
-  useMemo(async () => {
-    const fetchUser = async () => {
-      try {
-        const res = await fetch(`/api/users?id=${ userId }`);
-        if (!res.ok) {
-          throw new Error(`Unable to get user ${ userId }: ${ res.status }`);
-        }
-        const data = await res.json();
-        setUser(data);
-      } catch (error) {
-        setToast({
-          isSuccess: false,
-          header: "Unable to get user",
-          message: `Unable to get user ${ userId }. Try again later.`,
-        });
-        setShowToast(true);
-        console.log(error);
-      }
-    };
-    await fetchUser();
-  }, [])
 
   const isAllowedCancel = (selectedClass) => {
     const utcDate = fromZonedTime(selectedClass.date, "Asia/Singapore");
@@ -103,8 +81,8 @@ export default function BookingModal({
       setModalType("result");
       setResult({
         isSuccess: true,
-        header: "Cancellation successful",
-        message: `Your booking for ${ selectedBooking.class.name } has been cancelled.`,
+        header: "Unbooked class",
+        message: `Your booking for ${ selectedBooking.class.name } has been cancelled.`,  // TODO: Add in class time
       });
     } catch (error) {
       console.log(error);
@@ -197,7 +175,7 @@ export default function BookingModal({
                 <ModalBody>
                   <div className="flex flex-col items-center justify-center gap-y-5 p-20">
                     <Spinner color="primary" size="lg"/>
-                    <p className="text-a-black text-sm md:text-base">Booking your class...</p>
+                    <p className="text-a-black text-sm md:text-base">Unbooking your class...</p>
                   </div>
                 </ModalBody>
               ) }

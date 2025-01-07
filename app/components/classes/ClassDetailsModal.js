@@ -93,7 +93,7 @@ export default function ClassDetailsModal({
       setIsCancel(result);
       setIsBooked(true);
     }
-  });
+  }, [onOpenChange]);
 
   useEffect(() => {
     setModalType("view");

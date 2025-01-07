@@ -92,7 +92,6 @@ export async function GET(request) {
 export async function POST(request) {
   const t = await db.sequelize.transaction();
   try {
-    // NOTE: check for sufficient funds done before request sent
     const body = await request.json();
     const { classId, userId, isForced } = body;  // NOTE: isForced = TRUE when admin makes the booking, else FALSE
 
@@ -103,10 +102,15 @@ export async function POST(request) {
       { t },
     );
 
-    // 2. Check class capacity.
+    // 2a. Check user's balance.
+    if (user.balance < 1) {
+      throw new Error("Your account has insufficient credits. Please purchase more credits first.");
+    }
+
+    // 2b. Check class capacity.
     if (!isForced) {
       if (selectedClass.bookedCapacity >= selectedClass.maxCapacity) {
-        throw new Error(`Class ${ classId } is fully booked.`);
+        throw new Error(`${ selectedClass.name } is fully booked. Please join the waitlist or book another class.`);
       }
     }
 
@@ -152,7 +156,7 @@ export async function POST(request) {
     console.log(error);
     await t.rollback();
     return NextResponse.json(
-      { message: `Error creating booking: ${ error.message }` },
+      { message: `${ error.message }` },
       { status: 500 }
     );
   }

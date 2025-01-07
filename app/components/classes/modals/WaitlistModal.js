@@ -5,7 +5,7 @@ import {
   ModalBody,
   ModalFooter,
 } from "@nextui-org/modal";
-import { Chip, Spinner, Tooltip } from "@nextui-org/react";
+import { Chip, Spinner } from "@nextui-org/react";
 import { chipClassNames, chipTypes, modalClassNames } from "../../utils/ClassNames";
 import {
   MdCheckCircleOutline,
@@ -17,9 +17,11 @@ import {
 import { format } from "date-fns";
 import { SectionTitle } from "../../utils/Titles";
 import Toast from "../../Toast";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { fromZonedTime, toZonedTime } from "date-fns-tz";
 
-export default function ScheduleModal({
+export default function WaitlistModal({
+                                        selectedWaitlist,
                                         selectedClass,
                                         userId,
                                         isOpen,
@@ -30,7 +32,6 @@ export default function ScheduleModal({
   const [result, setResult] = useState({}); // {  isSuccess: boolean, header: string, message: string }
   const [showToast, setShowToast] = useState(false);
   const [toast, setToast] = useState({});
-  const [isWaitlist, setIsWaitlist] = useState(false);  // TRUE when user is already on the class' waitlist
   const toggleShowToast = () => {
     setShowToast(!showToast);
   }
@@ -47,86 +48,40 @@ export default function ScheduleModal({
   useEffect(() => {
     setModalType("view");
   }, [isOpen]);
-  useEffect(() => {
-    const fetchWaitlists = async () => {
-      const res = await fetch(`/api/waitlists?userId=${ userId }`);
-      if (!res.ok) {
-        const response = await res.json();
-        throw new Error(`Unable to get waitlists for user ${ userId }: ${ response }`)
-      }
-      const waitlists = await res.json();
-      for (let i = 0; i < waitlists.length; i++) {
-        const waitlist = waitlists[i];
-        if (selectedClass.id === waitlist.class.id) {
-          setIsWaitlist(true);
-        }
-      }
-    };
-    if (selectedClass.status === "full") {
-      fetchWaitlists();
-    }
-  }, [onOpenChange]);
 
-  async function bookClass() {
-    setModalType("loading");
-    try {
-      const res = await fetch("/api/bookings", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(
-          {
-            classId: selectedClass.id,
-            userId: userId,
-            isForced: false,
-          }),
-      });
-      if (!res.ok) {
-        const response = await res.json();
-        throw new Error(`${ response.message }`)
-      }
-      setResult({
-        isSuccess: true,
-        header: "Booking successful",
-        message: `Your booking for ${ selectedClass.name } has been confirmed.`,  // TODO: Add in class time
-      });
-      setModalType("result");
-    } catch (error) {
-      console.log(error);
-      setResult({
-        isSuccess: false,
-        header: "Booking unsuccessful",
-        message: `${ error.message }`,
-      });
-      setModalType("result");
-    }
+  const isAllowedCancel = (selectedClass) => {
+    const utcDate = fromZonedTime(selectedClass.date, "Asia/Singapore");
+    const sgDate = toZonedTime(utcDate, "Asia/Singapore");
+    const sgCurrentDate = toZonedTime(new Date(), "Asia/Singapore");
+    const cancelDeadline = new Date(sgDate.getTime() - 12 * 60 * 60 * 1000);
+    return sgCurrentDate < cancelDeadline;
   }
 
-  async function joinWaitlist() {
+  async function leaveWaitlist() {
     setModalType("loading");
     try {
-      const res = await fetch("/api/waitlists", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ classId: selectedClass.id, userId: userId }),
+      const res = await fetch(`/api/waitlists/${ selectedWaitlist.id }`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" }
       });
       if (!res.ok) {
         const response = await res.json();
         throw new Error(`${ response.error }`);
       }
+      setModalType("result");
       setResult({
         isSuccess: true,
-        header: "Joined waitlist",
-        message: `Your spot on the waitlist for ${ selectedClass.name } has been confirmed. An email will be sent to you if a vacancy opens.`,
-      });
-      setModalType("result");
+        header: "Left waitlist",
+        message: `You have been removed from the waitlist for ${ selectedClass.name }. You will not receive an email when a slot becomes available.`
+      })
     } catch (error) {
       console.log(error);
+      setModalType("result");
       setResult({
         isSuccess: false,
-        header: "Join waitlist unsuccessful",
-        message: `Unable to join waitlist for ${ selectedClass.name }: ${ error.message }`,
+        header: "Unable to leave waitlist",
+        message: `We are unable to remove you from the waitlist for ${ selectedClass.name } at the moment: ${ error.message }`,
       });
-      setModalType("result");
     }
   }
 
@@ -149,11 +104,11 @@ export default function ScheduleModal({
                       <p className="text-a-navy">{ selectedClass.name }</p>
                       <Chip
                         classNames={
-                          chipClassNames[selectedClass.status]
+                          chipClassNames["booked"]
                         }
                       >
                         {
-                          chipTypes[selectedClass.status].message
+                          chipTypes["booked"].message
                         }
                       </Chip>
                     </div>
@@ -186,36 +141,11 @@ export default function ScheduleModal({
                     </div>
                   </ModalBody>
                   <ModalFooter>
-                    <div className="flex justify-end">
-                      { selectedClass.status === "open" && (
-                        <button
-                          onClick={ bookClass }
-                          className="rounded-[30px] px-[10px] md:px-[20px] py-[10px] text-xs md:text-sm bg-a-navy text-white cursor-pointer"
-                        >
-                          Book class
-                        </button>
-                      ) }
-                      { selectedClass.status === "full" && !isWaitlist && (
-                        <button
-                          onClick={ joinWaitlist }
-                          className="rounded-[30px] px-[10px] md:px-[20px] py-[10px] text-xs md:text-sm bg-a-navy text-white cursor-pointer"
-                        >
-                          Join waitlist
-                        </button>
-                      ) }
-                      { selectedClass.status === "full" && isWaitlist && (
-                        <Tooltip
-                          content="You are already on the waitlist."
-                        >
-                          <button
-                            className="rounded-[30px] px-[10px] md:px-[20px] py-[10px] text-xs md:text-sm bg-a-navy/10 text-a-navy cursor-not-allowed"
-                            disabled
-                          >
-                            Join waitlist
-                          </button>
-                        </Tooltip>
-                      ) }
-                    </div>
+                    <button
+                      onClick={ leaveWaitlist }
+                      className="rounded-[30px] px-[10px] md:px-[20px] py-[10px] text-xs md:text-sm bg-a-red text-white cursor-pointer">
+                      Leave waitlist
+                    </button>
                   </ModalFooter>
                 </>
               ) }
@@ -223,7 +153,7 @@ export default function ScheduleModal({
                 <ModalBody>
                   <div className="flex flex-col items-center justify-center gap-y-5 p-20">
                     <Spinner color="primary" size="lg"/>
-                    <p className="text-a-black text-sm md:text-base">Booking your class...</p>
+                    <p className="text-a-black text-sm md:text-base">Leaving the waitlist...</p>
                   </div>
                 </ModalBody>
               ) }
