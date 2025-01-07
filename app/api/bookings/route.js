@@ -12,16 +12,6 @@ export async function GET(request) {
     const url = new URL(request.url);
     const searchParams = new URLSearchParams(url.searchParams);
 
-    // getBookingById
-    if (searchParams.get("id") != undefined) {
-      const id = searchParams.get("id");
-      const booking = await Booking.findOne({ where: { id: id } }); // NOTE: When would I need a booking by ID?
-      if (!booking) {
-        throw new Error(`Booking ${ id } does not exist`);
-      }
-      return NextResponse.json(booking, { status: 200 });
-    }
-
     // getBookingsByUser
     if (searchParams.get("userId") != undefined) {
       const userId = searchParams.get("userId");
@@ -176,62 +166,6 @@ export async function PUT(request) {
     console.log(error);
     return NextResponse.json(
       { message: `Error updating booking: ${ error }` },
-      { status: 500 }
-    );
-  }
-}
-
-// deleteBooking
-export async function DELETE(request) {
-  const t = await db.sequelize.transaction();
-  try {
-    const body = await request.json();
-    const { bookingId, classId, userId } = body;
-
-    // 1. Delete booking.
-    await Booking.destroy(
-      {
-        where: { id: bookingId },
-        transaction: t
-      }
-    );
-
-    // 2. Update class' booked capacity.
-    const bookedClass = await Class.findOne(
-      { where: { id: classId } },
-      { t }
-    );
-    await Class.update(
-      {
-        bookedCapacity: bookedClass.bookedCapacity - 1
-      },
-      { where: { id: classId }, transaction: t });
-
-    // 3. Update user's balance.
-    const user = await User.findOne({ where: { id: userId } }, { t });
-    await User.update(
-      { balance: user.balance + 1 },
-      { where: { id: userId }, transaction: t }
-    );
-
-    // 4. Create new transaction.
-    await Transaction.create({
-      userId: userId,
-      amount: 1,
-      type: "refund",
-      description: `Refunded '${ bookedClass.name }'`,
-    }, { transaction: t });
-
-    await t.commit();
-    return NextResponse.json(
-      { json: `Booking ${ bookingId } deleted successfully` },
-      { status: 200 }
-    );
-  } catch (error) {
-    console.log(error);
-    await t.rollback();
-    return NextResponse.json(
-      { message: `Error deleting booking: ${ error }` },
       { status: 500 }
     );
   }

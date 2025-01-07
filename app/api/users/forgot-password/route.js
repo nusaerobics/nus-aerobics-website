@@ -35,18 +35,20 @@ export async function PUT(request) {
 
     const emailHTML = `
       Hi ${ user.name }!
+      <br>
       <br>We received a request to reset your password on NUS Aerobics.
       <br>
       <br>Login with your temporary password and reset your password in the Profile page.
       <br><strong>Temporary password:</strong> ${ tempPassword }
       <br>
-      <br>If you have any questions or problems, please contact us at: <a href="mailto:aerobics@nussportsclub.org">aerobics@nussportsclub.org</a>.
+      <br>If you have any questions or problems, please contact us at <a href="mailto:aerobics@nussportsclub.org">aerobics@nussportsclub.org</a>.
+      <br>
       <br>Kindest regards,
       <br>NUS Aerobics`;
     const mailOptions = {
       from: process.env.EMAIL_USER,
       to: email,
-      subject: "Forgot your password?",
+      subject: "[NUS Aerobics] Forgot your password?",
       html: emailHTML,
     };
 
