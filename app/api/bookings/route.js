@@ -5,6 +5,7 @@ const Class = db.classes;
 const Booking = db.bookings;
 const Transaction = db.transactions;
 const User = db.users;
+const Waitlist = db.waitlists;
 
 export async function GET(request) {
   try {
@@ -93,7 +94,7 @@ export async function POST(request) {
   try {
     // NOTE: check for sufficient funds done before request sent
     const body = await request.json();
-    const { classId, userId, isForced } = body;  // NOTE: isForced = TRUE when admin makes the booking
+    const { classId, userId, isForced } = body;  // NOTE: isForced = TRUE when admin makes the booking, else FALSE
 
     // 1. Find user and class.
     const selectedClass = await Class.findOne({ where: { id: classId } }, { t });
@@ -138,6 +139,12 @@ export async function POST(request) {
       type: "book",
       description: `Booked '${ selectedClass.name }'`,
     }, { transaction: t });
+
+    // 6. Delete any waitlist user had for class.
+    const waitlist = await Waitlist.findOne({ where: { userId: userId, classId: classId }, transaction: t });
+    if (waitlist !== null) {
+      await Waitlist.destroy({ where: { id: waitlist.id }, transaction: t });
+    }
 
     await t.commit();
     return NextResponse.json(newBooking, { status: 200 });

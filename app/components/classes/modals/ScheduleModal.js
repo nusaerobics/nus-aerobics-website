@@ -5,7 +5,7 @@ import {
   ModalBody,
   ModalFooter,
 } from "@nextui-org/modal";
-import { Chip, Spinner } from "@nextui-org/react";
+import { Chip, Spinner, Tooltip } from "@nextui-org/react";
 import { chipClassNames, chipTypes, modalClassNames } from "../../utils/ClassNames";
 import {
   MdCheckCircleOutline,
@@ -31,6 +31,7 @@ export default function ScheduleModal({
   const [result, setResult] = useState({}); // {  isSuccess: boolean, header: string, message: string }
   const [showToast, setShowToast] = useState(false);
   const [toast, setToast] = useState({});
+  const [isWaitlist, setIsWaitlist] = useState(false);
   const toggleShowToast = () => {
     setShowToast(!showToast);
   }
@@ -47,6 +48,32 @@ export default function ScheduleModal({
   useEffect(() => {
     setModalType("view");
   }, [isOpen]);
+  useEffect(() => {
+    const result = isOnWaitlist(selectedClass);
+    setIsWaitlist(result);
+  }, [isOpen])
+
+  const isOnWaitlist = async (selectedClass) => {
+    try {
+      const res = await fetch(`/api/waitlists?userId=${ userId }`);
+      if (!res.ok) {
+        const response = await res.json();
+        throw new Error(`${ response.error }`);
+      }
+      const waitlists = await res.json();
+      for (let i = 0; i < waitlists.length; i++) {
+        const waitlist = waitlists[i];
+        if (selectedClass.id === waitlist.classId) {
+          return true;
+        }
+      }
+      return false;
+    } catch (error) {
+      // TODO: Add Toast message
+      console.log(error);
+    }
+  };
+
   useMemo(async () => {
     const fetchUser = async () => {
       try {
@@ -208,13 +235,25 @@ export default function ScheduleModal({
                           Book class
                         </button>
                       ) }
-                      { selectedClass.status === "full" && (
+                      { selectedClass.status === "full" && !isWaitlist && (
                         <button
                           onClick={ joinWaitlist }
                           className="rounded-[30px] px-[10px] md:px-[20px] py-[10px] text-xs md:text-sm bg-a-navy text-white cursor-pointer"
                         >
                           Join waitlist
                         </button>
+                      ) }
+                      { selectedClass.status === "full" && isWaitlist && (
+                        <Tooltip
+                          content="You are already on the waitlist."
+                        >
+                          <button
+                            className="rounded-[30px] px-[10px] md:px-[20px] py-[10px] text-xs md:text-sm bg-a-navy/10 text-a-navy cursor-not-allowed"
+                            disabled
+                          >
+                            Join waitlist
+                          </button>
+                        </Tooltip>
                       ) }
                     </div>
                   </ModalFooter>

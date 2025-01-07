@@ -74,7 +74,7 @@ export default function ReservationsPage({ userId }) {
       }
     };
     fetchWaitlists();
-  }, []);
+  }, [bookingModal.isOpen, waitlistModal.isOpen]);
 
   const [page, setPage] = useState(1);
   const rowsPerPage = 10;

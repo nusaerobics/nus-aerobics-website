@@ -19,7 +19,6 @@ import { SectionTitle } from "../../utils/Titles";
 import Toast from "../../Toast";
 import { useEffect, useMemo, useState } from "react";
 import { fromZonedTime, toZonedTime } from "date-fns-tz";
-import clsx from "clsx";
 
 export default function BookingModal({
                                        selectedBooking,
@@ -174,26 +173,23 @@ export default function BookingModal({
                     </div>
                   </ModalBody>
                   <ModalFooter>
-                    <Tooltip
-                      content="Classes can only be cancelled 12 hours before"
-                      isDisabled={ isCancel }
-                    >
+                    { isCancel && (
                       <button
                         onClick={ unbookClass }
-                        disabled={ !isCancel }
-                        className={ clsx(
-                          "rounded-[30px] px-[10px] md:px-[20px] py-[10px] text-xs md:text-sm",
-                          {
-                            "bg-a-red text-white cursor-pointer":
-                            isCancel,
-                            "bg-a-red/10 text-a-red cursor-not-allowed":
-                              !isCancel,
-                          }
-                        ) }
-                      >
+                        className="rounded-[30px] px-[10px] md:px-[20px] py-[10px] text-xs md:text-sm bg-a-red text-white cursor-pointer">
                         Unbook class
-                      </button>
-                    </Tooltip>
+                      </button>) }
+                    { !isCancel && (
+                      <Tooltip
+                        content="Classes can only be cancelled 12 hours before"
+                      >
+                        <button
+                          disabled
+                          className="rounded-[30px] px-[10px] md:px-[20px] py-[10px] text-xs md:text-sm bg-a-red/10 text-a-red cursor-not-allowed"
+                        >
+                          Unbook class
+                        </button>
+                      </Tooltip>) }
                   </ModalFooter>
                 </>
               ) }

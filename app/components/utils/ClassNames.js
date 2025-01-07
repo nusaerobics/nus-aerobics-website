@@ -19,10 +19,10 @@ export const chipClassNames = {
 
 export const chipTypes = {
   open: {
-    message: "Open",
+    message: "Open for booking",
   },
   full: {
-    message: "Full",
+    message: "Fully booked",
   },
   closed: {
     message: "Closed",

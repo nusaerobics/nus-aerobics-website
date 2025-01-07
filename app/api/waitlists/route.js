@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 const db = require("../../config/sequelize");
 const Waitlist = db.waitlists;
 const Class = db.classes;
+const User = db.users;
 
 export async function GET(request) {
   try {
@@ -24,6 +25,24 @@ export async function GET(request) {
       });
       return NextResponse.json(userWaitlists, { status: 200 });
     }
+
+    // TODO: Fix needed, not showing the user's information (Refer to Classes route)
+    // getWaitlistsByClass
+    if (searchParams.get("classId") !== undefined) {
+      const classId = searchParams.get("classId");
+      const classWaitlists = await Waitlist.findAll({
+        where: { classId: classId },
+        include: [
+          {
+            model: User,
+            required: true,
+            as: "user",
+          }
+        ]
+      });
+      return NextResponse.json(classWaitlists, { status: 200 });
+    }
+
   } catch (error) {
     console.log(error);
     return NextResponse.json(

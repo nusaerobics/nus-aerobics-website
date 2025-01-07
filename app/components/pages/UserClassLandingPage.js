@@ -63,7 +63,7 @@ export default function UserClassLandingPage({ userId }) {
         setToast({
           isSuccess: false,
           header: "Unable to get classes",
-          message: `Unable to get classes. Try again later.`,
+          message: `An error occurred. Try again later.`,
         });
         setShowToast(true);
         console.log(error);
@@ -240,7 +240,6 @@ export default function UserClassLandingPage({ userId }) {
             onOpen={ scheduleModal.onOpen }
             onOpenChange={ scheduleModal.onOpenChange }
           />
-
         </div>
       </div>
       { showToast && (

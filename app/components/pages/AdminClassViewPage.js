@@ -73,7 +73,7 @@ export default function AdminClassViewPage({ classId }) {
     // getClass
     const fetchClass = async () => {
       try {
-        const res = await fetch(`/api/classes?id=${ classId }`);
+        const res = await fetch(`api/classes/${ classId }`);
         if (!res.ok) {
           throw new Error(`Unable to get class ${ classId }: ${ res.status }`);
         }

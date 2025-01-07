@@ -1,6 +1,5 @@
 import { fromZonedTime, toZonedTime } from "date-fns-tz";
 import { NextResponse } from "next/server";
-import { now } from "sequelize/lib/utils";
 
 const db = require("../../config/sequelize");
 const { Op } = require("sequelize");
@@ -10,22 +9,25 @@ const User = db.users;
 
 export async function GET(request) {
   const t = await db.sequelize.transaction();
-
   try {
     const url = new URL(request.url);
     const searchParams = new URLSearchParams(url.searchParams);
 
-    // getClassById
-    if (searchParams.get("id") != undefined) {
-      const id = searchParams.get("id");
-      const targetClass = await Class.findOne({ where: { id: id } });
-      if (!targetClass) {
-        throw new Error(`Class ${ id } does not exist`);
-      }
-      return NextResponse.json(targetClass, { status: 200 });
-    }
-
     const classes = await Class.findAll({ transaction: t });
+    const upcomingClasses = await Class.findAll({ where: { status: { [Op.ne]: "closed" } }, transaction: t });
+    for (let i = 0; i < upcomingClasses.length; i++) {
+      const c = upcomingClasses[i];
+      const utcClassDate = fromZonedTime(c.date, "Asia/Singapore");
+      const sgClassDate = toZonedTime(utcClassDate, "Asia/Singapore");
+      const sgCurrentDate = toZonedTime(new Date(), "Asia/Singapore");
+      if (sgClassDate < sgCurrentDate) {
+        await Class.update({ status: "closed" }, { where: { id: c.id }, transaction: t });
+      } else if (c.bookedCapacity < 19) {
+        await Class.update({ status: "open" }, { where: { id: c.id }, transaction: t });
+      } else {
+        await Class.update({ status: "full" }, { where: { id: c.id }, transaction: t });
+      }
+    }
 
     // getTodayClasses /api/classes?isToday=true
     if (searchParams.get("isToday") != undefined) {
@@ -50,33 +52,22 @@ export async function GET(request) {
     // getClassesByUser /api/classes?userId=
     if (searchParams.get("userId") != undefined) {
       const userId = searchParams.get("userId");
-      // await Class.update({ status: "open" }, { where: { bookedCapacity: { [Op.lt]: 19 }}, transaction: t });
-      // await Class.update({ status: "full" }, { where: { bookedCapacity: { [Op.gte]: 19 }}, transaction: t });
-      // const pastClasses = classes.filter((c) => {
-      //   const utcClassDate = fromZonedTime(c.date, "Asia/Singapore");
-      //   const sgClassDate = toZonedTime(utcClassDate, "Asia/Singapore");
-      //   const sgCurrentDate = toZonedTime(new Date(), "Asia/Singapore");
-      //   return sgClassDate < sgCurrentDate;
-      // })
-      // for (let i = 0; i < pastClasses.length; i++) {
-      //   const c = pastClasses[i];
-      //   await Class.update({ status: "closed" }, { where: { id: c.id }, transaction: t });
-      // }
 
       const bookedClassIds = await Booking.findAll({
         where: { userId: userId },
         attributes: ['classId'],
         transaction: t,
       }).then((bookings) => bookings.map((booking) => booking.classId));
-      const filteredClasses = await Class.findAll({ where: { id: { [Op.notIn]: bookedClassIds } }, transaction: t });
-      const upcomingClasses = filteredClasses.filter((c) => {
-        const utcClassDate = fromZonedTime(c.date, "Asia/Singapore");
-        const sgClassDate = toZonedTime(utcClassDate, "Asia/Singapore");
-        const sgCurrentDate = toZonedTime(new Date(), "Asia/Singapore");
-        return sgClassDate > sgCurrentDate;
-      })
+      const filteredClasses = await Class.findAll(
+        {
+          where: {
+            id: { [Op.notIn]: bookedClassIds },
+            status: { [Op.ne]: "closed" }
+          },
+          transaction: t
+        });
       await t.commit();
-      return NextResponse.json(upcomingClasses, { status: 200 });
+      return NextResponse.json(filteredClasses, { status: 200 });
     }
 
     // getClasses
@@ -105,6 +96,7 @@ export async function POST(request) {
   }
 }
 
+// TODO: Move PUT and DELETE to [id]/route.js
 // updateClass
 export async function PUT(request) {
   // All values have to be inputted in request - either the unchanged values or updated values
@@ -133,21 +125,21 @@ export async function DELETE(request) {
     const body = await request.json();
     const id = body.id;
 
-    // 1. get bookings of a class
+    // 1. Get bookings of a class.
     const bookings = await Booking.findAll({ where: { classId: id }, transaction: t });
     for (let i = 0; i < bookings.length; i++) {
       const booking = bookings[i];
       const userId = booking.userId;
 
       const user = await User.findOne({ where: { id: userId }, transaction: t });
-      // 1a. refund each user
+      // 1a. Refund each user.
       await User.update({ balance: user.balance + 1 }, { where: { id: userId }, transaction: t });
 
-      // 1b. delete each booking
+      // 1b. Delete each booking.
       await Booking.destroy({ where: { id: booking.id }, transaction: t });
     }
 
-    // 2. delete class
+    // 2. Delete class.
     await Class.destroy({ where: { id: id }, transaction: t });
 
     await t.commit();
