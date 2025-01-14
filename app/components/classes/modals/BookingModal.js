@@ -16,8 +16,7 @@ import {
 } from "react-icons/md";
 import { format } from "date-fns";
 import { SectionTitle } from "../../utils/Titles";
-import Toast from "../../Toast";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { fromZonedTime, toZonedTime } from "date-fns-tz";
 
 export default function BookingModal({
@@ -31,25 +30,11 @@ export default function BookingModal({
   const [isCancel, setIsCancel] = useState(true);
   const [modalType, setModalType] = useState("view"); // Either: "view", "loading", or "result"
   const [result, setResult] = useState({}); // {  isSuccess: boolean, header: string, message: string }
-  const [showToast, setShowToast] = useState(false);
-  const [toast, setToast] = useState({});
-  const toggleShowToast = () => {
-    setShowToast(!showToast);
-  }
 
   useEffect(() => {
     const result = isAllowedCancel(selectedClass);
     setIsCancel(result);
   })
-  useEffect(() => {
-    let timer;
-    if (showToast) {
-      timer = setTimeout(() => {
-        setShowToast(false);
-      }, 5000);
-    }
-    return () => clearTimeout(timer);
-  }, [showToast]);
   useEffect(() => {
     setModalType("view");
   }, [isOpen]);
@@ -65,7 +50,7 @@ export default function BookingModal({
   async function unbookClass() {
     setModalType("loading");
     try {
-      const res = await fetch("/api/bookings", {
+      const res = await fetch(`/api/bookings/${ selectedBooking.id }`, {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -82,7 +67,7 @@ export default function BookingModal({
       setResult({
         isSuccess: true,
         header: "Unbooked class",
-        message: `Your booking for ${ selectedBooking.class.name } has been cancelled.`,  // TODO: Add in class time
+        message: `Your booking for ${ selectedClass.name } on ${ format(selectedClass.date, "d/MM/y HH:mm (EEE)") } has been cancelled.`,
       });
     } catch (error) {
       console.log(error);
@@ -90,7 +75,7 @@ export default function BookingModal({
       setResult({
         isSuccess: false,
         header: "Cancellation unsuccessful",
-        message: `Unable to cancel booking for ${ selectedBooking.class.name }: ${ error.message }`,
+        message: `${ error.message }`,  // TODO: Edit error messages displayed
       });
     }
   }
@@ -188,7 +173,7 @@ export default function BookingModal({
                       <MdOutlineCancel size={ 84 } color={ "#9E2A2A" }/>
                     ) }
                     <SectionTitle title={ result.header }/>
-                    <p className="text-a-black text-sm md:text-base">
+                    <p className="text-a-black text-sm md:text-base text-center">
                       { result.message }
                     </p>
                   </div>
@@ -198,14 +183,6 @@ export default function BookingModal({
           );
         } }
       </ModalContent>
-      { showToast &&
-        <div onClick={ toggleShowToast }>
-          <Toast
-            isSuccess={ toast.isSuccess }
-            header={ toast.header }
-            message={ toast.message }
-          />
-        </div> }
     </Modal>
   )
 }

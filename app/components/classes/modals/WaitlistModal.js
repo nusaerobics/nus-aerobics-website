@@ -16,9 +16,7 @@ import {
 } from "react-icons/md";
 import { format } from "date-fns";
 import { SectionTitle } from "../../utils/Titles";
-import Toast from "../../Toast";
-import { useEffect, useMemo, useState } from "react";
-import { fromZonedTime, toZonedTime } from "date-fns-tz";
+import { useEffect, useState } from "react";
 
 export default function WaitlistModal({
                                         selectedWaitlist,
@@ -30,32 +28,10 @@ export default function WaitlistModal({
                                       }) {
   const [modalType, setModalType] = useState("view"); // Either: "view", "loading", or "result"
   const [result, setResult] = useState({}); // {  isSuccess: boolean, header: string, message: string }
-  const [showToast, setShowToast] = useState(false);
-  const [toast, setToast] = useState({});
-  const toggleShowToast = () => {
-    setShowToast(!showToast);
-  }
 
-  useEffect(() => {
-    let timer;
-    if (showToast) {
-      timer = setTimeout(() => {
-        setShowToast(false);
-      }, 5000);
-    }
-    return () => clearTimeout(timer);
-  }, [showToast]);
   useEffect(() => {
     setModalType("view");
   }, [isOpen]);
-
-  const isAllowedCancel = (selectedClass) => {
-    const utcDate = fromZonedTime(selectedClass.date, "Asia/Singapore");
-    const sgDate = toZonedTime(utcDate, "Asia/Singapore");
-    const sgCurrentDate = toZonedTime(new Date(), "Asia/Singapore");
-    const cancelDeadline = new Date(sgDate.getTime() - 12 * 60 * 60 * 1000);
-    return sgCurrentDate < cancelDeadline;
-  }
 
   async function leaveWaitlist() {
     setModalType("loading");
@@ -104,11 +80,11 @@ export default function WaitlistModal({
                       <p className="text-a-navy">{ selectedClass.name }</p>
                       <Chip
                         classNames={
-                          chipClassNames["booked"]
+                          chipClassNames["waitlisted"]
                         }
                       >
                         {
-                          chipTypes["booked"].message
+                          chipTypes["waitlisted"].message
                         }
                       </Chip>
                     </div>
@@ -166,7 +142,7 @@ export default function WaitlistModal({
                       <MdOutlineCancel size={ 84 } color={ "#9E2A2A" }/>
                     ) }
                     <SectionTitle title={ result.header }/>
-                    <p className="text-a-black text-sm md:text-base">
+                    <p className="text-a-black text-sm md:text-base text-center">
                       { result.message }
                     </p>
                   </div>
@@ -176,14 +152,6 @@ export default function WaitlistModal({
           );
         } }
       </ModalContent>
-      { showToast &&
-        <div onClick={ toggleShowToast }>
-          <Toast
-            isSuccess={ toast.isSuccess }
-            header={ toast.header }
-            message={ toast.message }
-          />
-        </div> }
     </Modal>
   )
 }

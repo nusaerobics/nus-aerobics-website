@@ -106,7 +106,7 @@ export default function UserClassLandingPage({ userId }) {
     const filteredClasses = sortedClasses
       .filter((c) => {
         const className = c.name.toLowerCase();
-        const searchName = classQuery.toLowerCase();
+        const searchName = classQuery.trim().toLowerCase();
         return className.includes(searchName);
       })
       .filter((c) => {
@@ -126,7 +126,7 @@ export default function UserClassLandingPage({ userId }) {
     const filteredClasses = sortedClasses
       .filter((c) => {
         const className = c.name.toLowerCase();
-        const searchName = classQuery.toLowerCase();
+        const searchName = classQuery.trim().toLowerCase();
         return className.includes(searchName);
       })
       .filter((c) => {
@@ -145,7 +145,6 @@ export default function UserClassLandingPage({ userId }) {
       <div className="w-full h-full flex flex-col gap-y-5 p-5 md:p-10 pt-20 overflow-y-scroll">
         <PageTitle title="Classes"/>
         <div className="w-full rounded-[20px] border border-a-black/10 bg-white gap-y-2.5">
-
           <div className="md:h-full md:w-full flex flex-col p-2.5 gap-y-5">
             <div className="flex flex-row justify-end items-center gap-x-2.5">
               <Dropdown>

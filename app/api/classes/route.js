@@ -13,7 +13,6 @@ export async function GET(request) {
     const url = new URL(request.url);
     const searchParams = new URLSearchParams(url.searchParams);
 
-    const classes = await Class.findAll({ transaction: t });
     const upcomingClasses = await Class.findAll({ where: { status: { [Op.ne]: "closed" } }, transaction: t });
     for (let i = 0; i < upcomingClasses.length; i++) {
       const c = upcomingClasses[i];
@@ -28,6 +27,7 @@ export async function GET(request) {
         await Class.update({ status: "full" }, { where: { id: c.id }, transaction: t });
       }
     }
+    const classes = await Class.findAll({ transaction: t });
 
     // getTodayClasses /api/classes?isToday=true
     if (searchParams.get("isToday") != undefined) {
@@ -46,6 +46,8 @@ export async function GET(request) {
 
         return (sgClassYear == sgCurrentYear && sgClassMonth == sgCurrentMonth && sgClassDay == sgCurrentDay);
       });
+
+      await t.commit();
       return NextResponse.json(todayClasses, { status: 200 });
     }
 

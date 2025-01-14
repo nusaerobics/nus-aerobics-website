@@ -7,7 +7,7 @@ export async function GET(request, { params }) {
   try {
     const id = await params.id;
     const c = await Class.findOne({ where: { id: id } });
-    if (c === null) {
+    if (c == null) {
       throw new Error(`Class ${ id } does not exist`);
     }
     return NextResponse.json(c, { status: 200 });

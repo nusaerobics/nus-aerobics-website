@@ -16,7 +16,6 @@ import {
 } from "react-icons/md";
 import { format } from "date-fns";
 import { SectionTitle } from "../../utils/Titles";
-import Toast from "../../Toast";
 import { useEffect, useState } from "react";
 
 export default function ScheduleModal({
@@ -28,22 +27,8 @@ export default function ScheduleModal({
                                       }) {
   const [modalType, setModalType] = useState("view"); // Either: "view", "loading", or "result"
   const [result, setResult] = useState({}); // {  isSuccess: boolean, header: string, message: string }
-  const [showToast, setShowToast] = useState(false);
-  const [toast, setToast] = useState({});
   const [isWaitlist, setIsWaitlist] = useState(false);  // TRUE when user is already on the class' waitlist
-  const toggleShowToast = () => {
-    setShowToast(!showToast);
-  }
 
-  useEffect(() => {
-    let timer;
-    if (showToast) {
-      timer = setTimeout(() => {
-        setShowToast(false);
-      }, 5000);
-    }
-    return () => clearTimeout(timer);
-  }, [showToast]);
   useEffect(() => {
     setModalType("view");
   }, [isOpen]);
@@ -87,7 +72,7 @@ export default function ScheduleModal({
       setResult({
         isSuccess: true,
         header: "Booking successful",
-        message: `Your booking for ${ selectedClass.name } has been confirmed.`,  // TODO: Add in class time
+        message: `Your booking for ${ selectedClass.name } on ${ format(selectedClass.date, "d/MM/y HH:mm (EEE)") } has been confirmed.`,
       });
       setModalType("result");
     } catch (error) {
@@ -116,7 +101,7 @@ export default function ScheduleModal({
       setResult({
         isSuccess: true,
         header: "Joined waitlist",
-        message: `Your spot on the waitlist for ${ selectedClass.name } has been confirmed. An email will be sent to you if a vacancy opens.`,
+        message: `Your spot on the waitlist for ${ selectedClass.name } on ${ format(selectedClass.date, "d/MM/y HH:mm (EEE)") } has been confirmed. An email will be sent to you if a vacancy opens.`,
       });
       setModalType("result");
     } catch (error) {
@@ -236,7 +221,7 @@ export default function ScheduleModal({
                       <MdOutlineCancel size={ 84 } color={ "#9E2A2A" }/>
                     ) }
                     <SectionTitle title={ result.header }/>
-                    <p className="text-a-black text-sm md:text-base">
+                    <p className="text-a-black text-sm md:text-base text-center">
                       { result.message }
                     </p>
                   </div>
@@ -246,14 +231,6 @@ export default function ScheduleModal({
           );
         } }
       </ModalContent>
-      { showToast &&
-        <div onClick={ toggleShowToast }>
-          <Toast
-            isSuccess={ toast.isSuccess }
-            header={ toast.header }
-            message={ toast.message }
-          />
-        </div> }
     </Modal>
   )
 }

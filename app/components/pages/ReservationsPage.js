@@ -4,12 +4,14 @@ import { PageTitle } from "../utils/Titles";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Input, Pagination, Tab, Tabs } from "@nextui-org/react";
 import { inputClassNames, tableClassNames, tabsClassNames } from "../utils/ClassNames";
-import { MdAvTimer, MdCheckCircleOutline, MdOpenInNew } from "react-icons/md";
+import { MdAvTimer, MdCheckCircleOutline, MdOpenInNew, MdOutlineFilterAlt } from "react-icons/md";
 import { Table, TableBody, TableCell, TableColumn, TableHeader, TableRow } from "@nextui-org/table";
 import { format } from "date-fns";
 import { useDisclosure } from "@nextui-org/modal";
 import BookingModal from "../classes/modals/BookingModal";
 import WaitlistModal from "../classes/modals/WaitlistModal";
+import { fromZonedTime, toZonedTime } from "date-fns-tz";
+import { Dropdown, DropdownItem, DropdownMenu, DropdownSection, DropdownTrigger } from "@nextui-org/dropdown";
 
 export default function ReservationsPage({ userId }) {
   const bookingModal = useDisclosure();
@@ -27,7 +29,7 @@ export default function ReservationsPage({ userId }) {
       direction: "ascending",
     }
   );
-  const [filters, setFilters] = useState(new Set(["open"]));  // TODO: modify filters as needed
+  const [bookingFilters, setBookingFilters] = useState(new Set("upcoming"));
 
   const [selectedBooking, setSelectedBooking] = useState({});
   const [selectedWaitlist, setSelectedWaitlist] = useState({});
@@ -91,7 +93,7 @@ export default function ReservationsPage({ userId }) {
   const sortedBookings = useMemo(() => {
     return [...bookings].sort((a, b) => {
       let first, second;
-      if (sortDescriptor.column === "bookingDate") {
+      if (sortDescriptor.column == "bookingDate") {
         first = a["createdAt"];
         second = b["createdAt"];
       } else if (sortDescriptor.column === "classDate") {
@@ -103,30 +105,65 @@ export default function ReservationsPage({ userId }) {
     });
   }, [sortDescriptor, bookings]);
   const bookingPages = useMemo(() => {
-    if (bookingQuery !== "") {
-      const bookingsSearch = sortedBookings
-        .filter((booking) => {
-          const className = booking.class.name.toLowerCase();
-          const searchName = bookingQuery.toLowerCase();
-          return className.includes(searchName);
-        });
-      return Math.ceil(bookingsSearch.length / rowsPerPage);
-    }
-    return Math.ceil(sortedBookings.length / rowsPerPage);
+    const bookingsSearch = sortedBookings
+      .filter((booking) => {
+        const className = booking.class.name.toLowerCase();
+        const searchName = bookingQuery.trim().toLowerCase();
+        return className.includes(searchName);
+      })
+      .filter((booking) => {
+        if (bookingFilters.has("upcoming")) {
+          const bookedClass = booking.class;
+          const utcClassDate = fromZonedTime(bookedClass.date, "Asia/Singapore");
+          const sgClassDate = toZonedTime(utcClassDate, "Asia/Singapore");
+          const sgCurrentDate = toZonedTime(new Date(), "Asia/Singapore");
+          return sgClassDate > sgCurrentDate;
+        }
+        return true;
+      })
+      .filter((booking) => {
+        if (bookingFilters.has("closed")) {
+          const bookedClass = booking.class;
+          const utcClassDate = fromZonedTime(bookedClass.date, "Asia/Singapore");
+          const sgClassDate = toZonedTime(utcClassDate, "Asia/Singapore");
+          const sgCurrentDate = toZonedTime(new Date(), "Asia/Singapore");
+          return sgClassDate <= sgCurrentDate;
+        }
+        return true;
+      });
+    return Math.ceil(bookingsSearch.length / rowsPerPage);
   }, [sortedBookings, bookingQuery]);
   const bookingItems = useMemo(() => {
     const start = (page - 1) * rowsPerPage;
     const end = start + rowsPerPage;
 
-    if (bookingQuery !== "") {
-      const bookingsSearch = sortedBookings.filter((booking) => {
+    const bookingsSearch = sortedBookings
+      .filter((booking) => {
         const className = booking.class.name.toLowerCase();
-        const searchName = bookingQuery.toLowerCase();
+        const searchName = bookingQuery.trim().toLowerCase();
         return className.includes(searchName);
+      })
+      .filter((booking) => {
+        if (bookingFilters.has("upcoming")) {
+          const bookedClass = booking.class;
+          const utcClassDate = fromZonedTime(bookedClass.date, "Asia/Singapore");
+          const sgClassDate = toZonedTime(utcClassDate, "Asia/Singapore");
+          const sgCurrentDate = toZonedTime(new Date(), "Asia/Singapore");
+          return sgClassDate > sgCurrentDate;
+        }
+        return true;
+      })
+      .filter((booking) => {
+        if (bookingFilters.has("closed")) {
+          const bookedClass = booking.class;
+          const utcClassDate = fromZonedTime(bookedClass.date, "Asia/Singapore");
+          const sgClassDate = toZonedTime(utcClassDate, "Asia/Singapore");
+          const sgCurrentDate = toZonedTime(new Date(), "Asia/Singapore");
+          return sgClassDate <= sgCurrentDate;
+        }
+        return true;
       });
-      return bookingsSearch.slice(start, end);
-    }
-    return sortedBookings.slice(start, end);
+    return bookingsSearch.slice(start, end);
   }, [page, sortedBookings, bookingQuery]);
 
   const sortedWaitlists = useMemo(() => {
@@ -144,31 +181,25 @@ export default function ReservationsPage({ userId }) {
     });
   }, [sortDescriptor, waitlists]);
   const waitlistPages = useMemo(() => {
-    if (waitlistQuery !== "") {
-      const waitlistsSearch = sortedWaitlists
-        .filter((waitlist) => {
-          const className = waitlist.class.name.toLowerCase();
-          const searchName = waitlistQuery.toLowerCase();
-          return className.includes(searchName);
-        });
-      return Math.ceil(waitlistsSearch.length / rowsPerPage);
-    }
-    return Math.ceil(sortedWaitlists.length / rowsPerPage);
+    const waitlistsSearch = sortedWaitlists
+      .filter((waitlist) => {
+        const className = waitlist.class.name.toLowerCase();
+        const searchName = waitlistQuery.trim().toLowerCase();
+        return className.includes(searchName);
+      });
+    return Math.ceil(waitlistsSearch.length / rowsPerPage);
   }, [sortedWaitlists, waitlistQuery]);
   const waitlistItems = useMemo(() => {
     const start = (page - 1) * rowsPerPage;
     const end = start + rowsPerPage;
 
-    if (waitlistQuery !== "") {
-      const waitlistsSearch = sortedWaitlists
-        .filter((waitlist) => {
-          const className = waitlist.class.name.toLowerCase();
-          const searchName = bookingQuery.toLowerCase();
-          return className.includes(searchName);
-        });
-      return waitlistsSearch.slice(start, end);
-    }
-    return sortedWaitlists.slice(start, end);
+    const waitlistsSearch = sortedWaitlists
+      .filter((waitlist) => {
+        const className = waitlist.class.name.toLowerCase();
+        const searchName = waitlistQuery.trim().toLowerCase();
+        return className.includes(searchName);
+      });
+    return waitlistsSearch.slice(start, end);
   }, [page, sortedWaitlists, waitlistQuery]);
 
   function handleBookingSelect(rowData) {
@@ -205,77 +236,101 @@ export default function ReservationsPage({ userId }) {
               }
             >
               <div className="md:h-full md:w-full flex flex-col p-2.5 gap-y-5">
-                <div className="self-end md:w-1/4">
-                  <Input
-                    placeholder="Search"
-                    value={ bookingQuery }
-                    onValueChange={ onBookingQueryChange }
-                    variant="bordered"
-                    size="xs"
-                    classNames={ inputClassNames }
-                  />
+                <div className="flex flex-row justify-end items-center gap-x-2.5">
+                  <Dropdown>
+                    <DropdownTrigger>
+                      <button className="cursor-pointer text-lg">
+                        <MdOutlineFilterAlt color="#393E46"/>
+                      </button>
+                    </DropdownTrigger>
+                    <DropdownMenu
+                      aria-label="Filter bookings"
+                      variant="flat"
+                      closeOnSelect={ false }
+                      selectionMode="multiple"
+                      selectedKeys={ bookingFilters }
+                      onSelectionChange={ setBookingFilters }
+                    >
+                      <DropdownSection title="Filter bookings">
+                        <DropdownItem key="upcoming">Upcoming bookings</DropdownItem>
+                        <DropdownItem key="closed">Past bookings</DropdownItem>
+                      </DropdownSection>
+                    </DropdownMenu>
+                  </Dropdown>
+                  <div className="self-end md:w-1/4">
+                    <Input
+                      placeholder="Search"
+                      value={ bookingQuery }
+                      onValueChange={ onBookingQueryChange }
+                      variant="bordered"
+                      size="xs"
+                      classNames={ inputClassNames }
+                    />
+                  </div>
                 </div>
-                <Table
-                  removeWrapper
-                  classNames={ tableClassNames }
-                  sortDescriptor={ sortDescriptor }
-                  onSortChange={ setSortDescriptor }
-                >
-                  <TableHeader>
-                    <TableColumn>Class</TableColumn>
-                    <TableColumn></TableColumn>
-                    <TableColumn key="classDate" allowsSorting>
-                      Class date
-                    </TableColumn>
-                    <TableColumn key="bookingDate" allowsSorting>
-                      Booking date
-                    </TableColumn>
-                  </TableHeader>
-                  <TableBody>
-                    { bookingItems.map((booking) => {
-                      return (
-                        <TableRow key={ booking.id }>
-                          <TableCell>{ booking.class.name }</TableCell>
-                          <TableCell>
-                            <button
-                              className="cursor-pointer text-base md:text-lg"
-                              onClick={ () => handleBookingSelect(booking) }
-                            >
-                              <MdOpenInNew color="#393E46"/>
-                            </button>
-                          </TableCell>
-                          <TableCell>
-                            { format(booking.class.date, "d/MM/y HH:mm (EEE)") }
-                          </TableCell>
-                          <TableCell>
-                            { format(booking.createdAt, "d/MM/y HH:mm") }
-                          </TableCell>
-                        </TableRow>
-                      );
-                    }) }
-                  </TableBody>
-                </Table>
-                <div className="flex flex-row justify-center">
-                  <Pagination
-                    showControls
-                    isCompact
-                    color="primary"
-                    size="sm"
-                    loop={ true }
-                    page={ page }
-                    total={ bookingPages }
-                    onChange={ (page) => setPage(page) }
-                  />
+                <div className="overflow-x-scroll">
+                  <Table
+                    removeWrapper
+                    classNames={ tableClassNames }
+                    sortDescriptor={ sortDescriptor }
+                    onSortChange={ setSortDescriptor }
+                  >
+                    <TableHeader>
+                      <TableColumn>Class</TableColumn>
+                      <TableColumn></TableColumn>
+                      <TableColumn key="classDate" allowsSorting>
+                        Class date
+                      </TableColumn>
+                      <TableColumn key="bookingDate" allowsSorting>
+                        Booking date
+                      </TableColumn>
+                    </TableHeader>
+                    <TableBody>
+                      { bookingItems.map((booking) => {
+                        return (
+                          <TableRow key={ booking.id }>
+                            <TableCell>{ booking.class.name }</TableCell>
+                            <TableCell>
+                              <button
+                                className="cursor-pointer text-base md:text-lg"
+                                onClick={ () => handleBookingSelect(booking) }
+                              >
+                                <MdOpenInNew color="#393E46"/>
+                              </button>
+                            </TableCell>
+                            <TableCell>
+                              { format(booking.class.date, "d/MM/y HH:mm (EEE)") }
+                            </TableCell>
+                            <TableCell>
+                              { format(booking.createdAt, "d/MM/y HH:mm") }
+                            </TableCell>
+                          </TableRow>
+                        );
+                      }) }
+                    </TableBody>
+                  </Table>
+                  <div className="flex flex-row justify-center">
+                    <Pagination
+                      showControls
+                      isCompact
+                      color="primary"
+                      size="sm"
+                      loop={ true }
+                      page={ page }
+                      total={ bookingPages }
+                      onChange={ (page) => setPage(page) }
+                    />
+                  </div>
                 </div>
+                <BookingModal
+                  selectedBooking={ selectedBooking }
+                  selectedClass={ selectedClass }
+                  userId={ userId }
+                  isOpen={ bookingModal.isOpen }
+                  onOpen={ bookingModal.onOpen }
+                  onOpenChange={ bookingModal.onOpenChange }
+                />
               </div>
-              <BookingModal
-                selectedBooking={ selectedBooking }
-                selectedClass={ selectedClass }
-                userId={ userId }
-                isOpen={ bookingModal.isOpen }
-                onOpen={ bookingModal.onOpen }
-                onOpenChange={ bookingModal.onOpenChange }
-              />
             </Tab>
             <Tab
               key="waitlists"

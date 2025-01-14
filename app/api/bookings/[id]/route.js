@@ -26,7 +26,7 @@ export async function GET(request, { params }) {
   try {
     const id = await params.id;
     const booking = await Booking.findOne({ where: { id: id } });
-    if (booking === null) {
+    if (booking == null) {
       throw new Error(`Booking ${ id } does not exist.`);
     }
     return NextResponse.json(booking, { status: 200 });
