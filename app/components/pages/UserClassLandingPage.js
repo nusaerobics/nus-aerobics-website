@@ -29,15 +29,16 @@ import {
   tableClassNames,
 } from "../utils/ClassNames";
 import { PageTitle } from "../utils/Titles";
-import ScheduleModal from "../classes/modals/ScheduleModal";
+import ScheduleModal from "../modals/ScheduleModal";
 import Toast from "../Toast";
 
 export default function UserClassLandingPage({ userId }) {
   const scheduleModal = useDisclosure();
 
   const [classes, setClasses] = useState([]);
+
+  const [filters, setFilters] = useState(new Set(["open"]));
   const [selectedClass, setSelectedClass] = useState({});
-  const [showToast, setShowToast] = useState(false);
   const [classQuery, setClassQuery] = useState("");
   const [sortDescriptor, setSortDescriptor] = useState(
     {
@@ -45,8 +46,10 @@ export default function UserClassLandingPage({ userId }) {
       direction: "ascending",
     }
   );
-  const [filters, setFilters] = useState(new Set(["open"]));
+
+  const [showToast, setShowToast] = useState(false);
   const [toast, setToast] = useState({});
+
   const [page, setPage] = useState(1);
   const rowsPerPage = 10;
 
@@ -220,16 +223,17 @@ export default function UserClassLandingPage({ userId }) {
               </Table>
             </div>
             <div className="flex flex-row justify-center">
-              <Pagination
-                showControls
-                isCompact
-                color="primary"
-                size="sm"
-                loop={ true }
-                page={ page }
-                total={ classPages }
-                onChange={ (page) => setPage(page) }
-              />
+              { classPages > 1 && (
+                <Pagination
+                  showControls
+                  isCompact
+                  color="primary"
+                  size="sm"
+                  loop={ true }
+                  page={ page }
+                  total={ classPages }
+                  onChange={ (page) => setPage(page) }
+                />) }
             </div>
           </div>
           <ScheduleModal

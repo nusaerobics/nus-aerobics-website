@@ -6,7 +6,7 @@ import {
   ModalFooter,
 } from "@nextui-org/modal";
 import { Chip, Spinner, Tooltip } from "@nextui-org/react";
-import { chipClassNames, chipTypes, modalClassNames } from "../../utils/ClassNames";
+import { chipClassNames, chipTypes, modalClassNames } from "../utils/ClassNames";
 import {
   MdCheckCircleOutline,
   MdOutlineCalendarMonth,
@@ -15,7 +15,7 @@ import {
   MdPersonOutline
 } from "react-icons/md";
 import { format } from "date-fns";
-import { SectionTitle } from "../../utils/Titles";
+import { SectionTitle } from "../utils/Titles";
 import { useEffect, useState } from "react";
 
 export default function ScheduleModal({
@@ -79,8 +79,8 @@ export default function ScheduleModal({
       console.log(error);
       setResult({
         isSuccess: false,
-        header: "Booking unsuccessful",
-        message: `${ error.message }`,
+        header: "Unable to book class",
+        message: `We are unable to make your booking at the moment: ${ error.message }`,
       });
       setModalType("result");
     }
@@ -108,8 +108,8 @@ export default function ScheduleModal({
       console.log(error);
       setResult({
         isSuccess: false,
-        header: "Join waitlist unsuccessful",
-        message: `Unable to join waitlist for ${ selectedClass.name }: ${ error.message }`,
+        header: "Unable to join waitlist",
+        message: `We are unable to add you to the waitlist at the moment: ${ error.message }`,
       });
       setModalType("result");
     }

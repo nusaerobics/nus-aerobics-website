@@ -8,10 +8,11 @@ import { MdAvTimer, MdCheckCircleOutline, MdOpenInNew, MdOutlineFilterAlt } from
 import { Table, TableBody, TableCell, TableColumn, TableHeader, TableRow } from "@nextui-org/table";
 import { format } from "date-fns";
 import { useDisclosure } from "@nextui-org/modal";
-import BookingModal from "../classes/modals/BookingModal";
-import WaitlistModal from "../classes/modals/WaitlistModal";
+import BookingModal from "../modals/BookingModal";
+import WaitlistModal from "../modals/WaitlistModal";
 import { fromZonedTime, toZonedTime } from "date-fns-tz";
 import { Dropdown, DropdownItem, DropdownMenu, DropdownSection, DropdownTrigger } from "@nextui-org/dropdown";
+import Toast from "../Toast";
 
 export default function ReservationsPage({ userId }) {
   const bookingModal = useDisclosure();
@@ -34,6 +35,9 @@ export default function ReservationsPage({ userId }) {
   const [selectedBooking, setSelectedBooking] = useState({});
   const [selectedWaitlist, setSelectedWaitlist] = useState({});
   const [selectedClass, setSelectedClass] = useState({});
+
+  const [showToast, setShowToast] = useState(false);
+  const [toast, setToast] = useState({});
 
   useEffect(() => {
     const fetchBookings = async () => {
@@ -78,6 +82,15 @@ export default function ReservationsPage({ userId }) {
     };
     fetchWaitlists();
   }, [bookingModal.isOpen, waitlistModal.isOpen]);
+  useEffect(() => {
+    let timer;
+    if (showToast) {
+      timer = setTimeout(() => {
+        setShowToast(false);
+      }, 5000);
+    }
+    return () => clearTimeout(timer);
+  }, [showToast]);
 
   const [page, setPage] = useState(1);
   const rowsPerPage = 10;
@@ -310,16 +323,17 @@ export default function ReservationsPage({ userId }) {
                     </TableBody>
                   </Table>
                   <div className="flex flex-row justify-center">
-                    <Pagination
-                      showControls
-                      isCompact
-                      color="primary"
-                      size="sm"
-                      loop={ true }
-                      page={ page }
-                      total={ bookingPages }
-                      onChange={ (page) => setPage(page) }
-                    />
+                    { bookingPages > 1 && (
+                      <Pagination
+                        showControls
+                        isCompact
+                        color="primary"
+                        size="sm"
+                        loop={ true }
+                        page={ page }
+                        total={ bookingPages }
+                        onChange={ (page) => setPage(page) }
+                      />) }
                   </div>
                 </div>
                 <BookingModal
@@ -417,6 +431,14 @@ export default function ReservationsPage({ userId }) {
           </Tabs>
         </div>
       </div>
+      { showToast && (
+        <div onClick={ toggleShowToast }>
+          <Toast
+            isSuccess={ toast.isSuccess }
+            header={ toast.header }
+            message={ toast.message }
+          />
+        </div>) }
     </>
   );
 }

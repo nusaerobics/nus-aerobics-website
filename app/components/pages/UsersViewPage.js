@@ -4,7 +4,6 @@ import { format } from "date-fns";
 
 import { Pagination } from "@nextui-org/react";
 import { useRouter } from "next/navigation";
-import { Select, SelectItem } from "@nextui-org/select";
 import { Input } from "@nextui-org/input";
 import {
   Table,
@@ -226,16 +225,17 @@ export default function UsersViewPage({ userId }) {
             </Table>
           </div>
           <div className="flex flex-row justify-center">
-            <Pagination
-              showControls
-              isCompact
-              color="primary"
-              size="sm"
-              loop={ true }
-              page={ page }
-              total={ bookingPages }
-              onChange={ (page) => setPage(page) }
-            />
+            { bookingPages > 1 && (
+              <Pagination
+                showControls
+                isCompact
+                color="primary"
+                size="sm"
+                loop={ true }
+                page={ page }
+                total={ bookingPages }
+                onChange={ (page) => setPage(page) }
+              />) }
           </div>
         </div>
       </div>

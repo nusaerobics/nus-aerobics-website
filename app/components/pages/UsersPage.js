@@ -351,16 +351,17 @@ export default function UsersPage() {
             </Table>
           </div>
           <div className="flex flex-row justify-center">
-            <Pagination
-              showControls
-              isCompact
-              color="primary"
-              size="sm"
-              loop={ true }
-              page={ page }
-              total={ userPages }
-              onChange={ (page) => setPage(page) }
-            />
+            { userPages > 1 && (
+              <Pagination
+                showControls
+                isCompact
+                color="primary"
+                size="sm"
+                loop={ true }
+                page={ page }
+                total={ userPages }
+                onChange={ (page) => setPage(page) }
+              />) }
           </div>
         </div>
       </div>

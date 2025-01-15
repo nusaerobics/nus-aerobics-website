@@ -12,6 +12,11 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.DATE,
       allowNull: false,
     },
+    price: {
+      type: DataTypes.INTEGER.UNSIGNED,
+      defaultValue: 1,
+      allowNull: false,
+    },
     maxCapacity: {
       type: DataTypes.INTEGER.UNSIGNED,
       defaultValue: 19,

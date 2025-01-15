@@ -273,16 +273,17 @@ export default function AdminClassLandingPage({ openCreate }) {
           </Table>
         </div>
         <div className="flex flex-row justify-center">
-          <Pagination
-            showControls
-            isCompact
-            color="primary"
-            size="sm"
-            loop={ true }
-            page={ page }
-            total={ classPages }
-            onChange={ (page) => setPage(page) }
-          />
+          { classPages > 1 && (
+            <Pagination
+              showControls
+              isCompact
+              color="primary"
+              size="sm"
+              loop={ true }
+              page={ page }
+              total={ classPages }
+              onChange={ (page) => setPage(page) }
+            />) }
         </div>
       </div>
       { showToast ? (

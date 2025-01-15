@@ -82,9 +82,9 @@ export async function DELETE(request) {
     for (let i = 0; i < waitlists.length; i++) {
       const waitlist = waitlists[i];
       const user = await User.findOne({ where: { id: waitlist.userId }, transaction: t });
-
+      // await sendEmail(user, bookedClass);  // NOTE: Normally would use sendEmail function, but didn't want Nodemailer error to prevent user from unbooking their class
       const emailHTML = `
-      Hi ${ user.name }!
+      Hi ${ user.name },
       <br>
       <br>Great news! There is an open vacancy for your waitlisted class, ${ bookedClass.name } on ${ format(bookedClass.date, "d/MM/y HH:mm (EEE)") }.
       <br>
@@ -100,11 +100,9 @@ export async function DELETE(request) {
         subject: "[NUS Aerobics] Claim your spot!",
         html: emailHTML,
       };
-
       await transporter.sendMail(mailOptions, function (error, info) {
         if (error) {
           console.log(error);
-          throw new Error(`${ error }`);
         } else {
           console.log(info.response);
         }

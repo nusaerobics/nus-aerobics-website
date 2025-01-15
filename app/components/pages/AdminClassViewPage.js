@@ -1,3 +1,5 @@
+"use client";
+
 import clsx from "clsx";
 import { format } from "date-fns";
 import PropTypes from "prop-types";
@@ -45,6 +47,7 @@ import {
 import { PageTitle, SectionTitle } from "../utils/Titles";
 import Toast from "../Toast";
 
+// TODO: Add in filter for classes, "Present" and "Absent"
 export default function AdminClassViewPage({ classId }) {
   const router = useRouter();
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
@@ -52,12 +55,13 @@ export default function AdminClassViewPage({ classId }) {
   const [selectedClass, setSelectedClass] = useState({
     name: "",
     description: "",
-    date: "2024-01-01 00:00",
+    date: "2025-01-01 00:00",
     maxCapacity: 19,
     bookedCapacity: 0,
     status: "open",
   });
   const [bookings, setBookings] = useState([]);
+  const [waitlists, setWaitlists] = useState([]);
   const [selectedBooking, setSelectedBooking] = useState({});
   const [modalType, setModalType] = useState("view"); // Either: "view", "loading", or "result"
   const [result, setResult] = useState({}); // {  isSuccess: boolean, header: string, message: string }
@@ -66,16 +70,16 @@ export default function AdminClassViewPage({ classId }) {
   const [page, setPage] = useState(1);
   const [isEdit, setIsEdit] = useState(false);
   const [email, setEmail] = useState("");
+  // const [filters, setFilters] = useState(new Set(["present", "absent"]));
 
   useEffect(() => {
-    console.log(classId);
-
     // getClass
     const fetchClass = async () => {
       try {
-        const res = await fetch(`api/classes/${ classId }`);
+        const res = await fetch(`/api/classes/${ classId }`);
         if (!res.ok) {
-          throw new Error(`Unable to get class ${ classId }: ${ res.status }`);
+          const response = await res.json();
+          throw new Error(`Unable to get class ${ classId }: ${ response }`);
         }
         const data = await res.json();
         setSelectedClass(data);
@@ -83,7 +87,7 @@ export default function AdminClassViewPage({ classId }) {
         setToast({
           isSuccess: false,
           header: "Unable to get class",
-          message: `Unable to get class ${ classId }. Try again later.`,
+          message: `${ error.message }`,
         });
         setShowToast(true);
         console.log(error);
@@ -113,6 +117,30 @@ export default function AdminClassViewPage({ classId }) {
       }
     };
     fetchBookings();
+
+    // getWaitlistsByClass
+    const fetchWaitlists = async () => {
+      try {
+        const res = await fetch(`/api/waitlists?classId=${ classId }`);
+        if (!res.ok) {
+          const response = await res.json();
+          throw new Error(
+            `Unable to get waitlists for class ${ classId }: ${ response }`
+          );
+        }
+        const data = await res.json();
+        setWaitlists(data);
+      } catch (error) {
+        setToast({
+          isSuccess: false,
+          header: "Unable to get bookings for class",
+          message: `${ error.message }`,
+        });
+        setShowToast(true);
+        console.log(error);
+      }
+    };
+    fetchWaitlists();
   }, [modalType]);
 
   const rowsPerPage = 10;
@@ -122,6 +150,12 @@ export default function AdminClassViewPage({ classId }) {
     const end = start + rowsPerPage;
     return bookings.slice(start, end);
   }, [page, bookings]);
+  const waitlistPages = Math.ceil(waitlists.length / rowsPerPage);
+  const waitlistItems = useMemo(() => {
+    const start = (page - 1) * rowsPerPage;
+    const end = start + rowsPerPage;
+    return waitlists.slice(start, end);
+  }, [page, waitlists]);
 
   const toggleShowToast = () => {
     setShowToast(!showToast);
@@ -329,7 +363,7 @@ export default function AdminClassViewPage({ classId }) {
           <div className="overflow-x-scroll">
             <Table removeWrapper classNames={ tableClassNames }>
               <TableHeader>
-                <TableColumn>Name</TableColumn>
+                <TableColumn key="name" allowsSorting>Name</TableColumn>
                 <TableColumn>Email</TableColumn>
                 <TableColumn>Attendance</TableColumn>
                 <TableColumn>Booking date</TableColumn>
@@ -341,7 +375,7 @@ export default function AdminClassViewPage({ classId }) {
                     <TableRow key={ booking.id }>
                       <TableCell>{ booking.user.name }</TableCell>
                       <TableCell>{ booking.user.email }</TableCell>
-                      <TableCell>{ booking.attendance }</TableCell>
+                      <TableCell>{ booking.attendance == "present" ? "Present" : "Absent" }</TableCell>
                       <TableCell>
                         { format(booking.createdAt, "d/MM/y HH:mm") }
                       </TableCell>
@@ -368,18 +402,60 @@ export default function AdminClassViewPage({ classId }) {
             </Table>
           </div>
           <div className="flex flex-row justify-center">
-            <Pagination
-              showControls
-              isCompact
-              color="primary"
-              size="sm"
-              loop={ true }
-              page={ page }
-              total={ bookingPages }
-              onChange={ (page) => setPage(page) }
-            />
+            { bookingPages > 1 && (
+              <Pagination
+                showControls
+                isCompact
+                color="primary"
+                size="sm"
+                loop={ true }
+                page={ page }
+                total={ bookingPages }
+                onChange={ (page) => setPage(page) }
+              />) }
           </div>
         </div>
+        <div className="md:h-full w-full flex flex-col p-5 rounded-[20px] border border-a-black/10 bg-white gap-y-2.5">
+          <div className="flex flex-row justify-between">
+            <SectionTitle title="Waitlist"/>
+          </div>
+          <div className="overflow-x-scroll">
+            <Table removeWrapper classNames={ tableClassNames }>
+              <TableHeader>
+                <TableColumn>Name</TableColumn>
+                <TableColumn>Email</TableColumn>
+                <TableColumn>Waitlist date</TableColumn>
+              </TableHeader>
+              <TableBody>
+                { waitlistItems.map((waitlist) => {
+                  return (
+                    <TableRow key={ waitlist.id }>
+                      <TableCell>{ waitlist.user.name }</TableCell>
+                      <TableCell>{ waitlist.user.email }</TableCell>
+                      <TableCell>
+                        { format(waitlist.createdAt, "d/MM/y HH:mm") }
+                      </TableCell>
+                    </TableRow>
+                  );
+                }) }
+              </TableBody>
+            </Table>
+          </div>
+          <div className="flex flex-row justify-center">
+            { waitlistPages > 1 && (
+              <Pagination
+                showControls
+                isCompact
+                color="primary"
+                size="sm"
+                loop={ true }
+                page={ page }
+                total={ waitlistPages }
+                onChange={ (page) => setPage(page) }
+              />) }
+          </div>
+        </div>
+
       </div>
       <Modal
         isOpen={ isOpen }
@@ -457,7 +533,7 @@ export default function AdminClassViewPage({ classId }) {
           ) }
         </ModalContent>
       </Modal>
-      { showToast ? (
+      { showToast && (
         <div onClick={ toggleShowToast }>
           <Toast
             isSuccess={ toast.isSuccess }
@@ -465,8 +541,6 @@ export default function AdminClassViewPage({ classId }) {
             message={ toast.message }
           />
         </div>
-      ) : (
-        <></>
       ) }
     </>
   );

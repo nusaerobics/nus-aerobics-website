@@ -1,11 +1,66 @@
 import { NextResponse } from "next/server";
 
 const db = require("../../config/sequelize");
+import { format } from "date-fns";
+
 const Class = db.classes;
 const Booking = db.bookings;
 const Transaction = db.transactions;
 const User = db.users;
 const Waitlist = db.waitlists;
+
+const nodemailer = require('nodemailer');
+const transporter = nodemailer.createTransport({
+  host: "smtp.gmail.com",
+  port: 465,
+  secure: true,
+  service: "Gmail",
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
+  },
+});
+
+function sendEmail(user, selectedClass) {
+  const emailHTML = `
+        Hi ${ user.name },
+        <br>
+        <br>Thank you for booking a class with us! Here are the details of your booking and how to prepare for class:
+        <br>
+        <br>
+          <table>
+            <tr>
+              <td><strong>Class</strong></td>
+              <td>${ selectedClass.name }</td>
+            </tr>
+            <tr>
+              <td><strong>Date and Time</strong></td>
+              <td>${ format(selectedClass.date, "d/MM/y HH:mm (EEE)") }</td>
+            </tr>
+            <tr>
+              <td><strong>Location</strong></td>
+              <td>UTown Gym Aerobics Studio</td>
+            </tr>
+          </table>
+        <br><strong>Attire</strong>
+        <br>Come to class dressed in comfortable attire. If you booked HIIT, Kickboxing, KKardio, or Zumba, we reccomend you to wear training shoes. 
+        <br>
+        <br><strong>What to Bring</strong>
+        <br>All equipment for your class will be provided. Just bring yourself and a waterbottle!
+        <br>
+        <br>Please remember to arrive early in order for us to take attendance. If you have any questions or problems, please feel free to contact us at <a href="mailto:aerobics@nussportsclub.org">aerobics@nussportsclub.org</a>.
+        <br>
+        <br>We're looking forward to seeing you in class!
+        <br>Kindest regards,
+        <br>NUS Aerobics`;
+  const mailOptions = {
+    from: process.env.EMAIL_USER,
+    to: user.email,
+    subject: "[NUS Aerobics] Get ready for your class!",
+    html: emailHTML,
+  };
+  return transporter.sendMail(mailOptions);
+}
 
 export async function GET(request) {
   try {
@@ -86,10 +141,9 @@ export async function POST(request) {
     const { classId, userId, isForced } = body;  // NOTE: isForced = TRUE when admin makes the booking, else FALSE
 
     // 1. Find user and class.
-    const selectedClass = await Class.findOne({ where: { id: classId } }, { t });
+    const selectedClass = await Class.findOne({ where: { id: classId }, transaction: t });
     const user = await User.findOne(
-      { where: { id: userId } },
-      { t },
+      { where: { id: userId }, transaction: t },
     );
 
     // 2a. Check user's balance.
@@ -138,6 +192,11 @@ export async function POST(request) {
     const waitlist = await Waitlist.findOne({ where: { userId: userId, classId: classId }, transaction: t });
     if (waitlist !== null) {
       await Waitlist.destroy({ where: { id: waitlist.id }, transaction: t });
+    }
+
+    // 7. Email user to confirm booking.
+    if (!isForced) {
+      await sendEmail(user, selectedClass);
     }
 
     await t.commit();
