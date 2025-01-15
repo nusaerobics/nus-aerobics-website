@@ -18,6 +18,34 @@ const transporter = nodemailer.createTransport({
   },
 });
 
+function sendEmail(existingUser, user) {
+  const accountDetails = (!existingUser)
+    ? `<br>We created an account for you with the following details:
+        <br><strong>Email:</strong> ${ user.email }
+        <br><strong>Password:</strong> ${ user.email }
+        <br>After logging in, please reset your password in the Profile page.`
+    : `You may log in with your existing details to see the updated balance.`
+
+  const emailHTML = `
+      Hi ${ user.name },
+      <br>
+      <br>Get ready to book classes! We're happy to update you that we have processed your form submission and credited your account.
+      <br>
+      <br>${ accountDetails }
+      <br>
+      <br>If you have any questions or problems, please feel free to contact us at <a href="mailto:aerobics@nussportsclub.org">aerobics@nussportsclub.org</a>.
+      <br>
+      <br>Kindest regards,
+      <br>NUS Aerobics`;
+  const mailOptions = {
+    from: process.env.EMAIL_USER,
+    to: user.email,
+    subject: "[NUS Aerobics] It's payday!",
+    html: emailHTML,
+  };
+  return transporter.sendMail(mailOptions);
+}
+
 // getSubmissions
 export async function GET() {
   try {
@@ -98,31 +126,7 @@ export async function POST(request) {
     }, { transaction: t });
 
     // 7. Email user to update about crediting.
-    const emailHTML = `
-      Hi ${ name }!
-      <br>We have processed your form submission and have credited your account.
-      <br>
-      <br>If you had an existing account, you may log in with your existing details to see the updated balance.
-      <br>If you didn't have an existing account, we created one for you. Please log in with your email address and your temporary password is set to your email address. After logging in, reset your password in the Profile page.
-      <br>
-      <br>If you have any questions or problems, please contact us at: <a href="mailto:aerobics@nussportsclub.org">aerobics@nussportsclub.org</a>.
-      <br>Kindest regards,
-      <br>NUS Aerobics`;
-    const mailOptions = {
-      from: process.env.EMAIL_USER,
-      to: email,
-      subject: "Update to your account balance",
-      html: emailHTML,
-    };
-
-    await transporter.sendMail(mailOptions, function (error, info) {
-      if (error) {
-        console.log(error);
-        throw new Error(`${ error }`);
-      } else {
-        console.log(info.response);
-      }
-    });
+    await sendEmail(existingUser, user);
 
     await t.commit();
     return NextResponse.json(`Handled submission ${ submissionId } for user ${ user.id }`, { status: 200 });

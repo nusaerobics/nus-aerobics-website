@@ -93,7 +93,7 @@ export default function ClassDetailsModal({
       setIsCancel(result);
       setIsBooked(true);
     }
-  });
+  }, [onOpenChange]);
 
   useEffect(() => {
     setModalType("view");
@@ -222,15 +222,11 @@ export default function ClassDetailsModal({
                         <p className="text-a-navy">{ selectedClass.name }</p>
                         <Chip
                           classNames={
-                            chipClassNames[
-                              isBooked ? "booked" : selectedClass.status
-                              ]
+                            chipClassNames[isBooked ? "booked" : selectedClass.status]
                           }
                         >
                           {
-                            chipTypes[
-                              isBooked ? "booked" : selectedClass.status
-                              ].message
+                            chipTypes[isBooked ? "booked" : selectedClass.status].message
                           }
                         </Chip>
                       </div>
@@ -262,16 +258,17 @@ export default function ClassDetailsModal({
                         </p>
                       </div>
                     </ModalBody>
+
                     <ModalFooter>
                       <div className="flex justify-end">
                         { tab == "schedule" ? (
                           <>
-                            { !isBooked && selectedClass.status == "open" ? (
+                            { !isBooked ? (
                               <button
                                 onClick={ bookClass }
                                 className="rounded-[30px] px-[10px] md:px-[20px] py-[10px] text-xs md:text-sm bg-a-navy text-white cursor-pointer"
                               >
-                                Book class
+                                { selectedClass.status == "full" ? ("Join waitlist") : ("Book class") }
                               </button>
                             ) : (
                               <></>

@@ -1,10 +1,10 @@
 "use client";
 
-import {format} from "date-fns";
+import { format } from "date-fns";
 import PropTypes from "prop-types";
-import {useCallback, useEffect, useMemo, useState} from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
-import {MdOutlineFilterAlt} from "react-icons/md";
+import { MdOutlineFilterAlt } from "react-icons/md";
 import {
   Dropdown,
   DropdownItem,
@@ -20,15 +20,15 @@ import {
   TableRow,
   TableCell,
 } from "@nextui-org/table";
-import {Input, Pagination} from "@nextui-org/react";
-import {PageTitle, SectionTitle} from "../utils/Titles";
+import { Input, Pagination } from "@nextui-org/react";
+import { PageTitle, SectionTitle } from "../utils/Titles";
 import {
   inputClassNames,
   tableClassNames,
 } from "../utils/ClassNames";
 import Toast from "../Toast";
 
-export default function WalletPage({session}) {
+export default function WalletPage({ session }) {
   const [balance, setBalance] = useState(0);
   const [isAdmin, setIsAdmin] = useState(false);
   const [searchInput, setSearchInput] = useState("");
@@ -64,7 +64,7 @@ export default function WalletPage({session}) {
       const fetchTransactions = async () => {
         const res = await fetch("/api/transactions");
         if (!res.ok) {
-          throw new Error(`Unable to get transactions: ${res.status}`);
+          throw new Error(`Unable to get transactions: ${ res.status }`);
         }
         const data = await res.json();
         setTransactions(data);
@@ -72,10 +72,10 @@ export default function WalletPage({session}) {
       fetchTransactions();
     } else {
       const fetchTransactions = async () => {
-        const res = await fetch(`/api/transactions?userId=${session.userId}`);
+        const res = await fetch(`/api/transactions?userId=${ session.userId }`);
         if (!res.ok) {
           throw new Error(
-            `Unable to get transactions for user ${session.userId}: ${res.status}`
+            `Unable to get transactions for user ${ session.userId }: ${ res.status }`
           );
         }
         const data = await res.json();
@@ -86,11 +86,11 @@ export default function WalletPage({session}) {
       const countCreditsSpent = async () => {
         try {
           const res = await fetch(
-            `/api/bookings?isCountByUser=${session.userId}`
+            `/api/bookings?isCountByUser=${ session.userId }`
           );
           if (!res.ok) {
             throw new Error(
-              `Unable to count credits spent for user ${session.userId}.`
+              `Unable to count credits spent for user ${ session.userId }.`
             );
           }
           const data = await res.json();
@@ -99,7 +99,7 @@ export default function WalletPage({session}) {
           setToast({
             isSuccess: false,
             header: "Unable to count credits spent",
-            message: `Unable to count credits spent for user ${session.userId}. Try again later.`,
+            message: `Unable to count credits spent for user ${ session.userId }. Try again later.`,
           });
           setShowToast(true);
           console.log(error);
@@ -109,10 +109,10 @@ export default function WalletPage({session}) {
 
       const fetchBalance = async () => {
         try {
-          const res = await fetch(`/api/users?id=${session.userId}`);
+          const res = await fetch(`/api/users?id=${ session.userId }`);
           if (!res.ok) {
             throw new Error(
-              `Unable to get user ${session.userId}: ${res.status}`
+              `Unable to get user ${ session.userId }: ${ res.status }`
             );
           }
           const data = await res.json();
@@ -121,7 +121,7 @@ export default function WalletPage({session}) {
           setToast({
             isSuccess: false,
             header: "Unable to get user",
-            message: `Unable to get user ${session.userId}. Try again later.`,
+            message: `Unable to get user ${ session.userId }. Try again later.`,
           });
           setShowToast(true);
           console.log(error);
@@ -208,7 +208,7 @@ export default function WalletPage({session}) {
 
   return (
     <>
-      {isAdmin ? (
+      { isAdmin ? (
         <div className="w-full h-full flex flex-col gap-y-5 p-5 md:p-10 pt-20 overflow-y-scroll">
           <div className="flex flex-row items-center justify-between">
             <PageTitle title="Wallet"/>
@@ -219,16 +219,16 @@ export default function WalletPage({session}) {
               <Dropdown>
                 <DropdownTrigger>
                   <button className="cursor-pointer">
-                    <MdOutlineFilterAlt color="#393E46" size={24}/>
+                    <MdOutlineFilterAlt color="#393E46" size={ 24 }/>
                   </button>
                 </DropdownTrigger>
                 <DropdownMenu
                   aria-label="Filter transactions"
                   variant="flat"
-                  closeOnSelect={false}
+                  closeOnSelect={ false }
                   selectionMode="multiple"
-                  selectedKeys={filters}
-                  onSelectionChange={setFilters}
+                  selectedKeys={ filters }
+                  onSelectionChange={ setFilters }
                 >
                   <DropdownSection title="Filter classes">
                     <DropdownItem key="refund">Refund</DropdownItem>
@@ -240,20 +240,20 @@ export default function WalletPage({session}) {
               <div className="md:w-1/4">
                 <Input
                   placeholder="Search"
-                  value={searchInput}
-                  onValueChange={onSearchInputChange}
+                  value={ searchInput }
+                  onValueChange={ onSearchInputChange }
                   variant="bordered"
                   size="xs"
-                  classNames={inputClassNames}
+                  classNames={ inputClassNames }
                 />
               </div>
             </div>
             <div className="overflow-x-scroll">
               <Table
                 removeWrapper
-                classNames={tableClassNames}
-                sortDescriptor={sortDescriptor}
-                onSortChange={setSortDescriptor}
+                classNames={ tableClassNames }
+                sortDescriptor={ sortDescriptor }
+                onSortChange={ setSortDescriptor }
               >
                 <TableHeader>
                   <TableColumn key="createdAt" allowsSorting>
@@ -264,32 +264,33 @@ export default function WalletPage({session}) {
                   <TableColumn>Description</TableColumn>
                 </TableHeader>
                 <TableBody>
-                  {transactionItems.map((transaction) => {
+                  { transactionItems.map((transaction) => {
                     return (
-                      <TableRow key={transaction.id}>
+                      <TableRow key={ transaction.id }>
                         <TableCell>
-                          {format(transaction.createdAt, "d/MM/y HH:mm")}
+                          { format(transaction.createdAt, "d/MM/y HH:mm") }
                         </TableCell>
-                        <TableCell>{transaction.amount}</TableCell>
-                        <TableCell>{transaction.user.name}</TableCell>
-                        <TableCell>{transaction.description}</TableCell>
+                        <TableCell>{ transaction.amount }</TableCell>
+                        <TableCell>{ transaction.user.name }</TableCell>
+                        <TableCell>{ transaction.description }</TableCell>
                       </TableRow>
                     );
-                  })}
+                  }) }
                 </TableBody>
               </Table>
             </div>
             <div className="flex flex-row justify-center">
-              <Pagination
-                showControls
-                isCompact
-                color="primary"
-                size="sm"
-                loop={true}
-                page={page}
-                total={transactionPages}
-                onChange={(page) => setPage(page)}
-              />
+              { transactionPages > 1 && (
+                <Pagination
+                  showControls
+                  isCompact
+                  color="primary"
+                  size="sm"
+                  loop={ true }
+                  page={ page }
+                  total={ transactionPages }
+                  onChange={ (page) => setPage(page) }
+                />) }
             </div>
           </div>
         </div>
@@ -299,7 +300,7 @@ export default function WalletPage({session}) {
           <div className="h-1/4 flex flex-row gap-x-5">
             <div className="w-1/2 rounded-[20px] border border-a-black/10 p-5 bg-white">
               <p className="font-poppins font-bold text-a-navy text-2xl md:text-3xl">
-                {balance}
+                { balance }
               </p>
               <p className="font-poppins text-a-black text-sm md:text-lg">
                 credits remaining
@@ -307,7 +308,7 @@ export default function WalletPage({session}) {
             </div>
             <div className="w-1/2 rounded-[20px] border border-a-black/10 p-5 bg-white">
               <p className="font-poppins font-bold text-a-navy text-2xl md:text-3xl">
-                {creditsSpent}
+                { creditsSpent }
               </p>
               <p className="font-poppins text-a-black text-sm md:text-lg">
                 credits spent
@@ -318,9 +319,9 @@ export default function WalletPage({session}) {
             <SectionTitle title="All transactions"/>
             <Table
               removeWrapper
-              classNames={tableClassNames}
-              sortDescriptor={sortDescriptor}
-              onSortChange={setSortDescriptor}
+              classNames={ tableClassNames }
+              sortDescriptor={ sortDescriptor }
+              onSortChange={ setSortDescriptor }
             >
               <TableHeader>
                 <TableColumn key="createdAt" allowsSorting>
@@ -330,17 +331,17 @@ export default function WalletPage({session}) {
                 <TableColumn>Description</TableColumn>
               </TableHeader>
               <TableBody>
-                {transactionItems.map((transaction) => {
+                { transactionItems.map((transaction) => {
                   return (
-                    <TableRow key={transaction.id}>
+                    <TableRow key={ transaction.id }>
                       <TableCell>
-                        {format(transaction.createdAt, "d/MM/y HH:mm")}
+                        { format(transaction.createdAt, "d/MM/y HH:mm") }
                       </TableCell>
-                      <TableCell>{transaction.amount}</TableCell>
-                      <TableCell>{transaction.description}</TableCell>
+                      <TableCell>{ transaction.amount }</TableCell>
+                      <TableCell>{ transaction.description }</TableCell>
                     </TableRow>
                   );
-                })}
+                }) }
               </TableBody>
             </Table>
             <div className="flex flex-row justify-center">
@@ -349,26 +350,26 @@ export default function WalletPage({session}) {
                 isCompact
                 color="primary"
                 size="sm"
-                loop={true}
-                page={page}
-                total={transactionPages}
-                onChange={(page) => setPage(page)}
+                loop={ true }
+                page={ page }
+                total={ transactionPages }
+                onChange={ (page) => setPage(page) }
               />
             </div>
           </div>
         </div>
-      )}
-      {showToast ? (
-        <div onClick={toggleShowToast}>
+      ) }
+      { showToast ? (
+        <div onClick={ toggleShowToast }>
           <Toast
-            isSuccess={toast.isSuccess}
-            header={toast.header}
-            message={toast.message}
+            isSuccess={ toast.isSuccess }
+            header={ toast.header }
+            message={ toast.message }
           />
         </div>
       ) : (
         <></>
-      )}
+      ) }
     </>
   );
 }

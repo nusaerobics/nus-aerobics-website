@@ -2,70 +2,32 @@ import { fromZonedTime, toZonedTime } from "date-fns-tz";
 import { NextResponse } from "next/server";
 
 const db = require("../../config/sequelize");
+const { Op } = require("sequelize");
 const Booking = db.bookings;
 const Class = db.classes;
 const User = db.users;
 
-function getStatus(c) {
-  if (c.bookedCapacity >= c.maxCapacity) {
-    return "full";
-  }
-
-  // const utcClassDate = fromZonedTime(c.date, "Asia/Singapore");
-  // const sgClassDate = toZonedTime(utcClassDate, "Asia/Singapore");
-  // const sgCurrentDate = toZonedTime(new Date(), "Asia/Singapore");
-
-  // if (sgClassDate < sgCurrentDate) {
-  //   return "closed";
-  // }
-  // should remain as closed or open otherwise
-
-  // if (searchParams.get("isToday") != undefined) {
-  //   const todayClasses = classes.filter((c) => {
-  //     const utcClassDate = fromZonedTime(c.date, "Asia/Singapore");
-  //     const sgClassDate = toZonedTime(utcClassDate, "Asia/Singapore");
-  //     const sgCurrentDate = toZonedTime(new Date(), "Asia/Singapore");
-
-  //     const sgClassYear = sgClassDate.getFullYear();
-  //     const sgClassMonth = sgClassDate.getMonth();
-  //     const sgClassDay = sgClassDate.getDate();
-
-  //     const sgCurrentYear = sgCurrentDate.getFullYear();
-  //     const sgCurrentMonth = sgCurrentDate.getMonth();
-  //     const sgCurrentDay = sgCurrentDate.getDate();
-
-  //     return (
-  //       sgClassYear == sgCurrentYear &&
-  //       sgClassMonth == sgCurrentMonth &&
-  //       sgClassDay == sgCurrentDay
-  //     );
-
-  return c.status;
-}
-
-// async function getCapacity(c) {
-//   const res = await fetch(`https://aerobics.nussportsclub.org/api/bookings?isCount=true&classId=${c.id}`);
-//   const bookedCapacity = res.json();
-//   return bookedCapacity;
-// };
-
 export async function GET(request) {
+  const t = await db.sequelize.transaction();
   try {
     const url = new URL(request.url);
     const searchParams = new URLSearchParams(url.searchParams);
 
-    // getClassById
-    if (searchParams.get("id") != undefined) {
-      const id = searchParams.get("id");
-      const targetClass = await Class.findOne({ where: { id: id } });
-      if (!targetClass) {
-        throw new Error(`Class ${ id } does not exist`);
+    const upcomingClasses = await Class.findAll({ where: { status: { [Op.ne]: "closed" } }, transaction: t });
+    for (let i = 0; i < upcomingClasses.length; i++) {
+      const c = upcomingClasses[i];
+      const utcClassDate = fromZonedTime(c.date, "Asia/Singapore");
+      const sgClassDate = toZonedTime(utcClassDate, "Asia/Singapore");
+      const sgCurrentDate = toZonedTime(new Date(), "Asia/Singapore");
+      if (sgClassDate < sgCurrentDate) {
+        await Class.update({ status: "closed" }, { where: { id: c.id }, transaction: t });
+      } else if (c.bookedCapacity < 19) {
+        await Class.update({ status: "open" }, { where: { id: c.id }, transaction: t });
+      } else {
+        await Class.update({ status: "full" }, { where: { id: c.id }, transaction: t });
       }
-      targetClass.status = getStatus(targetClass);
-      return NextResponse.json(targetClass, { status: 200 });
     }
-
-    const classes = await Class.findAll();
+    const classes = await Class.findAll({ transaction: t });
 
     // getTodayClasses /api/classes?isToday=true
     if (searchParams.get("isToday") != undefined) {
@@ -84,20 +46,38 @@ export async function GET(request) {
 
         return (sgClassYear == sgCurrentYear && sgClassMonth == sgCurrentMonth && sgClassDay == sgCurrentDay);
       });
-      todayClasses.forEach((c) => {
-        c.status = getStatus(c);
-      });
+
+      await t.commit();
       return NextResponse.json(todayClasses, { status: 200 });
     }
 
+    // getClassesByUser /api/classes?userId=
+    if (searchParams.get("userId") != undefined) {
+      const userId = searchParams.get("userId");
+
+      const bookedClassIds = await Booking.findAll({
+        where: { userId: userId },
+        attributes: ['classId'],
+        transaction: t,
+      }).then((bookings) => bookings.map((booking) => booking.classId));
+      const filteredClasses = await Class.findAll(
+        {
+          where: {
+            id: { [Op.notIn]: bookedClassIds },
+            status: { [Op.ne]: "closed" }
+          },
+          transaction: t
+        });
+      await t.commit();
+      return NextResponse.json(filteredClasses, { status: 200 });
+    }
+
     // getClasses
-    classes.forEach((c) => {
-      c.status = getStatus(c);
-      // console.log(c.id, getCapacity(c));
-    });
+    await t.commit();
     return NextResponse.json(classes, { status: 200 });
   } catch (error) {
     console.log(error);
+    await t.rollback();
     return NextResponse.json({ message: `Error getting class(es): ${ error }` }, { status: 500 });
   }
 }
@@ -118,6 +98,7 @@ export async function POST(request) {
   }
 }
 
+// TODO: Move PUT and DELETE to [id]/route.js
 // updateClass
 export async function PUT(request) {
   // All values have to be inputted in request - either the unchanged values or updated values
@@ -146,21 +127,21 @@ export async function DELETE(request) {
     const body = await request.json();
     const id = body.id;
 
-    // 1. get bookings of a class
+    // 1. Get bookings of a class.
     const bookings = await Booking.findAll({ where: { classId: id }, transaction: t });
     for (let i = 0; i < bookings.length; i++) {
       const booking = bookings[i];
       const userId = booking.userId;
 
       const user = await User.findOne({ where: { id: userId }, transaction: t });
-      // 1a. refund each user
+      // 1a. Refund each user.
       await User.update({ balance: user.balance + 1 }, { where: { id: userId }, transaction: t });
 
-      // 1b. delete each booking
+      // 1b. Delete each booking.
       await Booking.destroy({ where: { id: booking.id }, transaction: t });
     }
 
-    // 2. delete class
+    // 2. Delete class.
     await Class.destroy({ where: { id: id }, transaction: t });
 
     await t.commit();

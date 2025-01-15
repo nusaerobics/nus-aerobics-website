@@ -18,6 +18,32 @@ const transporter = nodemailer.createTransport({
   },
 });
 
+function sendEmail(user, tempPassword) {
+  const emailHTML = `
+      Hi ${ user.name },
+      <br>
+      <br>We received a request to reset your password on NUS Aerobics.
+      <br>
+      <br>Login with the temporary password below and reset your password in the Profile page.
+      <table>
+        <tr>
+          <td><strong>Temporary password</strong></td>
+          <td>${ tempPassword }</td>
+        </tr>
+      </table>
+      <br>If you have any questions or problems, please contact us at <a href="mailto:aerobics@nussportsclub.org">aerobics@nussportsclub.org</a>.
+      <br>
+      <br>Kindest regards,
+      <br>NUS Aerobics`;
+  const mailOptions = {
+    from: process.env.EMAIL_USER,
+    to: user.email,
+    subject: "[NUS Aerobics] Forgot your password?",
+    html: emailHTML,
+  };
+  return transporter.sendMail(mailOptions);
+}
+
 export async function PUT(request) {
   const t = await db.sequelize.transaction();
   try {
@@ -33,31 +59,7 @@ export async function PUT(request) {
     const hashedPassword = await bcrypt.hash(tempPassword, saltRounds);
     await User.update({ password: hashedPassword }, { where: { id: user.id }, transaction: t });
 
-    const emailHTML = `
-      Hi ${ user.name }!
-      <br>We received a request to reset your password on NUS Aerobics.
-      <br>
-      <br>Login with your temporary password and reset your password in the Profile page.
-      <br><strong>Temporary password:</strong> ${ tempPassword }
-      <br>
-      <br>If you have any questions or problems, please contact us at: <a href="mailto:aerobics@nussportsclub.org">aerobics@nussportsclub.org</a>.
-      <br>Kindest regards,
-      <br>NUS Aerobics`;
-    const mailOptions = {
-      from: process.env.EMAIL_USER,
-      to: email,
-      subject: "Forgot your password?",
-      html: emailHTML,
-    };
-
-    await transporter.sendMail(mailOptions, function (error, info) {
-      if (error) {
-        console.log(error);
-        throw new Error(`${ error }`);
-      } else {
-        console.log(info.response);
-      }
-    });
+    await sendEmail(user, tempPassword);
 
     await t.commit()
     return NextResponse.json("Successful password reset request", { status: 200 });

@@ -33,16 +33,16 @@ import Toast from "../Toast";
 export default function AdminClassLandingPage({ openCreate }) {
   const router = useRouter();
 
-  const [ classes, setClasses ] = useState([]);
-  const [ searchInput, setSearchInput ] = useState("");
-  const [ selectedClass, setSelectedClass ] = useState({});
-  const [ showToast, setShowToast ] = useState(false);
-  const [ toast, setToast ] = useState({});
-  const [ sortDescriptor, setSortDescriptor ] = useState({
+  const [classes, setClasses] = useState([]);
+  const [searchInput, setSearchInput] = useState("");
+  const [selectedClass, setSelectedClass] = useState({});
+  const [showToast, setShowToast] = useState(false);
+  const [toast, setToast] = useState({});
+  const [sortDescriptor, setSortDescriptor] = useState({
     column: "date",
     direction: "ascending",
   });
-  const [ filters, setFilters ] = useState(new Set([ "open", "upcoming" ]));
+  const [filters, setFilters] = useState(new Set(["upcoming"]));
 
   useEffect(() => {
     const fetchClasses = async () => {
@@ -53,11 +53,10 @@ export default function AdminClassLandingPage({ openCreate }) {
       const data = await res.json();
       setClasses(data);
     };
-    // TODO: fix for useEffect, handling the promises without using async due to destroy() error.
     fetchClasses();
   }, []);
 
-  const [ page, setPage ] = useState(1);
+  const [page, setPage] = useState(1);
   const rowsPerPage = 10;
 
   const onSearchInputChange = useCallback((value) => {
@@ -66,13 +65,13 @@ export default function AdminClassLandingPage({ openCreate }) {
   });
 
   const sortedClasses = useMemo(() => {
-    return [ ...classes ].sort((a, b) => {
+    return [...classes].sort((a, b) => {
       const first = a[sortDescriptor.column];
       const second = b[sortDescriptor.column];
       const compare = first < second ? -1 : first > second ? 1 : 0;
       return sortDescriptor.direction == "descending" ? -compare : compare;
     });
-  }, [ sortDescriptor, classes ]);
+  }, [sortDescriptor, classes]);
 
   const classPages = useMemo(() => {
     const filteredClasses = sortedClasses
@@ -80,14 +79,6 @@ export default function AdminClassLandingPage({ openCreate }) {
         const className = c.name.toLowerCase();
         const searchValue = searchInput.toLowerCase();
         return className.includes(searchValue);
-      })
-      .filter((c) => {
-        if (filters.has("open")) {
-          const isFull = c.bookedCapacity == c.maxCapacity;
-          const classStatus = c.status.toLowerCase();
-          return !isFull && classStatus == "open";
-        }
-        return true;
       })
       .filter((c) => {
         if (filters.has("upcoming")) {
@@ -100,7 +91,7 @@ export default function AdminClassLandingPage({ openCreate }) {
         return true;
       });
     return Math.ceil(filteredClasses.length / rowsPerPage);
-  }, [ sortedClasses, searchInput, filters ]);
+  }, [sortedClasses, searchInput, filters]);
 
   const classItems = useMemo(() => {
     const start = (page - 1) * rowsPerPage;
@@ -113,14 +104,6 @@ export default function AdminClassLandingPage({ openCreate }) {
         return className.includes(searchValue);
       })
       .filter((c) => {
-        if (filters.has("open")) {
-          const isFull = c.bookedCapacity == c.maxCapacity;
-          const classStatus = c.status.toLowerCase();
-          return !isFull && classStatus == "open";
-        }
-        return true;
-      })
-      .filter((c) => {
         if (filters.has("upcoming")) {
           const utcClassDate = fromZonedTime(c.date, "Asia/Singapore");
           const sgClassDate = toZonedTime(utcClassDate, "Asia/Singapore");
@@ -131,7 +114,7 @@ export default function AdminClassLandingPage({ openCreate }) {
         return true;
       });
     return filteredClasses.slice(start, end);
-  }, [ page, sortedClasses, searchInput, filters ]);
+  }, [page, sortedClasses, searchInput, filters]);
 
   const toggleShowToast = () => {
     setShowToast(!showToast);
@@ -145,7 +128,7 @@ export default function AdminClassLandingPage({ openCreate }) {
       }, 5000);
     }
     return () => clearTimeout(timer);
-  }, [ showToast ]);
+  }, [showToast]);
 
   const selectRow = (rowData) => {
     console.log("selectedClass:", rowData);
@@ -173,7 +156,7 @@ export default function AdminClassLandingPage({ openCreate }) {
 
       // update class list
       const updatedClasses = classes.filter((originalClass) => {
-        return originalClass.id != selectedClass.id;
+        return originalClass.id !== selectedClass.id;
       });
       setClasses(updatedClasses);
       setToast({
@@ -222,7 +205,6 @@ export default function AdminClassLandingPage({ openCreate }) {
               onSelectionChange={ setFilters }
             >
               <DropdownSection title="Filter classes">
-                <DropdownItem key="open">Open for booking</DropdownItem>
                 <DropdownItem key="upcoming">Upcoming</DropdownItem>
               </DropdownSection>
             </DropdownMenu>
@@ -291,16 +273,17 @@ export default function AdminClassLandingPage({ openCreate }) {
           </Table>
         </div>
         <div className="flex flex-row justify-center">
-          <Pagination
-            showControls
-            isCompact
-            color="primary"
-            size="sm"
-            loop={ true }
-            page={ page }
-            total={ classPages }
-            onChange={ (page) => setPage(page) }
-          />
+          { classPages > 1 && (
+            <Pagination
+              showControls
+              isCompact
+              color="primary"
+              size="sm"
+              loop={ true }
+              page={ page }
+              total={ classPages }
+              onChange={ (page) => setPage(page) }
+            />) }
         </div>
       </div>
       { showToast ? (

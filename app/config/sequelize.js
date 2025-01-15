@@ -27,17 +27,22 @@ db.users = require("../models/user.model")(sequelize, Sequelize);
 db.bookings = require("../models/booking.model")(sequelize, Sequelize);
 db.transactions = require("../models/transaction.model")(sequelize, Sequelize);
 db.submissions = require("../models/submission.model")(sequelize, Sequelize);
+db.waitlists = require("../models/waitlist.model")(sequelize, Sequelize);
 
 db.classes.hasMany(db.bookings, { as: "bookings" });
 db.bookings.belongsTo(db.classes, { as: "class" });
-// NOTE: Can also do this, but it adds classId and class_id to the table
-// db.bookings.belongsTo(db.classes, { foreignKey: "class_id", as: "class" });
 
 db.users.hasMany(db.bookings, { as: "bookings" });
 db.bookings.belongsTo(db.users, { as: "user" });
 
 db.users.hasMany(db.transactions, { as: "transactions" });
 db.transactions.belongsTo(db.users, { as: "user" });
+
+db.classes.hasMany(db.waitlists, { as: "waitlists" });
+db.waitlists.belongsTo(db.classes, { as: "class" });
+
+db.users.hasMany(db.waitlists, { as: "waitlists" });
+db.waitlists.belongsTo(db.users, { as: "user" });
 
 (async () => {
   try {

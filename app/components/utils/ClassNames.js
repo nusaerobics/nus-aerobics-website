@@ -15,14 +15,18 @@ export const chipClassNames = {
     base: ["bg-a-navy/10"],
     content: ["text-xs md:text-sm text-a-navy"],
   },
+  waitlisted: {
+    base: ["bg-a-black/10"],
+    content: ["text-xs md:text-sm text-a-black"],
+  }
 };
 
 export const chipTypes = {
   open: {
-    message: "Open",
+    message: "Open for booking",
   },
   full: {
-    message: "Full",
+    message: "Fully booked",
   },
   closed: {
     message: "Closed",
@@ -30,6 +34,9 @@ export const chipTypes = {
   booked: {
     message: "Booked",
   },
+  waitlisted: {
+    message: "Waitlisted",
+  }
 };
 
 export const inputClassNames = {

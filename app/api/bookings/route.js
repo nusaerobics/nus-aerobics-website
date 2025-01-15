@@ -1,25 +1,71 @@
 import { NextResponse } from "next/server";
 
 const db = require("../../config/sequelize");
+import { format } from "date-fns";
+
 const Class = db.classes;
 const Booking = db.bookings;
 const Transaction = db.transactions;
 const User = db.users;
+const Waitlist = db.waitlists;
+
+const nodemailer = require('nodemailer');
+const transporter = nodemailer.createTransport({
+  host: "smtp.gmail.com",
+  port: 465,
+  secure: true,
+  service: "Gmail",
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
+  },
+});
+
+function sendEmail(user, selectedClass) {
+  const emailHTML = `
+        Hi ${ user.name },
+        <br>
+        <br>Thank you for booking a class with us! Here are the details of your booking and how to prepare for class:
+        <br>
+        <br>
+          <table>
+            <tr>
+              <td><strong>Class</strong></td>
+              <td>${ selectedClass.name }</td>
+            </tr>
+            <tr>
+              <td><strong>Date and Time</strong></td>
+              <td>${ format(selectedClass.date, "d/MM/y HH:mm (EEE)") }</td>
+            </tr>
+            <tr>
+              <td><strong>Location</strong></td>
+              <td>UTown Gym Aerobics Studio</td>
+            </tr>
+          </table>
+        <br><strong>Attire</strong>
+        <br>Come to class dressed in comfortable attire. If you booked HIIT, Kickboxing, KKardio, or Zumba, we reccomend you to wear training shoes. 
+        <br>
+        <br><strong>What to Bring</strong>
+        <br>All equipment for your class will be provided. Just bring yourself and a waterbottle!
+        <br>
+        <br>Please remember to arrive early in order for us to take attendance. If you have any questions or problems, please feel free to contact us at <a href="mailto:aerobics@nussportsclub.org">aerobics@nussportsclub.org</a>.
+        <br>
+        <br>We're looking forward to seeing you in class!
+        <br>Kindest regards,
+        <br>NUS Aerobics`;
+  const mailOptions = {
+    from: process.env.EMAIL_USER,
+    to: user.email,
+    subject: "[NUS Aerobics] Get ready for your class!",
+    html: emailHTML,
+  };
+  return transporter.sendMail(mailOptions);
+}
 
 export async function GET(request) {
   try {
     const url = new URL(request.url);
     const searchParams = new URLSearchParams(url.searchParams);
-
-    // getBookingById
-    if (searchParams.get("id") != undefined) {
-      const id = searchParams.get("id");
-      const booking = await Booking.findOne({ where: { id: id } }); // NOTE: When would I need a booking by ID?
-      if (!booking) {
-        throw new Error(`Booking ${ id } does not exist`);
-      }
-      return NextResponse.json(booking, { status: 200 });
-    }
 
     // getBookingsByUser
     if (searchParams.get("userId") != undefined) {
@@ -91,21 +137,24 @@ export async function GET(request) {
 export async function POST(request) {
   const t = await db.sequelize.transaction();
   try {
-    // NOTE: check for sufficient funds done before request sent
     const body = await request.json();
-    const { classId, userId, isForced } = body;  // NOTE: isForced = TRUE when admin makes the booking
+    const { classId, userId, isForced } = body;  // NOTE: isForced = TRUE when admin makes the booking, else FALSE
 
     // 1. Find user and class.
-    const selectedClass = await Class.findOne({ where: { id: classId } }, { t });
+    const selectedClass = await Class.findOne({ where: { id: classId }, transaction: t });
     const user = await User.findOne(
-      { where: { id: userId } },
-      { t },
+      { where: { id: userId }, transaction: t },
     );
 
-    // 2. Check class capacity.
+    // 2a. Check user's balance.
+    if (user.balance < 1) {
+      throw new Error("Your account has insufficient credits. Please purchase more credits first.");
+    }
+
+    // 2b. Check class capacity.
     if (!isForced) {
       if (selectedClass.bookedCapacity >= selectedClass.maxCapacity) {
-        throw new Error(`Class ${ classId } is fully booked.`);
+        throw new Error(`${ selectedClass.name } is fully booked. Please join the waitlist or book another class.`);
       }
     }
 
@@ -139,13 +188,24 @@ export async function POST(request) {
       description: `Booked '${ selectedClass.name }'`,
     }, { transaction: t });
 
+    // 6. Delete any waitlist user had for class.
+    const waitlist = await Waitlist.findOne({ where: { userId: userId, classId: classId }, transaction: t });
+    if (waitlist !== null) {
+      await Waitlist.destroy({ where: { id: waitlist.id }, transaction: t });
+    }
+
+    // 7. Email user to confirm booking.
+    if (!isForced) {
+      await sendEmail(user, selectedClass);
+    }
+
     await t.commit();
     return NextResponse.json(newBooking, { status: 200 });
   } catch (error) {
     console.log(error);
     await t.rollback();
     return NextResponse.json(
-      { message: `Error creating booking: ${ error.message }` },
+      { message: `${ error.message }` },
       { status: 500 }
     );
   }
@@ -165,62 +225,6 @@ export async function PUT(request) {
     console.log(error);
     return NextResponse.json(
       { message: `Error updating booking: ${ error }` },
-      { status: 500 }
-    );
-  }
-}
-
-// deleteBooking
-export async function DELETE(request) {
-  const t = await db.sequelize.transaction();
-  try {
-    const body = await request.json();
-    const { bookingId, classId, userId } = body;
-
-    // 1. Delete booking.
-    await Booking.destroy(
-      {
-        where: { id: bookingId },
-        transaction: t
-      }
-    );
-
-    // 2. Update class' booked capacity.
-    const bookedClass = await Class.findOne(
-      { where: { id: classId } },
-      { t }
-    );
-    await Class.update(
-      {
-        bookedCapacity: bookedClass.bookedCapacity - 1
-      },
-      { where: { id: classId }, transaction: t });
-
-    // 3. Update user's balance.
-    const user = await User.findOne({ where: { id: userId } }, { t });
-    await User.update(
-      { balance: user.balance + 1 },
-      { where: { id: userId }, transaction: t }
-    );
-
-    // 4. Create new transaction.
-    await Transaction.create({
-      userId: userId,
-      amount: 1,
-      type: "refund",
-      description: `Refunded '${ bookedClass.name }'`,
-    }, { transaction: t });
-
-    await t.commit();
-    return NextResponse.json(
-      { json: `Booking ${ bookingId } deleted successfully` },
-      { status: 200 }
-    );
-  } catch (error) {
-    console.log(error);
-    await t.rollback();
-    return NextResponse.json(
-      { message: `Error deleting booking: ${ error }` },
       { status: 500 }
     );
   }
