@@ -13,20 +13,20 @@ export async function GET(request) {
     const url = new URL(request.url);
     const searchParams = new URLSearchParams(url.searchParams);
 
-    const upcomingClasses = await Class.findAll({ where: { status: { [Op.ne]: "closed" } }, transaction: t });
-    for (let i = 0; i < upcomingClasses.length; i++) {
-      const c = upcomingClasses[i];
-      const utcClassDate = fromZonedTime(c.date, "Asia/Singapore");
-      const sgClassDate = toZonedTime(utcClassDate, "Asia/Singapore");
-      const sgCurrentDate = toZonedTime(new Date(), "Asia/Singapore");
-      if (sgClassDate < sgCurrentDate) {
-        await Class.update({ status: "closed" }, { where: { id: c.id }, transaction: t });
-      } else if (c.bookedCapacity < 19) {
-        await Class.update({ status: "open" }, { where: { id: c.id }, transaction: t });
-      } else {
-        await Class.update({ status: "full" }, { where: { id: c.id }, transaction: t });
-      }
-    }
+    // const upcomingClasses = await Class.findAll({ where: { status: { [Op.ne]: "closed" } }, transaction: t });
+    // for (let i = 0; i < upcomingClasses.length; i++) {
+    //   const c = upcomingClasses[i];
+    //   const utcClassDate = fromZonedTime(c.date, "Asia/Singapore");
+    //   const sgClassDate = toZonedTime(utcClassDate, "Asia/Singapore");
+    //   const sgCurrentDate = toZonedTime(new Date(), "Asia/Singapore");
+    //   if (sgClassDate < sgCurrentDate) {
+    //     await Class.update({ status: "closed" }, { where: { id: c.id }, transaction: t });
+    //   } else if (c.bookedCapacity < 19) {
+    //     await Class.update({ status: "open" }, { where: { id: c.id }, transaction: t });
+    //   } else {
+    //     await Class.update({ status: "full" }, { where: { id: c.id }, transaction: t });
+    //   }
+    // }
     const classes = await Class.findAll({ transaction: t });
 
     // getTodayClasses /api/classes?isToday=true
@@ -64,7 +64,7 @@ export async function GET(request) {
         {
           where: {
             id: { [Op.notIn]: bookedClassIds },
-            status: { [Op.ne]: "closed" }
+            date: { [Op.gt]: new Date() },  // status: { [Op.ne]: "closed" }
           },
           transaction: t
         });

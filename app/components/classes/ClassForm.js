@@ -8,8 +8,8 @@ import PropTypes from "prop-types";
 import { useEffect, useState } from "react";
 import { z } from "zod";
 
-import { Input, Switch, Textarea } from "@nextui-org/react";
-import { inputClassNames, switchClassNames } from "../utils/ClassNames";
+import { Input, Textarea } from "@nextui-org/react";
+import { inputClassNames } from "../utils/ClassNames";
 import { SectionTitle } from "../utils/Titles";
 import Toast from "../Toast";
 
@@ -28,9 +28,6 @@ export default function AdminClassForm({
     selectedClass.date != "" ? format(selectedClass.date, "HH:mm") : "HH:mm"
   );
   const [description, setDescription] = useState(selectedClass.description);
-  const [isOpenBooking, setIsOpenBooking] = useState(
-    selectedClass.status == "open"
-  );
   const [showToast, setShowToast] = useState(false);
   const [toast, setToast] = useState({});
 
@@ -95,7 +92,6 @@ export default function AdminClassForm({
         name: name,
         description: description,
         date: newDate,
-        status: isOpenBooking ? "open" : "closed",
       };
       const res = await fetch("/api/classes", {
         method: "POST",
@@ -135,7 +131,6 @@ export default function AdminClassForm({
         date: updateDate,
         maxCapacity: selectedClass.maxCapacity,
         bookedCapacity: selectedClass.bookedCapacity,
-        status: isOpenBooking ? "open" : "closed",
       };
       const res = await fetch("/api/classes", {
         method: "PUT",
@@ -219,17 +214,6 @@ export default function AdminClassForm({
             classNames={inputClassNames}
           />
         </div>
-      </div>
-      <div className="flex flex-col">
-        <Switch
-          isSelected={isOpenBooking}
-          onValueChange={setIsOpenBooking}
-          size="sm"
-          className="mb-2.5"
-          classNames={switchClassNames}
-        >
-          Open for booking
-        </Switch>
       </div>
       <div className="flex flex-col gap-y-[5px]">
         <p className="text-a-black/50 text-sm">Description</p>

@@ -46,6 +46,7 @@ import {
 } from "../utils/ClassNames";
 import { PageTitle, SectionTitle } from "../utils/Titles";
 import Toast from "../Toast";
+import { fromZonedTime, toZonedTime } from "date-fns-tz";
 
 // TODO: Add in filter for classes, "Present" and "Absent"
 export default function AdminClassViewPage({ classId }) {
@@ -58,7 +59,6 @@ export default function AdminClassViewPage({ classId }) {
     date: "2025-01-01 00:00",
     maxCapacity: 19,
     bookedCapacity: 0,
-    status: "open",
   });
   const [bookings, setBookings] = useState([]);
   const [waitlists, setWaitlists] = useState([]);
@@ -71,6 +71,7 @@ export default function AdminClassViewPage({ classId }) {
   const [isEdit, setIsEdit] = useState(false);
   const [email, setEmail] = useState("");
   // const [filters, setFilters] = useState(new Set(["present", "absent"]));
+  const [status, setStatus] = useState("open");
 
   useEffect(() => {
     // getClass
@@ -83,6 +84,17 @@ export default function AdminClassViewPage({ classId }) {
         }
         const data = await res.json();
         setSelectedClass(data);
+
+        // setStatus
+        const utcClassDate = fromZonedTime(data.date, "Asia/Singapore");
+        const sgClassDate = toZonedTime(utcClassDate, "Asia/Singapore");
+        const sgCurrentDate = toZonedTime(new Date(), "Asia/Singapore");
+
+        if (sgClassDate < sgCurrentDate) {
+          setStatus("closed");
+        } else {
+          setStatus(data.bookedCapacity === data.maxCapacity ? "full" : "open");
+        }
       } catch (error) {
         setToast({
           isSuccess: false,
@@ -327,8 +339,8 @@ export default function AdminClassViewPage({ classId }) {
             <MdChevronLeft color="#1F4776" size={ 42 }/>
           </button>
           <PageTitle title={ selectedClass.name }/>
-          <Chip classNames={ chipClassNames[selectedClass.status] }>
-            { chipTypes[selectedClass.status].message }
+          <Chip classNames={ chipClassNames[status] }>
+            { chipTypes[status].message }
           </Chip>
         </div>
 

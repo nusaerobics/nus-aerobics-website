@@ -47,7 +47,7 @@ export default function ScheduleModal({
         }
       }
     };
-    if (selectedClass.status === "full") {
+    if (selectedClass.bookedCapacity === selectedClass.maxCapacity) {
       fetchWaitlists();
     }
   }, [onOpenChange]);
@@ -134,11 +134,11 @@ export default function ScheduleModal({
                       <p className="text-a-navy">{ selectedClass.name }</p>
                       <Chip
                         classNames={
-                          chipClassNames[selectedClass.status]
+                          chipClassNames[selectedClass.bookedCapacity === selectedClass.maxCapacity ? "full" : "open"]
                         }
                       >
                         {
-                          chipTypes[selectedClass.status].message
+                          chipTypes[selectedClass.bookedCapacity === selectedClass.maxCapacity ? "full" : "open"].message
                         }
                       </Chip>
                     </div>
@@ -172,7 +172,7 @@ export default function ScheduleModal({
                   </ModalBody>
                   <ModalFooter>
                     <div className="flex justify-end">
-                      { selectedClass.status === "open" && (
+                      { selectedClass.bookedCapacity < selectedClass.maxCapacity && (
                         <button
                           onClick={ bookClass }
                           className="rounded-[30px] px-[10px] md:px-[20px] py-[10px] text-xs md:text-sm bg-a-navy text-white cursor-pointer"
@@ -180,7 +180,7 @@ export default function ScheduleModal({
                           Book class
                         </button>
                       ) }
-                      { selectedClass.status === "full" && !isWaitlist && (
+                      { selectedClass.bookedCapacity === selectedClass.maxCapacity && !isWaitlist && (
                         <button
                           onClick={ joinWaitlist }
                           className="rounded-[30px] px-[10px] md:px-[20px] py-[10px] text-xs md:text-sm bg-a-navy text-white cursor-pointer"
@@ -188,7 +188,7 @@ export default function ScheduleModal({
                           Join waitlist
                         </button>
                       ) }
-                      { selectedClass.status === "full" && isWaitlist && (
+                      { selectedClass.bookedCapacity === selectedClass.maxCapacity && isWaitlist && (
                         <Tooltip
                           content="You are already on the waitlist."
                         >

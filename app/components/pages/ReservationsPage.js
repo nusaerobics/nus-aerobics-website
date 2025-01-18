@@ -4,14 +4,13 @@ import { PageTitle } from "../utils/Titles";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Input, Pagination, Tab, Tabs } from "@nextui-org/react";
 import { inputClassNames, tableClassNames, tabsClassNames } from "../utils/ClassNames";
-import { MdAvTimer, MdCheckCircleOutline, MdOpenInNew, MdOutlineFilterAlt } from "react-icons/md";
+import { MdAvTimer, MdCheckCircleOutline, MdOpenInNew } from "react-icons/md";
 import { Table, TableBody, TableCell, TableColumn, TableHeader, TableRow } from "@nextui-org/table";
 import { format } from "date-fns";
 import { useDisclosure } from "@nextui-org/modal";
 import BookingModal from "../modals/BookingModal";
 import WaitlistModal from "../modals/WaitlistModal";
-import { fromZonedTime, toZonedTime } from "date-fns-tz";
-import { Dropdown, DropdownItem, DropdownMenu, DropdownSection, DropdownTrigger } from "@nextui-org/dropdown";
+// import { Dropdown, DropdownItem, DropdownMenu, DropdownSection, DropdownTrigger } from "@nextui-org/dropdown";
 import Toast from "../Toast";
 
 export default function ReservationsPage({ userId }) {
@@ -30,7 +29,7 @@ export default function ReservationsPage({ userId }) {
       direction: "ascending",
     }
   );
-  const [bookingFilters, setBookingFilters] = useState(new Set("upcoming"));
+  // const [bookingFilters, setBookingFilters] = useState(new Set("upcoming"));
 
   const [selectedBooking, setSelectedBooking] = useState({});
   const [selectedWaitlist, setSelectedWaitlist] = useState({});
@@ -124,26 +123,27 @@ export default function ReservationsPage({ userId }) {
         const searchName = bookingQuery.trim().toLowerCase();
         return className.includes(searchName);
       })
-      .filter((booking) => {
-        if (bookingFilters.has("upcoming")) {
-          const bookedClass = booking.class;
-          const utcClassDate = fromZonedTime(bookedClass.date, "Asia/Singapore");
-          const sgClassDate = toZonedTime(utcClassDate, "Asia/Singapore");
-          const sgCurrentDate = toZonedTime(new Date(), "Asia/Singapore");
-          return sgClassDate > sgCurrentDate;
-        }
-        return true;
-      })
-      .filter((booking) => {
-        if (bookingFilters.has("closed")) {
-          const bookedClass = booking.class;
-          const utcClassDate = fromZonedTime(bookedClass.date, "Asia/Singapore");
-          const sgClassDate = toZonedTime(utcClassDate, "Asia/Singapore");
-          const sgCurrentDate = toZonedTime(new Date(), "Asia/Singapore");
-          return sgClassDate <= sgCurrentDate;
-        }
-        return true;
-      });
+      // TODO: Fix filtering for upcoming and past bookings
+      // .filter((booking) => {
+      //   if (bookingFilters.has("upcoming")) {
+      //     const bookedClass = booking.class;
+      //     const utcClassDate = fromZonedTime(bookedClass.date, "Asia/Singapore");
+      //     const sgClassDate = toZonedTime(utcClassDate, "Asia/Singapore");
+      //     const sgCurrentDate = toZonedTime(new Date(), "Asia/Singapore");
+      //     return sgClassDate > sgCurrentDate;
+      //   }
+      //   return true;
+      // })
+      // .filter((booking) => {
+      //   if (bookingFilters.has("closed")) {
+      //     const bookedClass = booking.class;
+      //     const utcClassDate = fromZonedTime(bookedClass.date, "Asia/Singapore");
+      //     const sgClassDate = toZonedTime(utcClassDate, "Asia/Singapore");
+      //     const sgCurrentDate = toZonedTime(new Date(), "Asia/Singapore");
+      //     return sgClassDate <= sgCurrentDate;
+      //   }
+      //   return true;
+      // });
     return Math.ceil(bookingsSearch.length / rowsPerPage);
   }, [sortedBookings, bookingQuery]);
   const bookingItems = useMemo(() => {
@@ -156,26 +156,26 @@ export default function ReservationsPage({ userId }) {
         const searchName = bookingQuery.trim().toLowerCase();
         return className.includes(searchName);
       })
-      .filter((booking) => {
-        if (bookingFilters.has("upcoming")) {
-          const bookedClass = booking.class;
-          const utcClassDate = fromZonedTime(bookedClass.date, "Asia/Singapore");
-          const sgClassDate = toZonedTime(utcClassDate, "Asia/Singapore");
-          const sgCurrentDate = toZonedTime(new Date(), "Asia/Singapore");
-          return sgClassDate > sgCurrentDate;
-        }
-        return true;
-      })
-      .filter((booking) => {
-        if (bookingFilters.has("closed")) {
-          const bookedClass = booking.class;
-          const utcClassDate = fromZonedTime(bookedClass.date, "Asia/Singapore");
-          const sgClassDate = toZonedTime(utcClassDate, "Asia/Singapore");
-          const sgCurrentDate = toZonedTime(new Date(), "Asia/Singapore");
-          return sgClassDate <= sgCurrentDate;
-        }
-        return true;
-      });
+      // .filter((booking) => {
+      //   if (bookingFilters.has("upcoming")) {
+      //     const bookedClass = booking.class;
+      //     const utcClassDate = fromZonedTime(bookedClass.date, "Asia/Singapore");
+      //     const sgClassDate = toZonedTime(utcClassDate, "Asia/Singapore");
+      //     const sgCurrentDate = toZonedTime(new Date(), "Asia/Singapore");
+      //     return sgClassDate > sgCurrentDate;
+      //   }
+      //   return true;
+      // })
+      // .filter((booking) => {
+      //   if (bookingFilters.has("closed")) {
+      //     const bookedClass = booking.class;
+      //     const utcClassDate = fromZonedTime(bookedClass.date, "Asia/Singapore");
+      //     const sgClassDate = toZonedTime(utcClassDate, "Asia/Singapore");
+      //     const sgCurrentDate = toZonedTime(new Date(), "Asia/Singapore");
+      //     return sgClassDate <= sgCurrentDate;
+      //   }
+      //   return true;
+      // });
     return bookingsSearch.slice(start, end);
   }, [page, sortedBookings, bookingQuery]);
 
@@ -250,26 +250,26 @@ export default function ReservationsPage({ userId }) {
             >
               <div className="md:h-full md:w-full flex flex-col p-2.5 gap-y-5">
                 <div className="flex flex-row justify-end items-center gap-x-2.5">
-                  <Dropdown>
-                    <DropdownTrigger>
-                      <button className="cursor-pointer text-lg">
-                        <MdOutlineFilterAlt color="#393E46"/>
-                      </button>
-                    </DropdownTrigger>
-                    <DropdownMenu
-                      aria-label="Filter bookings"
-                      variant="flat"
-                      closeOnSelect={ false }
-                      selectionMode="multiple"
-                      selectedKeys={ bookingFilters }
-                      onSelectionChange={ setBookingFilters }
-                    >
-                      <DropdownSection title="Filter bookings">
-                        <DropdownItem key="upcoming">Upcoming bookings</DropdownItem>
-                        <DropdownItem key="closed">Past bookings</DropdownItem>
-                      </DropdownSection>
-                    </DropdownMenu>
-                  </Dropdown>
+                  {/*<Dropdown>*/}
+                  {/*  <DropdownTrigger>*/}
+                  {/*    <button className="cursor-pointer text-lg">*/}
+                  {/*      <MdOutlineFilterAlt color="#393E46"/>*/}
+                  {/*    </button>*/}
+                  {/*  </DropdownTrigger>*/}
+                  {/*  <DropdownMenu*/}
+                  {/*    aria-label="Filter bookings"*/}
+                  {/*    variant="flat"*/}
+                  {/*    closeOnSelect={ false }*/}
+                  {/*    selectionMode="multiple"*/}
+                  {/*    selectedKeys={ bookingFilters }*/}
+                  {/*    onSelectionChange={ setBookingFilters }*/}
+                  {/*  >*/}
+                  {/*    <DropdownSection title="Filter bookings">*/}
+                  {/*      <DropdownItem key="upcoming">Upcoming bookings</DropdownItem>*/}
+                  {/*      <DropdownItem key="closed">Past bookings</DropdownItem>*/}
+                  {/*    </DropdownSection>*/}
+                  {/*  </DropdownMenu>*/}
+                  {/*</Dropdown>*/}
                   <div className="self-end md:w-1/4">
                     <Input
                       placeholder="Search"

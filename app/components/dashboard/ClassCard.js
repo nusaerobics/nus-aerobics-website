@@ -1,7 +1,7 @@
 import PropTypes from "prop-types";
 import { format } from "date-fns";
-import ClassDetailsModal from "../classes/ClassDetailsModal";
 import { useDisclosure } from "@nextui-org/modal";
+import BookingModal from "../modals/BookingModal";
 
 export default function ClassCard({ booking }) {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
@@ -22,14 +22,13 @@ export default function ClassCard({ booking }) {
           </button>
         </div>
       </div>
-      <ClassDetailsModal
-        selectedClass={booking.class}
-        selectedBooking={booking}
-        selected="booked"
-        userId={booking.userId}
-        isOpen={isOpen}
-        onOpen={onOpen}
-        onOpenChange={onOpenChange}
+      <BookingModal
+        selectedBooking={ booking }
+        selectedClass={ booking.class }
+        userId={ booking.userId }
+        isOpen={ isOpen }
+        onOpen={ onOpen }
+        onOpenChange={ onOpenChange }
       />
     </>
   );
