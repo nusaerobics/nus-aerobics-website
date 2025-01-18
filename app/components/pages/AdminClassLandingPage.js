@@ -238,12 +238,22 @@ export default function AdminClassLandingPage({ openCreate }) {
             </TableHeader>
             <TableBody>
               { classItems.map((c) => {
+                let status;
+                const utcClassDate = fromZonedTime(c.date, "Asia/Singapore");
+                const sgClassDate = toZonedTime(utcClassDate, "Asia/Singapore");
+                const sgCurrentDate = toZonedTime(new Date(), "Asia/Singapore");
+
+                if (sgClassDate < sgCurrentDate) {
+                  status = "closed";
+                } else {
+                  status = c.bookedCapacity === c.maxCapacity ? "full" : "open";
+                }
                 return (
                   <TableRow key={ c.id }>
                     <TableCell>{ c.name }</TableCell>
                     <TableCell>
-                      <Chip classNames={ chipClassNames[c.status] }>
-                        { chipTypes[c.status].message }
+                      <Chip classNames={ chipClassNames[status] }>
+                        { chipTypes[status].message }
                       </Chip>
                     </TableCell>
                     <TableCell>{ `${ c.bookedCapacity }/${ c.maxCapacity }` }</TableCell>
