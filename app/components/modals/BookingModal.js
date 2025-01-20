@@ -5,7 +5,7 @@ import {
   ModalBody,
   ModalFooter,
 } from "@nextui-org/modal";
-import { Chip, Spinner } from "@nextui-org/react";
+import { Chip, Spinner, Tooltip } from "@nextui-org/react";
 import { chipClassNames, chipTypes, modalClassNames } from "../utils/ClassNames";
 import {
   MdCheckCircleOutline,
@@ -17,6 +17,7 @@ import {
 import { format } from "date-fns";
 import { SectionTitle } from "../utils/Titles";
 import { useEffect, useState } from "react";
+import { fromZonedTime, toZonedTime } from "date-fns-tz";
 
 export default function BookingModal({
                                        selectedBooking,
@@ -28,10 +29,22 @@ export default function BookingModal({
                                      }) {
   const [modalType, setModalType] = useState("view"); // Either: "view", "loading", or "result"
   const [result, setResult] = useState({}); // {  isSuccess: boolean, header: string, message: string }
+  const [isUpcoming, setIsUpcoming] = useState(true);
+
+  const checkIsUpcoming = (selectedClass) => {
+    const utcClassDate = fromZonedTime(selectedClass.date, "Asia/Singapore");
+    const sgClassDate = toZonedTime(utcClassDate, "Asia/Singapore");
+    const sgCurrentDate = toZonedTime(new Date(), "Asia/Singapore");
+    return sgClassDate > sgCurrentDate;
+  }
+  useEffect(() => {
+    const result = checkIsUpcoming(selectedClass);
+    setIsUpcoming(result);
+  }, [onOpenChange])
 
   useEffect(() => {
     setModalType("view");
-  }, [isOpen]);
+  }, [onOpenChange]);
 
   async function unbookClass() {
     setModalType("loading");
@@ -122,11 +135,23 @@ export default function BookingModal({
                     </div>
                   </ModalBody>
                   <ModalFooter>
-                    <button
-                      onClick={ unbookClass }
-                      className="rounded-[30px] px-[10px] md:px-[20px] py-[10px] text-xs md:text-sm bg-a-red text-white cursor-pointer">
-                      Unbook class
-                    </button>
+                    { isUpcoming && (
+                      <button
+                        onClick={ unbookClass }
+                        className="rounded-[30px] px-[10px] md:px-[20px] py-[10px] text-xs md:text-sm bg-a-red text-white cursor-pointer">
+                        Unbook class
+                      </button>) }
+                    { !isUpcoming && (
+                      <Tooltip
+                        content="Only upcoming class bookings can be cancelled."
+                      >
+                        <button
+                          disabled
+                          className="rounded-[30px] px-[10px] md:px-[20px] py-[10px] text-xs md:text-sm bg-a-red/10 text-a-red cursor-not-allowed"
+                        >
+                          Unbook class
+                        </button>
+                      </Tooltip>) }
                   </ModalFooter>
                 </>
               ) }

@@ -157,7 +157,7 @@ export default function DashboardPage({ session }) {
     } else {
       const fetchBalance = async () => {
         try {
-          const res = await fetch(`/api/users?id=${ session.userId }`);
+          const res = await fetch(`/api/users/${ session.userId }`);
           if (!res.ok) {
             throw new Error(
               `Unable to get user ${ session.userId }: ${ res.status }`

@@ -30,7 +30,7 @@ export default function ProfilePage({ session }) {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const res = await fetch(`/api/users?id=${ session.userId }`);
+        const res = await fetch(`/api/users/${ session.userId }`);
         if (!res.ok) {
           throw new Error(
             `Unable to get user ${ session.userId }: ${ res.status }`
@@ -77,8 +77,8 @@ export default function ProfilePage({ session }) {
 
   async function saveEdit() {
     try {
-      const updatedUser = { id: session.userId, name: name, email: email };
-      const res = await fetch("/api/users", {
+      const updatedUser = { name: name, email: email };
+      const res = await fetch(`/api/users/${ session.userId }`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(updatedUser),
@@ -116,11 +116,10 @@ export default function ProfilePage({ session }) {
         return;
       }
       const updatedUser = {
-        id: session.userId,
         newPassword: confirmPW,
         currentPassword: currentPW,
       };
-      const res = await fetch("/api/users", {
+      const res = await fetch(`/api/users/${ session.userId }`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(updatedUser),

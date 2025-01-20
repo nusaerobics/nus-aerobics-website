@@ -60,19 +60,19 @@ export async function GET() {
 // createSubmission
 export async function POST(request) {
   const t = await db.sequelize.transaction();
-  let isDuplicateSubmission = false;
   try {
     const body = await request.json();
     const { submissionId, name, email, totalCredits } = body;
 
-    // 1. If submission id not in db, continue. else, don't need to continue.
+    // 1. If submission id not in db, continue. Else, don't need to continue.
     const existingSubmission = await Submission.findOne(
-      { where: { submissionId: submissionId } },
-      { t },
+      { where: { submissionId: submissionId }, transaction: t }
     );
     if (existingSubmission) {
-      isDuplicateSubmission = true;
-      throw new Error(`Submission ${ submissionId } already exists`);
+      return NextResponse.json(
+        { error: `Submission ${submissionId} already exist.` },
+        { status: 400 }
+      );
     }
 
     // 2. Add submission to db with pending status.
@@ -133,9 +133,6 @@ export async function POST(request) {
   } catch (error) {
     console.log(error);
     await t.rollback();
-    if (isDuplicateSubmission) {
-      return NextResponse.json({ error: `${ error.message }` }, { status: 400 });
-    }
     return NextResponse.json({ error: `${ error.message }` }, { status: 500 });
   }
 }

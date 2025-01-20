@@ -28,5 +28,5 @@ export default async function Page() {
       redirect(redirectPath);
     }
   }
-  return <ProfilePage session={{ userId: user.id }} />;  // NOTE: Doesn't have permission because it's redundant
+  return <ProfilePage session={ { userId: user.id } }/>;
 }
