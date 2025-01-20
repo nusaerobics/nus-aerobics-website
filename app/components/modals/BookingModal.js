@@ -5,7 +5,7 @@ import {
   ModalBody,
   ModalFooter,
 } from "@nextui-org/modal";
-import { Chip, Spinner, Tooltip } from "@nextui-org/react";
+import { Chip, Spinner } from "@nextui-org/react";
 import { chipClassNames, chipTypes, modalClassNames } from "../utils/ClassNames";
 import {
   MdCheckCircleOutline,
@@ -17,7 +17,6 @@ import {
 import { format } from "date-fns";
 import { SectionTitle } from "../utils/Titles";
 import { useEffect, useState } from "react";
-import { fromZonedTime, toZonedTime } from "date-fns-tz";
 
 export default function BookingModal({
                                        selectedBooking,
@@ -27,25 +26,12 @@ export default function BookingModal({
                                        onOpen,
                                        onOpenChange,
                                      }) {
-  const [isCancel, setIsCancel] = useState(true);
   const [modalType, setModalType] = useState("view"); // Either: "view", "loading", or "result"
   const [result, setResult] = useState({}); // {  isSuccess: boolean, header: string, message: string }
 
   useEffect(() => {
-    const result = isAllowedCancel(selectedClass);
-    setIsCancel(result);
-  })
-  useEffect(() => {
     setModalType("view");
   }, [isOpen]);
-
-  const isAllowedCancel = (selectedClass) => {
-    const utcDate = fromZonedTime(selectedClass.date, "Asia/Singapore");
-    const sgDate = toZonedTime(utcDate, "Asia/Singapore");
-    const sgCurrentDate = toZonedTime(new Date(), "Asia/Singapore");
-    const cancelDeadline = new Date(sgDate.getTime() - 12 * 60 * 60 * 1000);
-    return sgCurrentDate < cancelDeadline;
-  }
 
   async function unbookClass() {
     setModalType("loading");
@@ -136,23 +122,11 @@ export default function BookingModal({
                     </div>
                   </ModalBody>
                   <ModalFooter>
-                    { isCancel && (
-                      <button
-                        onClick={ unbookClass }
-                        className="rounded-[30px] px-[10px] md:px-[20px] py-[10px] text-xs md:text-sm bg-a-red text-white cursor-pointer">
-                        Unbook class
-                      </button>) }
-                    { !isCancel && (
-                      <Tooltip
-                        content="Classes can only be cancelled 12 hours before"
-                      >
-                        <button
-                          disabled
-                          className="rounded-[30px] px-[10px] md:px-[20px] py-[10px] text-xs md:text-sm bg-a-red/10 text-a-red cursor-not-allowed"
-                        >
-                          Unbook class
-                        </button>
-                      </Tooltip>) }
+                    <button
+                      onClick={ unbookClass }
+                      className="rounded-[30px] px-[10px] md:px-[20px] py-[10px] text-xs md:text-sm bg-a-red text-white cursor-pointer">
+                      Unbook class
+                    </button>
                   </ModalFooter>
                 </>
               ) }
