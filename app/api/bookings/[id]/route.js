@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 
 import db from "../../../config/sequelize";
 import { format } from "date-fns";
+import { fromZonedTime, toZonedTime } from "date-fns-tz";
 
 const Booking = db.bookings;
 const Class = db.classes;
@@ -53,8 +54,10 @@ export async function DELETE(request) {
 
     // 2. Update class' booked capacity.
     const bookedClass = await Class.findOne(
-      { where: { id: classId } },
-      { t }
+      {
+        where: { id: classId },
+        transaction: t
+      }
     );
     await Class.update(
       {
@@ -62,20 +65,29 @@ export async function DELETE(request) {
       },
       { where: { id: classId }, transaction: t });
 
-    // 3. Update user's balance.
+    // 3. Update user's balance, only if cancelling before 12 hours.
     const user = await User.findOne({ where: { id: userId }, transaction: t });
-    await User.update(
-      { balance: user.balance + 1 },
-      { where: { id: userId }, transaction: t }
-    );
 
-    // 4. Create new transaction.
-    await Transaction.create({
-      userId: userId,
-      amount: 1,
-      type: "refund",
-      description: `Refunded '${ bookedClass.name }'`,
-    }, { transaction: t });
+    const utcDate = fromZonedTime(bookedClass.date, "Asia/Singapore");
+    const sgDate = toZonedTime(utcDate, "Asia/Singapore");
+    const sgCurrentDate = toZonedTime(new Date(), "Asia/Singapore");
+    const cancelDeadline = new Date(sgDate.getTime() - 12 * 60 * 60 * 1000);
+    const isAllowedCancel = sgCurrentDate < cancelDeadline;
+
+    if (isAllowedCancel) {
+      await User.update(
+        { balance: user.balance + 1 },
+        { where: { id: userId }, transaction: t }
+      );
+
+      // 4. Create new transaction.
+      await Transaction.create({
+        userId: userId,
+        amount: 1,
+        type: "refund",
+        description: `Refunded '${ bookedClass.name }'`,
+      }, { transaction: t });
+    }
 
     // 5. Alert users on waitlist for class.
     const waitlists = await Waitlist.findAll({ where: { classId: classId }, transaction: t });
