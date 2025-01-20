@@ -190,23 +190,25 @@ export default function UsersPage() {
       const submissionId = row[0];
       const status = row[5];
       if (status === "Approved") {
-        const name = row[22];
-        const email = row[2];
-        const totalCredits = parseInt(row[32]) + (parseInt(row[33]) * 5) + (parseInt(row[34]) * 10);
         try {
+          const name = row[22];
+          const email = row[2];
+          const totalCredits = parseInt(row[32]) + (parseInt(row[33]) * 5) + (parseInt(row[34]) * 10);
+
           const res = await fetch("/api/submissions", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
               submissionId: submissionId,
               name: name,
-              email: email,
+              email: email.toLowerCase(),
               totalCredits: totalCredits,
             })
           })
 
           if (!res.ok) {
-            uncredited.push({ id: submissionId, result: "res error" });
+            const response = await res.json();
+            uncredited.push({ id: submissionId, result: `${ response.error }` });
           } else {
             credited.push({ id: submissionId });
           }
@@ -214,7 +216,7 @@ export default function UsersPage() {
           console.log(error);
         }
       } else {
-        uncredited.push({ id: submissionId, result: "pending" });
+        uncredited.push({ id: submissionId, result: "Pending approval." });
       }
     }
 
