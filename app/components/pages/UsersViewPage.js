@@ -38,7 +38,7 @@ export default function UsersViewPage({ userId }) {
     // getUser
     const fetchUser = async () => {
       try {
-        const res = await fetch(`/api/users?id=${ userId }`);
+        const res = await fetch(`/api/users/${ userId }`);
         if (!res.ok) {
           throw new Error(`Unable to get user ${ userId }: ${ res.status }`);
         }

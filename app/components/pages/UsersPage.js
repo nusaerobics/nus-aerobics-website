@@ -26,7 +26,7 @@ import {
   TableRow,
   TableCell,
 } from "@nextui-org/table";
-import { Pagination } from "@nextui-org/react";
+import { Pagination, Spinner } from "@nextui-org/react";
 import { MdMoreVert } from "react-icons/md";
 import {
   inputClassNames,
@@ -73,7 +73,6 @@ export default function UsersPage() {
     }
     return Math.ceil(users.length / rowsPerPage);
   }, [users, searchInput]);
-
   const userItems = useMemo(() => {
     const start = (page - 1) * rowsPerPage;
     const end = start + rowsPerPage;
@@ -94,7 +93,6 @@ export default function UsersPage() {
   const toggleShowToast = () => {
     setShowToast(!showToast);
   };
-
   useEffect(() => {
     let timer;
     if (showToast) {
@@ -137,6 +135,7 @@ export default function UsersPage() {
   }
 
   async function creditUser() {
+    setModalType("loading");
     try {
       const newBalance = parseInt(selectedUser.balance) + parseInt(credits);
       const res = await fetch(`/api/users/${ selectedUser.id }`, {
@@ -164,7 +163,6 @@ export default function UsersPage() {
       });
       setUsers(updatedUsers);
 
-      onOpenChange();
       setToast({
         isSuccess: true,
         header: "Credited user",
@@ -177,62 +175,72 @@ export default function UsersPage() {
         header: "Unable to credit user",
         message: `An error occurred while credit ${ selectedUser.name }'s account. Try again later.`, // error.message
       });
-      setModalType("result");
+      setToast("result");
       console.log(error);
     }
   }
 
   async function creditUsers() {
-    let creditCount = 0;
-    let hasSubmissionError = false;
+    await setModalType("loading");
+    const credited = [];
+    const uncredited = [];
 
     for (let i = 1; i < csv.length; i++) {
       const row = csv[i];
       const submissionId = row[0];
-      const name = row[22];
-      const email = row[24];
-      const totalCredits = parseInt(row[32]) + (parseInt(row[33]) * 5) + (parseInt(row[34]) * 10);
-
-      try {
-        const res = await fetch("/api/submissions", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            submissionId: submissionId,
-            name: name,
-            email: email,
-            totalCredits: totalCredits,
+      const status = row[5];
+      if (status === "Approved") {
+        const name = row[22];
+        const email = row[2];
+        const totalCredits = parseInt(row[32]) + (parseInt(row[33]) * 5) + (parseInt(row[34]) * 10);
+        try {
+          const res = await fetch("/api/submissions", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              submissionId: submissionId,
+              name: name,
+              email: email,
+              totalCredits: totalCredits,
+            })
           })
-        })
-        if (!res.ok) {
-          hasSubmissionError = true;
-          const response = await res.json();
-          if (res.status == 400) {
-            throw new Error(`${ response.error }`);
+
+          if (!res.ok) {
+            uncredited.push({ id: submissionId, result: "res error" });
           } else {
-            throw new Error(`Unable to handle submission ${ submissionId }: ${ response.error }`);
+            credited.push({ id: submissionId });
           }
+        } catch (error) {
+          console.log(error);
         }
-        creditCount += 1;
-      } catch (error) {
-        // TODO: edit toasts for accounts which could not be credited
-        setToast({
-          isSuccess: false,
-          header: "Unable to credit account(s)",
-          message: `${ error }`,
-        });
-        setShowToast(true);
-        onOpenChange();
-        console.log(error);
+      } else {
+        uncredited.push({ id: submissionId, result: "pending" });
       }
     }
-    setToast({
-      isSuccess: true,
-      header: "Credited accounts",
-      message: `Successfully credited ${ creditCount } account(s).`,
-    });
-    setShowToast(true);
-    onOpenChange();
+
+    await setCreditedSubmissions(credited);
+    await setUncreditedSubmissions(uncredited);
+
+    setModalType("save");
+  }
+
+  const [creditedSubmissions, setCreditedSubmissions] = useState([]);
+  const [uncreditedSubmissions, setUncreditedSubmissions] = useState([]);
+
+
+  function downloadResults() {
+    const link = document.createElement("a");
+    let list = `Credited submissions (${ creditedSubmissions.length }):\n`;
+    creditedSubmissions.forEach((submission) => list += `${ submission }\n`);
+
+    list += `Uncredited submissions (${ uncreditedSubmissions.length }):\n`;
+    uncreditedSubmissions.forEach((submission) => list += `${ submission.id } ${ submission.result } \n`);
+
+    const creditedFile = new Blob([list], { type: 'text/plain' });
+    link.href = URL.createObjectURL(creditedFile);
+    link.download = `credited.txt`;
+    link.click();
+    URL.revokeObjectURL(link.href);
   }
 
   async function deleteUser(selectedUser) {
@@ -357,7 +365,7 @@ export default function UsersPage() {
         backdrop="opaque"
         classNames={ modalClassNames }
       >
-        { modalType === "multiple" ?
+        { modalType === "multiple" &&
           (<ModalContent>
             { (onClose) => (
               <>
@@ -389,47 +397,77 @@ export default function UsersPage() {
                 </ModalFooter>
               </>
             ) }
-          </ModalContent>) : (
-            <ModalContent>
-              { (onClose) => (
-                <>
-                  <ModalHeader>
-                    <div className="flex flex-row items-center gap-x-2.5">
-                      <SectionTitle title="Credit user"/>
+          </ModalContent>) }
+        { modalType === "individual" && (
+          <ModalContent>
+            { (onClose) => (
+              <>
+                <ModalHeader>
+                  <div className="flex flex-row items-center gap-x-2.5">
+                    <SectionTitle title="Credit user"/>
+                  </div>
+                </ModalHeader>
+                <ModalBody>
+                  <div className="flex flex-col gap-y-[5px]">
+                    <p className="text-a-black/50 text-sm">
+                      Enter number of credits *
+                    </p>
+                    <div className="md:w-1/3">
+                      <Input
+                        type="number"
+                        value={ credits }
+                        onValueChange={ setCredits }
+                        isRequired
+                        variant="bordered"
+                        size="xs"
+                        classNames={ inputClassNames }
+                      />
                     </div>
-                  </ModalHeader>
-                  <ModalBody>
-                    <div className="flex flex-col gap-y-[5px]">
-                      <p className="text-a-black/50 text-sm">
-                        Enter number of credits *
-                      </p>
-                      <div className="md:w-1/3">
-                        <Input
-                          type="number"
-                          value={ credits }
-                          onValueChange={ setCredits }
-                          isRequired
-                          variant="bordered"
-                          size="xs"
-                          classNames={ inputClassNames }
-                        />
-                      </div>
-                    </div>
-                  </ModalBody>
-                  <ModalFooter>
-                    <button
-                      onClick={ creditUser }
-                      className="rounded-[30px] px-[20px] py-[10px] bg-a-navy text-white cursor-pointer"
-                    >
-                      Credit
-                    </button>
-                  </ModalFooter>
-                </>
-              ) }
-            </ModalContent>
-          )
-        }
+                  </div>
+                </ModalBody>
+                <ModalFooter>
+                  <button
+                    onClick={ creditUser }
+                    className="rounded-[30px] px-[20px] py-[10px] bg-a-navy text-white cursor-pointer"
+                  >
+                    Credit
+                  </button>
+                </ModalFooter>
+              </>
+            ) }
+          </ModalContent>) }
+        { modalType === "loading" && (
+          <ModalContent>
+            { (onClose) => (
+              <>
+                <ModalBody>
+                  <div className="flex flex-col items-center justify-center gap-y-5 p-20">
+                    <Spinner color="primary" size="lg"/>
+                    <p className="text-a-black text-sm md:text-base">Crediting user(s)...</p>
+                  </div>
+                </ModalBody>
+              </>)
+            }
+          </ModalContent>
+        ) }
+        { (modalType === "save") && (
+          <ModalContent>
+            { (onClose) => (
+              <>
+                <ModalBody>
+                  <div className="flex flex-col items-center justify-center gap-y-2.5 p-5 md:p-10">
 
+                    <button
+                      onClick={ downloadResults }
+                      className="h-[36px] rounded-[30px] px-[20px] bg-a-navy text-white text-sm cursor-pointer"
+                    >
+                      Download results
+                    </button>
+                  </div>
+                </ModalBody>
+              </>) }
+          </ModalContent>
+        ) }
       </Modal>
       { showToast ? (
         <div onClick={ toggleShowToast }>
