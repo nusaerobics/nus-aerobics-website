@@ -20,9 +20,19 @@ const transporter = nodemailer.createTransport({
 
 function sendEmail(existingUser, user) {
   const accountDetails = (!existingUser)
-    ? `<br>We created an account for you with the following details:
-        <br><strong>Email:</strong> ${ user.email }
-        <br><strong>Password:</strong> ${ user.email }
+    ? `We created an account for you with the following details:
+       <br>
+       <br>
+        <table>
+            <tr>
+              <td><strong>Email</strong></td>
+              <td>${ user.email }</td>
+            </tr>
+            <tr>
+              <td><strong>Password</strong></td>
+              <td>${ user.email }</td>
+            </tr>
+          </table>
         <br>After logging in, please reset your password in the Profile page.`
     : `You may log in with your existing details to see the updated balance.`
 

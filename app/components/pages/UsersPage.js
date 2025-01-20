@@ -231,7 +231,7 @@ export default function UsersPage() {
   function downloadResults() {
     const link = document.createElement("a");
     let list = `Credited submissions (${ creditedSubmissions.length }):\n`;
-    creditedSubmissions.forEach((submission) => list += `${ submission }\n`);
+    creditedSubmissions.forEach((submission) => list += `${ submission.id }\n`);
 
     list += `Uncredited submissions (${ uncreditedSubmissions.length }):\n`;
     uncreditedSubmissions.forEach((submission) => list += `${ submission.id } ${ submission.result } \n`);
