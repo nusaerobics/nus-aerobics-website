@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 
 const db = require("../../config/sequelize");
 import { format } from "date-fns";
+import { fromZonedTime, toZonedTime } from "date-fns-tz";
 
 const Class = db.classes;
 const Booking = db.bookings;
@@ -22,6 +23,9 @@ const transporter = nodemailer.createTransport({
 });
 
 function sendEmail(user, selectedClass) {
+  const utcClassDate = fromZonedTime(selectedClass.date, "Asia/Singapore");
+  const sgClassDate = toZonedTime(utcClassDate, "Asia/Singapore");  // NOTE: This might have been the error faced with previous user on wrong time formatting
+
   const emailHTML = `
         Hi ${ user.name },
         <br>
@@ -35,7 +39,7 @@ function sendEmail(user, selectedClass) {
             </tr>
             <tr>
               <td><strong>Date and Time</strong></td>
-              <td>${ format(selectedClass.date, "d/MM/y HH:mm (EEE)") }</td>
+              <td>${ format(sgClassDate, "d/MM/y HH:mm (EEE)") }</td>
             </tr>
             <tr>
               <td><strong>Location</strong></td>
