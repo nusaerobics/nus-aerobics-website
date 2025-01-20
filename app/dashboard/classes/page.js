@@ -1,7 +1,7 @@
 "use server";
 
-import {redirect} from "next/navigation";
-import {getSession} from "../../lib";
+import { redirect } from "next/navigation";
+import { getSession } from "../../lib";
 import ClassesPage from "../../components/pages/ClassesPage";
 
 export default async function Page() {
@@ -29,5 +29,5 @@ export default async function Page() {
       redirect(redirectPath);
     }
   }
-  return <ClassesPage session={{userId: user.id, permission: user.permission}}/>;
+  return <ClassesPage session={ { userId: user.id, permission: user.permission } }/>;
 }

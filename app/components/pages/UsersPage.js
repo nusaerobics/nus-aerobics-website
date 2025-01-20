@@ -139,11 +139,12 @@ export default function UsersPage() {
   async function creditUser() {
     try {
       const newBalance = parseInt(selectedUser.balance) + parseInt(credits);
-      const res = await fetch("/api/users", {
+      const res = await fetch(`/api/users/${ selectedUser.id }`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: selectedUser.id, balance: newBalance }),
+        body: JSON.stringify({ amount: credits }),
       });
+
       if (!res.ok) {
         setToast({
           isSuccess: false,
@@ -152,21 +153,6 @@ export default function UsersPage() {
         });
         setShowToast(true);
         throw new Error(`Unable to credit user ${ selectedUser.id }`);
-      }
-
-      const newTransaction = {
-        userId: selectedUser.id,
-        amount: newBalance,
-        type: "deposit",
-        description: `Deposited ${ credits } credit(s)`,
-      };
-      const res2 = await fetch("/api/transactions", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(newTransaction),
-      });
-      if (!res2.ok) {
-        throw new Error("Unable to create transaction");
       }
 
       // Update users
@@ -186,7 +172,7 @@ export default function UsersPage() {
       });
       setShowToast(true);
     } catch (error) {
-      setResult({
+      setToast({
         isSuccess: false,
         header: "Unable to credit user",
         message: `An error occurred while credit ${ selectedUser.name }'s account. Try again later.`, // error.message
@@ -251,10 +237,9 @@ export default function UsersPage() {
 
   async function deleteUser(selectedUser) {
     try {
-      const res = await fetch("/api/users", {
+      const res = await fetch(`/api/users/${ selectedUser.id }`, {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: selectedUser.id }),
       });
       if (!res.ok) {
         const response = await res.json();

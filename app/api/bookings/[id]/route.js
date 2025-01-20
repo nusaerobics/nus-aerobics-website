@@ -38,27 +38,42 @@ export async function GET(request, { params }) {
 }
 
 // deleteBooking
-export async function DELETE(request) {
+export async function DELETE(request, { params }) {
   const t = await db.sequelize.transaction();
   try {
+    const id = await params.id;
     const body = await request.json();
-    const { bookingId, classId, userId } = body;
+    const { classId, userId } = body;
 
-    // 1. Delete booking.
-    await Booking.destroy(
-      {
-        where: { id: bookingId },
-        transaction: t
-      }
-    );
-
-    // 2. Update class' booked capacity.
     const bookedClass = await Class.findOne(
       {
         where: { id: classId },
         transaction: t
       }
     );
+    const user = await User.findOne({ where: { id: userId }, transaction: t });
+
+    const utcClassDate = fromZonedTime(bookedClass.date, "Asia/Singapore");
+    const sgClassDate = toZonedTime(utcClassDate, "Asia/Singapore");
+    const sgCurrentDate = toZonedTime(new Date(), "Asia/Singapore");
+
+    // 1. Delete booking.
+    const isUpcoming = sgClassDate > sgCurrentDate;
+    if (!isUpcoming) {
+      return NextResponse.json(
+        { error: `Only upcoming class bookings can be cancelled.` },
+        { status: 400 }
+      );
+    } else {
+      await Booking.destroy(
+        {
+          where: { id: id },
+          transaction: t
+        }
+      );
+    }
+
+    // 2. Update class' booked capacity.
     await Class.update(
       {
         bookedCapacity: bookedClass.bookedCapacity - 1
@@ -66,12 +81,7 @@ export async function DELETE(request) {
       { where: { id: classId }, transaction: t });
 
     // 3. Update user's balance, only if cancelling before 12 hours.
-    const user = await User.findOne({ where: { id: userId }, transaction: t });
-
-    const utcDate = fromZonedTime(bookedClass.date, "Asia/Singapore");
-    const sgDate = toZonedTime(utcDate, "Asia/Singapore");
-    const sgCurrentDate = toZonedTime(new Date(), "Asia/Singapore");
-    const cancelDeadline = new Date(sgDate.getTime() - 12 * 60 * 60 * 1000);
+    const cancelDeadline = new Date(sgClassDate.getTime() - 12 * 60 * 60 * 1000);
     const isAllowedCancel = sgCurrentDate < cancelDeadline;
 
     if (isAllowedCancel) {
@@ -123,7 +133,7 @@ export async function DELETE(request) {
 
     await t.commit();
     return NextResponse.json(
-      { json: `Booking ${ bookingId } deleted successfully` },
+      { json: `Booking ${ id } deleted successfully` },
       { status: 200 }
     );
   } catch (error) {

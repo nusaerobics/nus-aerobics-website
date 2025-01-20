@@ -13,7 +13,7 @@ import WaitlistModal from "../modals/WaitlistModal";
 // import { Dropdown, DropdownItem, DropdownMenu, DropdownSection, DropdownTrigger } from "@nextui-org/dropdown";
 import Toast from "../Toast";
 
-export default function ReservationsPage({ userId }) {
+export default function ReservationsPage({ session }) {
   const bookingModal = useDisclosure();
   const waitlistModal = useDisclosure();
 
@@ -41,10 +41,10 @@ export default function ReservationsPage({ userId }) {
   useEffect(() => {
     const fetchBookings = async () => {
       try {
-        const res = await fetch(`/api/bookings?userId=${ userId }`);
+        const res = await fetch(`/api/bookings?userId=${ session.userId }`);
         if (!res.ok) {
           throw new Error(
-            `Unable to get booked classes for user ${ userId }: ${ res.status }`
+            `Unable to get booked classes for user ${ session.userId }: ${ res.status }`
           );
         }
         const bookings = await res.json();
@@ -53,7 +53,7 @@ export default function ReservationsPage({ userId }) {
         setToast({
           isSuccess: false,
           header: "Unable to get bookings",
-          message: `Unable to get bookings for user ${ userId }. Try again later.`,
+          message: `Unable to get bookings for user ${ session.userId }. Try again later.`,
         });
         setShowToast(true);
         console.log(error);
@@ -63,9 +63,9 @@ export default function ReservationsPage({ userId }) {
 
     const fetchWaitlists = async () => {
       try {
-        const res = await fetch(`/api/waitlists?userId=${ userId }`);
+        const res = await fetch(`/api/waitlists?userId=${ session.userId }`);
         if (!res.ok) {
-          throw new Error(`Unable to get waitlisted classes for user ${ userId } : ${ res.status }`);
+          throw new Error(`Unable to get waitlisted classes for user ${ session.userId } : ${ res.status }`);
         }
         const waitlists = await res.json();
         setWaitlists(waitlists);
@@ -123,27 +123,27 @@ export default function ReservationsPage({ userId }) {
         const searchName = bookingQuery.trim().toLowerCase();
         return className.includes(searchName);
       })
-      // TODO: Fix filtering for upcoming and past bookings
-      // .filter((booking) => {
-      //   if (bookingFilters.has("upcoming")) {
-      //     const bookedClass = booking.class;
-      //     const utcClassDate = fromZonedTime(bookedClass.date, "Asia/Singapore");
-      //     const sgClassDate = toZonedTime(utcClassDate, "Asia/Singapore");
-      //     const sgCurrentDate = toZonedTime(new Date(), "Asia/Singapore");
-      //     return sgClassDate > sgCurrentDate;
-      //   }
-      //   return true;
-      // })
-      // .filter((booking) => {
-      //   if (bookingFilters.has("closed")) {
-      //     const bookedClass = booking.class;
-      //     const utcClassDate = fromZonedTime(bookedClass.date, "Asia/Singapore");
-      //     const sgClassDate = toZonedTime(utcClassDate, "Asia/Singapore");
-      //     const sgCurrentDate = toZonedTime(new Date(), "Asia/Singapore");
-      //     return sgClassDate <= sgCurrentDate;
-      //   }
-      //   return true;
-      // });
+    // TODO: Fix filtering for upcoming and past bookings
+    // .filter((booking) => {
+    //   if (bookingFilters.has("upcoming")) {
+    //     const bookedClass = booking.class;
+    //     const utcClassDate = fromZonedTime(bookedClass.date, "Asia/Singapore");
+    //     const sgClassDate = toZonedTime(utcClassDate, "Asia/Singapore");
+    //     const sgCurrentDate = toZonedTime(new Date(), "Asia/Singapore");
+    //     return sgClassDate > sgCurrentDate;
+    //   }
+    //   return true;
+    // })
+    // .filter((booking) => {
+    //   if (bookingFilters.has("closed")) {
+    //     const bookedClass = booking.class;
+    //     const utcClassDate = fromZonedTime(bookedClass.date, "Asia/Singapore");
+    //     const sgClassDate = toZonedTime(utcClassDate, "Asia/Singapore");
+    //     const sgCurrentDate = toZonedTime(new Date(), "Asia/Singapore");
+    //     return sgClassDate <= sgCurrentDate;
+    //   }
+    //   return true;
+    // });
     return Math.ceil(bookingsSearch.length / rowsPerPage);
   }, [sortedBookings, bookingQuery]);
   const bookingItems = useMemo(() => {
@@ -156,26 +156,26 @@ export default function ReservationsPage({ userId }) {
         const searchName = bookingQuery.trim().toLowerCase();
         return className.includes(searchName);
       })
-      // .filter((booking) => {
-      //   if (bookingFilters.has("upcoming")) {
-      //     const bookedClass = booking.class;
-      //     const utcClassDate = fromZonedTime(bookedClass.date, "Asia/Singapore");
-      //     const sgClassDate = toZonedTime(utcClassDate, "Asia/Singapore");
-      //     const sgCurrentDate = toZonedTime(new Date(), "Asia/Singapore");
-      //     return sgClassDate > sgCurrentDate;
-      //   }
-      //   return true;
-      // })
-      // .filter((booking) => {
-      //   if (bookingFilters.has("closed")) {
-      //     const bookedClass = booking.class;
-      //     const utcClassDate = fromZonedTime(bookedClass.date, "Asia/Singapore");
-      //     const sgClassDate = toZonedTime(utcClassDate, "Asia/Singapore");
-      //     const sgCurrentDate = toZonedTime(new Date(), "Asia/Singapore");
-      //     return sgClassDate <= sgCurrentDate;
-      //   }
-      //   return true;
-      // });
+    // .filter((booking) => {
+    //   if (bookingFilters.has("upcoming")) {
+    //     const bookedClass = booking.class;
+    //     const utcClassDate = fromZonedTime(bookedClass.date, "Asia/Singapore");
+    //     const sgClassDate = toZonedTime(utcClassDate, "Asia/Singapore");
+    //     const sgCurrentDate = toZonedTime(new Date(), "Asia/Singapore");
+    //     return sgClassDate > sgCurrentDate;
+    //   }
+    //   return true;
+    // })
+    // .filter((booking) => {
+    //   if (bookingFilters.has("closed")) {
+    //     const bookedClass = booking.class;
+    //     const utcClassDate = fromZonedTime(bookedClass.date, "Asia/Singapore");
+    //     const sgClassDate = toZonedTime(utcClassDate, "Asia/Singapore");
+    //     const sgCurrentDate = toZonedTime(new Date(), "Asia/Singapore");
+    //     return sgClassDate <= sgCurrentDate;
+    //   }
+    //   return true;
+    // });
     return bookingsSearch.slice(start, end);
   }, [page, sortedBookings, bookingQuery]);
 
@@ -250,26 +250,26 @@ export default function ReservationsPage({ userId }) {
             >
               <div className="md:h-full md:w-full flex flex-col p-2.5 gap-y-5">
                 <div className="flex flex-row justify-end items-center gap-x-2.5">
-                  {/*<Dropdown>*/}
-                  {/*  <DropdownTrigger>*/}
-                  {/*    <button className="cursor-pointer text-lg">*/}
-                  {/*      <MdOutlineFilterAlt color="#393E46"/>*/}
-                  {/*    </button>*/}
-                  {/*  </DropdownTrigger>*/}
-                  {/*  <DropdownMenu*/}
-                  {/*    aria-label="Filter bookings"*/}
-                  {/*    variant="flat"*/}
-                  {/*    closeOnSelect={ false }*/}
-                  {/*    selectionMode="multiple"*/}
-                  {/*    selectedKeys={ bookingFilters }*/}
-                  {/*    onSelectionChange={ setBookingFilters }*/}
-                  {/*  >*/}
-                  {/*    <DropdownSection title="Filter bookings">*/}
-                  {/*      <DropdownItem key="upcoming">Upcoming bookings</DropdownItem>*/}
-                  {/*      <DropdownItem key="closed">Past bookings</DropdownItem>*/}
-                  {/*    </DropdownSection>*/}
-                  {/*  </DropdownMenu>*/}
-                  {/*</Dropdown>*/}
+                  {/*<Dropdown>*/ }
+                  {/*  <DropdownTrigger>*/ }
+                  {/*    <button className="cursor-pointer text-lg">*/ }
+                  {/*      <MdOutlineFilterAlt color="#393E46"/>*/ }
+                  {/*    </button>*/ }
+                  {/*  </DropdownTrigger>*/ }
+                  {/*  <DropdownMenu*/ }
+                  {/*    aria-label="Filter bookings"*/ }
+                  {/*    variant="flat"*/ }
+                  {/*    closeOnSelect={ false }*/ }
+                  {/*    selectionMode="multiple"*/ }
+                  {/*    selectedKeys={ bookingFilters }*/ }
+                  {/*    onSelectionChange={ setBookingFilters }*/ }
+                  {/*  >*/ }
+                  {/*    <DropdownSection title="Filter bookings">*/ }
+                  {/*      <DropdownItem key="upcoming">Upcoming bookings</DropdownItem>*/ }
+                  {/*      <DropdownItem key="closed">Past bookings</DropdownItem>*/ }
+                  {/*    </DropdownSection>*/ }
+                  {/*  </DropdownMenu>*/ }
+                  {/*</Dropdown>*/ }
                   <div className="self-end md:w-1/4">
                     <Input
                       placeholder="Search"
@@ -339,7 +339,7 @@ export default function ReservationsPage({ userId }) {
                 <BookingModal
                   selectedBooking={ selectedBooking }
                   selectedClass={ selectedClass }
-                  userId={ userId }
+                  userId={ session.userId }
                   isOpen={ bookingModal.isOpen }
                   onOpen={ bookingModal.onOpen }
                   onOpenChange={ bookingModal.onOpenChange }
@@ -422,7 +422,7 @@ export default function ReservationsPage({ userId }) {
               <WaitlistModal
                 selectedWaitlist={ selectedWaitlist }
                 selectedClass={ selectedClass }
-                userId={ userId }
+                userId={ session.userId }
                 isOpen={ waitlistModal.isOpen }
                 onOpen={ waitlistModal.onOpen }
                 onOpenChange={ waitlistModal.onOpenChange }

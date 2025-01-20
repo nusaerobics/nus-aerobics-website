@@ -30,5 +30,5 @@ export default async function Page() {
       redirect(redirectPath);
     }
   }
-  return <ReservationsPage userId={ user.id }/>;
+  return <ReservationsPage session={ { userId: user.id } }/>;
 }
