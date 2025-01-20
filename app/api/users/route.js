@@ -83,7 +83,7 @@ export async function POST(request) {
 
     const data = await User.create({
       name: name,
-      email: email,
+      email: email.toLowerCase(),
       password: hashedPassword,
     }, { transaction: t });
     await t.commit();
