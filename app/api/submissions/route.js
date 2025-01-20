@@ -80,7 +80,7 @@ export async function POST(request) {
     );
     if (existingSubmission) {
       return NextResponse.json(
-        { error: `Submission ${submissionId} already exist.` },
+        { error: `Submission ${submissionId} already exists.` },
         { status: 400 }
       );
     }
