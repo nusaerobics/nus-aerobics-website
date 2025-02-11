@@ -1,5 +1,5 @@
-import { fromZonedTime, toZonedTime } from "date-fns-tz";
 import PropTypes from "prop-types";
+import { toZonedTime } from "date-fns-tz";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 
@@ -82,11 +82,9 @@ export default function AdminClassLandingPage({ openCreate }) {
       })
       .filter((c) => {
         if (filters.has("upcoming")) {
-          const utcClassDate = fromZonedTime(c.date, "Asia/Singapore");
-          const sgClassDate = toZonedTime(utcClassDate, "Asia/Singapore");
-          const sgCurrentDate = toZonedTime(new Date(), "Asia/Singapore");
-
-          return sgClassDate > sgCurrentDate;
+          const classDate = toZonedTime(c.date, "Asia/Singapore");
+          const currentDate = toZonedTime(new Date(), "Asia/Singapore");
+          return classDate > currentDate;
         }
         return true;
       });
@@ -105,11 +103,9 @@ export default function AdminClassLandingPage({ openCreate }) {
       })
       .filter((c) => {
         if (filters.has("upcoming")) {
-          const utcClassDate = fromZonedTime(c.date, "Asia/Singapore");
-          const sgClassDate = toZonedTime(utcClassDate, "Asia/Singapore");
-          const sgCurrentDate = toZonedTime(new Date(), "Asia/Singapore");
-
-          return sgClassDate > sgCurrentDate;
+          const classDate = toZonedTime(c.date, "Asia/Singapore");
+          const currentDate = toZonedTime(new Date(), "Asia/Singapore");
+          return classDate > currentDate;
         }
         return true;
       });
@@ -239,14 +235,12 @@ export default function AdminClassLandingPage({ openCreate }) {
             <TableBody>
               { classItems.map((c) => {
                 let status;
-                const utcClassDate = fromZonedTime(c.date, "Asia/Singapore");
-                const sgClassDate = toZonedTime(utcClassDate, "Asia/Singapore");
-                const sgCurrentDate = toZonedTime(new Date(), "Asia/Singapore");
-
-                if (sgClassDate < sgCurrentDate) {
+                const classDate = toZonedTime(c.date, "Asia/Singapore");
+                const currentDate = toZonedTime(new Date(), "Asia/Singapore");
+                if (classDate < currentDate) {
                   status = "closed";
                 } else {
-                  status = c.bookedCapacity === c.maxCapacity ? "full" : "open";
+                  status = c.bookedCapacity >= c.maxCapacity ? "full" : "open";
                 }
                 return (
                   <TableRow key={ c.id }>
