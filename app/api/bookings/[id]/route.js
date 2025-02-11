@@ -64,14 +64,17 @@ export async function DELETE(request, { params }) {
         { error: `Only upcoming class bookings can be cancelled.` },
         { status: 400 }
       );
-    } else {
-      await Booking.destroy(
-        {
-          where: { id: id },
-          transaction: t
-        }
-      );
     }
+    const booking = await Booking.findOne({ where: { id: id }, transaction: t });
+    if (booking == null) {
+      throw new Error(`Booking ${ id } does not exist`);
+    }
+    await Booking.destroy(
+      {
+        where: { id: id },
+        transaction: t
+      }
+    );
 
     // 2. Update class' booked capacity.
     await Class.update(
@@ -99,11 +102,13 @@ export async function DELETE(request, { params }) {
       }, { transaction: t });
     }
 
+    await t.commit();
+
     // 5. Alert users on waitlist for class.
-    const waitlists = await Waitlist.findAll({ where: { classId: classId }, transaction: t });
+    const waitlists = await Waitlist.findAll({ where: { classId: classId }});
     for (let i = 0; i < waitlists.length; i++) {
       const waitlist = waitlists[i];
-      const user = await User.findOne({ where: { id: waitlist.userId }, transaction: t });
+      const user = await User.findOne({ where: { id: waitlist.userId }});
       // await sendEmail(user, bookedClass);  // NOTE: Normally would use sendEmail function, but didn't want Nodemailer error to prevent user from unbooking their class
       const emailHTML = `
       Hi ${ user.name },
@@ -131,7 +136,6 @@ export async function DELETE(request, { params }) {
       });
     }
 
-    await t.commit();
     return NextResponse.json(
       { json: `Booking ${ id } deleted successfully` },
       { status: 200 }
@@ -140,7 +144,7 @@ export async function DELETE(request, { params }) {
     console.log(error);
     await t.rollback();
     return NextResponse.json(
-      { message: `Error deleting booking: ${ error }` },
+      { message: `${ error.message }` },
       { status: 500 }
     );
   }

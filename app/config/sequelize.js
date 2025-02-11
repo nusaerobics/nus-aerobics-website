@@ -9,6 +9,11 @@ const sequelize = new Sequelize(
     host: process.env.DB_HOST,
     dialect: "mysql",
     dialectModule: require("mysql2"),
+    dialectOptions: {
+      options: {
+        useUTC: true,
+      }
+    },
     pool: {
       max: 5,
       min: 0,
