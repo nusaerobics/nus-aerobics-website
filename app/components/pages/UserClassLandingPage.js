@@ -114,7 +114,7 @@ export default function UserClassLandingPage({ userId }) {
       })
       .filter((c) => {
         if (filters.has("open")) {
-          const isFull = c.bookedCapacity === c.maxCapacity;
+          const isFull = c.bookedCapacity >= c.maxCapacity;
           return !isFull;
         }
         return true;
@@ -133,7 +133,7 @@ export default function UserClassLandingPage({ userId }) {
       })
       .filter((c) => {
         if (filters.has("open")) {
-          const isFull = c.bookedCapacity === c.maxCapacity;
+          const isFull = c.bookedCapacity >= c.maxCapacity;
           return !isFull;
         }
         return true;
@@ -195,7 +195,7 @@ export default function UserClassLandingPage({ userId }) {
                 </TableHeader>
                 <TableBody>
                   { classItems.map((c) => {
-                    let status = c.bookedCapacity === c.maxCapacity ? "full" : "open";
+                    let status = c.bookedCapacity >= c.maxCapacity ? "full" : "open";
                     return (
                       <TableRow key={ c.id }>
                         <TableCell>{ c.name }</TableCell>

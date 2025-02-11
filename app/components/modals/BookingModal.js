@@ -17,7 +17,7 @@ import {
 import { format } from "date-fns";
 import { SectionTitle } from "../utils/Titles";
 import { useEffect, useState } from "react";
-import { fromZonedTime, toZonedTime } from "date-fns-tz";
+import { toZonedTime } from "date-fns-tz";
 
 export default function BookingModal({
                                        selectedBooking,
@@ -32,10 +32,9 @@ export default function BookingModal({
   const [isUpcoming, setIsUpcoming] = useState(true);
 
   const checkIsUpcoming = (selectedClass) => {
-    const utcClassDate = fromZonedTime(selectedClass.date, "Asia/Singapore");
-    const sgClassDate = toZonedTime(utcClassDate, "Asia/Singapore");
-    const sgCurrentDate = toZonedTime(new Date(), "Asia/Singapore");
-    return sgClassDate > sgCurrentDate;
+    const classDate = toZonedTime(selectedClass.date, "Asia/Singapore");
+    const currentDate = toZonedTime(new Date(), "Asia/Singapore");
+    return classDate > currentDate;
   }
   useEffect(() => {
     const result = checkIsUpcoming(selectedClass);

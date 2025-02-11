@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 
 import db from "../../../config/sequelize";
 import { format } from "date-fns";
-import { fromZonedTime, toZonedTime } from "date-fns-tz";
+import { toZonedTime } from "date-fns-tz";
 
 const Booking = db.bookings;
 const Class = db.classes;
@@ -43,7 +43,7 @@ export async function DELETE(request, { params }) {
   try {
     const id = await params.id;
     const body = await request.json();
-    const { classId, userId } = body;
+    const { classId, userId, isForced } = body;  // NOTE: isForced = TRUE when admin cancels the booking, else FALSE
 
     const bookedClass = await Class.findOne(
       {
@@ -53,21 +53,23 @@ export async function DELETE(request, { params }) {
     );
     const user = await User.findOne({ where: { id: userId }, transaction: t });
 
-    // TODO: This is showing/using the wrong timings
-    const utcClassDate = fromZonedTime(bookedClass.date, "Asia/Singapore");
-    const sgClassDate = toZonedTime(utcClassDate, "Asia/Singapore");
-    const sgCurrentDate = toZonedTime(new Date(), "Asia/Singapore");
+    const classDate = toZonedTime(bookedClass.date, "Asia/Singapore");
+    const currentDate = toZonedTime(new Date(), "Asia/Singapore");
 
     // 1. Delete booking.
-    // const isUpcoming = sgClassDate > sgCurrentDate;
-    // if (!isUpcoming) {
-    //   return NextResponse.json(
-    //     { error: `Only upcoming class bookings can be cancelled.` },
-    //     { status: 400 }
-    //   );
-    // }
+    if (!isForced) {  // Only apply isUpcoming check on cancellations made from users.
+      const isUpcoming = classDate > currentDate;
+      if (!isUpcoming) {
+        throw new Error("Only upcoming class bookings can be cancelled");
+        // return NextResponse.json(
+        //   { error: `Only upcoming class bookings can be cancelled.` },
+        //   { status: 400 }
+        // );
+      }
+    }
+
     const booking = await Booking.findOne({ where: { id: id }, transaction: t });
-    if (booking == null) {
+    if (booking == null) {  // Check if the booking exists to prevent multiple refunds.
       throw new Error(`Booking ${ id } does not exist`);
     }
     await Booking.destroy(
@@ -85,8 +87,8 @@ export async function DELETE(request, { params }) {
       { where: { id: classId }, transaction: t });
 
     // 3. Update user's balance, only if cancelling before 12 hours.
-    const cancelDeadline = new Date(sgClassDate.getTime() - 12 * 60 * 60 * 1000);
-    const isAllowedCancel = sgCurrentDate < cancelDeadline;
+    const cancelDeadline = toZonedTime(new Date(bookedClass.date.getTime() - 12 * 60 * 60 * 1000), "Asia/Singapore");
+    const isAllowedCancel = currentDate < cancelDeadline;
 
     if (isAllowedCancel) {
       await User.update(
@@ -99,17 +101,17 @@ export async function DELETE(request, { params }) {
         userId: userId,
         amount: 1,
         type: "refund",
-        description: `Refunded '${ bookedClass.name }'`,
+        description: `${ bookedClass.name } (${ format(bookedClass.date, "d/MM/y") }) at ${ format(currentDate, "d/MM/y HH:mm") } `,
       }, { transaction: t });
     }
 
     await t.commit();
 
     // 5. Alert users on waitlist for class.
-    const waitlists = await Waitlist.findAll({ where: { classId: classId }});
+    const waitlists = await Waitlist.findAll({ where: { classId: classId } });
     for (let i = 0; i < waitlists.length; i++) {
       const waitlist = waitlists[i];
-      const user = await User.findOne({ where: { id: waitlist.userId }});
+      const user = await User.findOne({ where: { id: waitlist.userId } });
       // await sendEmail(user, bookedClass);  // NOTE: Normally would use sendEmail function, but didn't want Nodemailer error to prevent user from unbooking their class
       const emailHTML = `
       Hi ${ user.name },

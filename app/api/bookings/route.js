@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { format } from "date-fns";
 
 const db = require("../../config/sequelize");
 
@@ -189,7 +190,7 @@ export async function POST(request) {
       userId: user.id,
       amount: -1,
       type: "book",
-      description: `Booked '${ selectedClass.name }'`,
+      description: `${ selectedClass.name } (${ format(selectedClass.date, "d/MM/y") }) `,
     }, { transaction: t });
 
     // 7. Delete any waitlist user had for class.

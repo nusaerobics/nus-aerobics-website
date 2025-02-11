@@ -1,5 +1,7 @@
-import { fromZonedTime, toZonedTime } from "date-fns-tz";
 import { NextResponse } from "next/server";
+
+import { isSameDay } from "date-fns";
+import { toZonedTime } from "date-fns-tz";
 
 const db = require("../../config/sequelize");
 const { Op } = require("sequelize");
@@ -12,39 +14,14 @@ export async function GET(request) {
   try {
     const url = new URL(request.url);
     const searchParams = new URLSearchParams(url.searchParams);
-
-    // const upcomingClasses = await Class.findAll({ where: { status: { [Op.ne]: "closed" } }, transaction: t });
-    // for (let i = 0; i < upcomingClasses.length; i++) {
-    //   const c = upcomingClasses[i];
-    //   const utcClassDate = fromZonedTime(c.date, "Asia/Singapore");
-    //   const sgClassDate = toZonedTime(utcClassDate, "Asia/Singapore");
-    //   const sgCurrentDate = toZonedTime(new Date(), "Asia/Singapore");
-    //   if (sgClassDate < sgCurrentDate) {
-    //     await Class.update({ status: "closed" }, { where: { id: c.id }, transaction: t });
-    //   } else if (c.bookedCapacity < 19) {
-    //     await Class.update({ status: "open" }, { where: { id: c.id }, transaction: t });
-    //   } else {
-    //     await Class.update({ status: "full" }, { where: { id: c.id }, transaction: t });
-    //   }
-    // }
     const classes = await Class.findAll({ transaction: t });
 
     // getTodayClasses /api/classes?isToday=true
     if (searchParams.get("isToday") != undefined) {
       const todayClasses = classes.filter((c) => {
-        const utcClassDate = fromZonedTime(c.date, "Asia/Singapore");
-        const sgClassDate = toZonedTime(utcClassDate, "Asia/Singapore");
-        const sgCurrentDate = toZonedTime(new Date(), "Asia/Singapore");
-
-        const sgClassYear = sgClassDate.getFullYear();
-        const sgClassMonth = sgClassDate.getMonth();
-        const sgClassDay = sgClassDate.getDate();
-
-        const sgCurrentYear = sgCurrentDate.getFullYear();
-        const sgCurrentMonth = sgCurrentDate.getMonth();
-        const sgCurrentDay = sgCurrentDate.getDate();
-
-        return (sgClassYear == sgCurrentYear && sgClassMonth == sgCurrentMonth && sgClassDay == sgCurrentDay);
+        const classDate = toZonedTime(c.date, "Asia/Singapore");
+        const currentDate = toZonedTime(new Date(), "Asia/Singapore");
+        return isSameDay(classDate, currentDate);
       });
 
       await t.commit();

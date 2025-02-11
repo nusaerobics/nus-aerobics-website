@@ -1,7 +1,7 @@
 "use client";
 
 import { format } from "date-fns";
-import { fromZonedTime, toZonedTime } from "date-fns-tz";
+import { toZonedTime } from "date-fns-tz";
 import PropTypes from "prop-types";
 import { useEffect, useState } from "react";
 
@@ -207,13 +207,9 @@ export default function DashboardPage({ session }) {
 
           const upcomingBookings = data
             .filter((booking) => {
-              const utcClassDate = fromZonedTime(
-                booking.class.date,
-                "Asia/Singapore"
-              );
-              const sgClassDate = toZonedTime(utcClassDate, "Asia/Singapore");
-              const sgCurrentDate = toZonedTime(new Date(), "Asia/Singapore");
-              return sgClassDate >= sgCurrentDate;
+              const classDate = toZonedTime(booking.class.date, "Asia/Singapore");
+              const currentDate = toZonedTime(new Date(), "Asia/Singapore");
+              return classDate > currentDate;
             })
             .slice(0, 3);
           setBookings(upcomingBookings);

@@ -1,9 +1,8 @@
 /**
  * Form for creating or editing a Class' details, handles creating the new entry or updating existing entry
- * @returns
  */
 import { format } from "date-fns";
-import { fromZonedTime, toZonedTime } from "date-fns-tz";
+import { fromZonedTime } from "date-fns-tz";
 import PropTypes from "prop-types";
 import { useEffect, useState } from "react";
 import { z } from "zod";
@@ -86,12 +85,11 @@ export default function AdminClassForm({
 
       const concatDate = `${date} ${time}:00`;
       const utcDate = fromZonedTime(concatDate, "Asia/Singapore");
-      const newDate = toZonedTime(utcDate, "Asia/Singapore");
 
       const newClass = {
         name: name,
         description: description,
-        date: newDate,
+        date: utcDate,
       };
       const res = await fetch("/api/classes", {
         method: "POST",
@@ -122,13 +120,12 @@ export default function AdminClassForm({
     try {
       const concatDate = `${date} ${time}:00`;
       const utcDate = fromZonedTime(concatDate, "Asia/Singapore");
-      const updateDate = toZonedTime(utcDate, "Asia/Singapore");
 
       const updatedClass = {
         id: selectedClass.id,
         name: name,
         description: description,
-        date: updateDate,
+        date: utcDate,
         maxCapacity: selectedClass.maxCapacity,
         bookedCapacity: selectedClass.bookedCapacity,
       };

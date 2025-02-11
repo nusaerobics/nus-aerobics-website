@@ -21,6 +21,15 @@ export async function GET(request) {
       return NextResponse.json(transactionsByUser, { status: 200 });
     }
 
+    // getCreditsSpentByUser
+    if (searchParams.get("isCreditsSpent")) {
+      const userId = searchParams.get("isCreditsSpent");
+      const bookingsCount = await Transaction.sum('amount', { where: { userId: userId, type: "book" }});
+      const refundsCount = await Transaction.sum('amount',{ where: { userId: userId, type: "refund" }});
+      const amountSpent = Math.abs(bookingsCount) - refundsCount;
+      return NextResponse.json(amountSpent, { status: 200 });
+    }
+
     // getNumberOfDeposits
     if (searchParams.get("isCount") != undefined) {
       const number = await Transaction.sum('amount', {

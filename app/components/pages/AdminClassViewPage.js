@@ -46,7 +46,7 @@ import {
 } from "../utils/ClassNames";
 import { PageTitle, SectionTitle } from "../utils/Titles";
 import Toast from "../Toast";
-import { fromZonedTime, toZonedTime } from "date-fns-tz";
+import { toZonedTime } from "date-fns-tz";
 
 // TODO: Add in filter for classes, "Present" and "Absent"
 export default function AdminClassViewPage({ classId }) {
@@ -86,14 +86,13 @@ export default function AdminClassViewPage({ classId }) {
         setSelectedClass(data);
 
         // setStatus
-        const utcClassDate = fromZonedTime(data.date, "Asia/Singapore");
-        const sgClassDate = toZonedTime(utcClassDate, "Asia/Singapore");
+        const sgClassDate = toZonedTime(data.date, "Asia/Singapore");
         const sgCurrentDate = toZonedTime(new Date(), "Asia/Singapore");
 
         if (sgClassDate < sgCurrentDate) {
           setStatus("closed");
         } else {
-          setStatus(data.bookedCapacity === data.maxCapacity ? "full" : "open");
+          setStatus(data.bookedCapacity >= data.maxCapacity ? "full" : "open");
         }
       } catch (error) {
         setToast({
