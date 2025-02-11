@@ -42,10 +42,10 @@ function sendEmail(user, selectedClass) {
             </tr>
           </table>
         <br><strong>Attire</strong>
-        <br>Come to class dressed in comfortable attire. If you booked HIIT, Kickboxing, KKardio, or Zumba, we reccomend you to wear training shoes. 
+        <br>Come to class dressed in comfortable attire. If you booked HIIT, Kickboxing, KKardio, or Zumba, we recommend you to wear training shoes. 
         <br>
         <br><strong>What to Bring</strong>
-        <br>All equipment for your class will be provided. Just bring yourself and a waterbottle!
+        <br>All equipment for your class will be provided. Just bring yourself and a water bottle!
         <br>
         <br><strong>Cancellation Policy</strong>
         <br>If you no longer can attend, please remember to cancel your booking under the Reservations page. To receive a refund for a class credit, please cancel at least 12 hours before the class. Cancellations made less than 12 hours before the class will result in a full charge of the class credit.

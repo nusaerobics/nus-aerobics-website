@@ -26,11 +26,11 @@ function sendEmail(existingUser, user) {
         <table>
             <tr>
               <td><strong>Email</strong></td>
-              <td>${ user.email }</td>
+              <td>${ user.email.trim().toLowerCase() }</td>
             </tr>
             <tr>
               <td><strong>Password</strong></td>
-              <td>${ user.email }</td>
+              <td>${ user.email.trim().toLowerCase() }</td>
             </tr>
           </table>
         <br>After logging in, please reset your password in the Profile page.`
@@ -97,16 +97,16 @@ export async function POST(request) {
     // 3. If user already exists, find user. Else, create new user with email.
     let user;
     const existingUser = await User.findOne(
-      { where: { email: email } },
-      { t },
+      { where: { email: email }, transaction: t }
     );
     if (!existingUser) {
       const saltRounds = 10;
-      const hashedPassword = await bcrypt.hash(email, saltRounds);
+      const strippedEmail = email.trim().toLowerCase();
+      const hashedPassword = await bcrypt.hash(strippedEmail, saltRounds);
       user = await User.create(
         {
           name: name,
-          email: email,
+          email: strippedEmail,
           password: hashedPassword,
         },
         { transaction: t },
