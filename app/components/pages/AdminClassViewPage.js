@@ -256,20 +256,19 @@ export default function AdminClassViewPage({ classId }) {
 
   async function unbookUser(booking) {
     try {
-      const res = await fetch("/api/bookings", {
+      const res = await fetch(`/api/bookings/${ selectedBooking.id }`, {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(
           {
-            bookingId: booking.id,
             classId: selectedClass.id,
             userId: booking.userId,
           }),
       });
       if (!res.ok) {
-        throw new Error(`Unable to delete booking. Try again later.`);
+        const response = await res.json();
+        throw new Error(`${ response.error }`);
       }
-
       // update bookings list
       const updatedBookings = bookings.filter((originalBooking) => {
         return originalBooking.id !== booking.id;
@@ -279,17 +278,17 @@ export default function AdminClassViewPage({ classId }) {
       setToast({
         isSuccess: true,
         header: "Cancelled booking",
-        message: `Successfully cancelled booking of ${ selectedClass.name } for ${ selectedBooking.user.name }.`,
+        message: `Cancelled booking of ${ selectedClass.name } for ${ selectedBooking.user.name }.`,
       });
       setShowToast(true);
     } catch (error) {
+      console.log(error);
       setToast({
         isSuccess: false,
         header: "Unable to cancel booking",
         message: `${ error.message }`,
       });
       setShowToast(true);
-      console.log(error);
     }
   }
 

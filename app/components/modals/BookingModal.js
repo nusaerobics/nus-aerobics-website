@@ -53,20 +53,19 @@ export default function BookingModal({
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          bookingId: selectedBooking.id,
           classId: selectedBooking.class.id,
           userId: userId,
         }),
       });
       if (!res.ok) {
         const response = await res.json();
-        throw new Error(`${ response.error }`)
+        throw new Error(`${ response.message }`)
       }
       setModalType("result");
       setResult({
         isSuccess: true,
         header: "Unbooked class",
-        message: `Your booking for ${ selectedClass.name } on ${ format(selectedClass.date, "d/MM/y HH:mm (EEE)") } has been cancelled.`,
+        message: `Your booking for ${ selectedClass.name } has been cancelled.`,
       });
     } catch (error) {
       console.log(error);

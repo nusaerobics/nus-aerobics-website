@@ -142,25 +142,33 @@ export async function POST(request) {
     const body = await request.json();
     const { classId, userId, isForced } = body;  // NOTE: isForced = TRUE when admin makes the booking, else FALSE
 
-    // 1. Find user and class.
-    const selectedClass = await Class.findOne({ where: { id: classId }, transaction: t });
+    // 1. Find user.
     const user = await User.findOne(
       { where: { id: userId }, transaction: t },
     );
 
-    // 2a. Check user's balance.
+    // 1a. Check user's balance.
     if (user.balance < 1) {
       throw new Error("Your account has insufficient credits. Please purchase more credits first.");
     }
 
-    // 2b. Check class capacity.
+    // 2. Find class.
+    const selectedClass = await Class.findOne({ where: { id: classId }, transaction: t });
+
+    // 2a. Check class capacity.
     if (!isForced) {
       if (selectedClass.bookedCapacity >= selectedClass.maxCapacity) {
         throw new Error(`${ selectedClass.name } is fully booked. Please join the waitlist or book another class.`);
       }
     }
 
-    // 3. Create booking for user.
+    // 3. Update class' booked capacity.
+    await Class.update(
+      { bookedCapacity: selectedClass.bookedCapacity + 1 },
+      { where: { id: classId }, transaction: t });
+
+
+    // 4. Create booking for user.
     const newBooking = await Booking.create(
       {
         userId: userId,
@@ -169,7 +177,7 @@ export async function POST(request) {
       { transaction: t },
     );
 
-    // 3. Update user's balance.
+    // 5. Update user's balance.
     await User.update(
       { balance: user.balance - 1 },
       {
@@ -177,12 +185,7 @@ export async function POST(request) {
         transaction: t,
       });
 
-    // 4. Update class' booked capacity.
-    await Class.update(
-      { bookedCapacity: selectedClass.bookedCapacity + 1 },
-      { where: { id: classId }, transaction: t });
-
-    // 5. Create new transaction.
+    // 6. Create new transaction.
     await Transaction.create({
       userId: user.id,
       amount: -1,
@@ -190,19 +193,21 @@ export async function POST(request) {
       description: `Booked '${ selectedClass.name }'`,
     }, { transaction: t });
 
-    // 6. Delete any waitlist user had for class.
+    // 7. Delete any waitlist user had for class.
     const waitlist = await Waitlist.findOne({ where: { userId: userId, classId: classId }, transaction: t });
     if (waitlist !== null) {
       await Waitlist.destroy({ where: { id: waitlist.id }, transaction: t });
     }
 
-    // 7. Email user to confirm booking.
-    if (!isForced) {
-      await sendEmail(user, selectedClass);
-    }
-
     await t.commit();
+    await t.afterCommit(async () => {
+      if (!isForced) {
+        await sendEmail(user, selectedClass);
+      }
+    });
+
     return NextResponse.json(newBooking, { status: 200 });
+
   } catch (error) {
     console.log(error);
     await t.rollback();
