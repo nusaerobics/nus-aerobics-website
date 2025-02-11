@@ -167,7 +167,6 @@ export async function POST(request) {
       { bookedCapacity: selectedClass.bookedCapacity + 1 },
       { where: { id: classId }, transaction: t });
 
-
     // 4. Create booking for user.
     const newBooking = await Booking.create(
       {

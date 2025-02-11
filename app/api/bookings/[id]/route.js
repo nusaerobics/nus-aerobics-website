@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 
 import db from "../../../config/sequelize";
 import { format } from "date-fns";
-// import { fromZonedTime, toZonedTime } from "date-fns-tz";
+import { fromZonedTime, toZonedTime } from "date-fns-tz";
 
 const Booking = db.bookings;
 const Class = db.classes;
@@ -54,9 +54,9 @@ export async function DELETE(request, { params }) {
     const user = await User.findOne({ where: { id: userId }, transaction: t });
 
     // TODO: This is showing/using the wrong timings
-    // const utcClassDate = fromZonedTime(bookedClass.date, "Asia/Singapore");
-    // const sgClassDate = toZonedTime(utcClassDate, "Asia/Singapore");
-    // const sgCurrentDate = toZonedTime(new Date(), "Asia/Singapore");
+    const utcClassDate = fromZonedTime(bookedClass.date, "Asia/Singapore");
+    const sgClassDate = toZonedTime(utcClassDate, "Asia/Singapore");
+    const sgCurrentDate = toZonedTime(new Date(), "Asia/Singapore");
 
     // 1. Delete booking.
     // const isUpcoming = sgClassDate > sgCurrentDate;
