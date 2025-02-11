@@ -86,7 +86,7 @@ export default function WalletPage({ session }) {
       const countCreditsSpent = async () => {
         try {
           const res = await fetch(
-            `/api/bookings?isCountByUser=${ session.userId }`
+            `/api/transactions?isCreditsSpent=${ session.userId }`
           );
           if (!res.ok) {
             throw new Error(
