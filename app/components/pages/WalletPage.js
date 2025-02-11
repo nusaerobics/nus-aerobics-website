@@ -42,6 +42,12 @@ export default function WalletPage({ session }) {
   const [showToast, setShowToast] = useState(false);
   const [toast, setToast] = useState({});
 
+  const transactionTypes = {
+    "book": "Booking",
+    "refund": "Refund",
+    "deposit": "Deposit"
+  };
+
   const toggleShowToast = () => {
     setShowToast(!showToast);
   };
@@ -328,6 +334,7 @@ export default function WalletPage({ session }) {
                   Date
                 </TableColumn>
                 <TableColumn>Amount</TableColumn>
+                <TableColumn>Type</TableColumn>
                 <TableColumn>Description</TableColumn>
               </TableHeader>
               <TableBody>
@@ -338,6 +345,7 @@ export default function WalletPage({ session }) {
                         { format(transaction.createdAt, "d/MM/y HH:mm") }
                       </TableCell>
                       <TableCell>{ transaction.amount }</TableCell>
+                      <TableCell>{ transactionTypes[transaction.type] }</TableCell>
                       <TableCell>{ transaction.description }</TableCell>
                     </TableRow>
                   );

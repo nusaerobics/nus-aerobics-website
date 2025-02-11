@@ -29,10 +29,15 @@ export default function UsersViewPage({ userId }) {
 
   const [user, setUser] = useState({});
   const [bookings, setBookings] = useState([]);
+  const [transactions, setTransactions] = useState([]);
+  const [creditsSpent, setCreditsSpent] = useState(0);
+
   const [selectedBooking, setSelectedBooking] = useState({});
   const [showToast, setShowToast] = useState(false);
   const [toast, setToast] = useState({});
-  const [page, setPage] = useState(1);
+
+  const [bookingPage, setBookingPage] = useState(1);
+  const [transactionPage, setTransactionPage] = useState(1);
 
   useEffect(() => {
     // getUser
@@ -78,15 +83,66 @@ export default function UsersViewPage({ userId }) {
       }
     };
     fetchBookings();
+
+    // getTransactionsByUser
+    const fetchTransactions = async () => {
+      const res = await fetch(`/api/transactions?userId=${ userId }`);
+      if (!res.ok) {
+        throw new Error(
+          `Unable to get transactions for user ${ userId }: ${ res.status }`
+        );
+      }
+      const data = await res.json();
+      setTransactions(data);
+    };
+    fetchTransactions();
+
+    // getCreditsSpent
+    const countCreditsSpent = async () => {
+      try {
+        const res = await fetch(
+          `/api/transactions?isCreditsSpent=${ userId }`
+        );
+        if (!res.ok) {
+          throw new Error(
+            `Unable to count credits spent for user ${ userId }.`
+          );
+        }
+        const data = await res.json();
+        setCreditsSpent(data);
+      } catch (error) {
+        setToast({
+          isSuccess: false,
+          header: "Unable to count credits spent",
+          message: `Unable to count credits spent for user ${ userId }. Try again later.`,
+        });
+        setShowToast(true);
+        console.log(error);
+      }
+    };
+    countCreditsSpent();
   }, []);
 
   const rowsPerPage = 10;
   const bookingPages = Math.ceil(bookings.length / rowsPerPage);
   const bookingItems = useMemo(() => {
-    const start = (page - 1) * rowsPerPage;
+    const start = (bookingPage - 1) * rowsPerPage;
     const end = start + rowsPerPage;
     return bookings.slice(start, end);
-  }, [page, bookings]);
+  }, [bookingPage, bookings]);
+
+  const transactionPages = Math.ceil(transactions.length / rowsPerPage);
+  const transactionItems = useMemo(() => {
+    const start = (transactionPage - 1) * rowsPerPage;
+    const end = start + rowsPerPage;
+    return transactions.slice(start, end);
+  }, [transactionPage, transactions]);
+
+  const transactionTypes = {
+    "book": "Booking",
+    "refund": "Refund",
+    "deposit": "Deposit"
+  };
 
   const toggleShowToast = () => {
     setShowToast(!showToast);
@@ -141,6 +197,7 @@ export default function UsersViewPage({ userId }) {
     }
   };
 
+  // TODO: Add in showing the balance + credits spent as in the user's Wallet Page
   return (
     <>
       <div className="h-full flex flex-col gap-y-5 p-5 md:p-10 pt-20 overflow-y-scroll">
@@ -175,6 +232,24 @@ export default function UsersViewPage({ userId }) {
                 classNames={ inputClassNames }
               />
             </div>
+          </div>
+        </div>
+        <div className="flex flex-row gap-x-5">
+          <div className="w-1/2 rounded-[20px] border border-a-black/10 p-5 bg-white">
+            <p className="font-poppins font-bold text-lg md:text-xl text-a-navy">
+              { user.balance }
+            </p>
+            <p className="font-poppins text-a-black text-sm md:text-lg">
+              credits remaining
+            </p>
+          </div>
+          <div className="w-1/2 rounded-[20px] border border-a-black/10 p-5 bg-white">
+            <p className="font-poppins font-bold text-lg md:text-xl text-a-navy">
+              { creditsSpent }
+            </p>
+            <p className="font-poppins text-a-black text-sm md:text-lg">
+              credits spent
+            </p>
           </div>
         </div>
         <div className="flex flex-col rounded-[20px] border border-a-black/10 p-5 bg-white gap-y-2.5">
@@ -232,9 +307,56 @@ export default function UsersViewPage({ userId }) {
                 color="primary"
                 size="sm"
                 loop={ true }
-                page={ page }
+                page={ bookingPage }
                 total={ bookingPages }
-                onChange={ (page) => setPage(page) }
+                onChange={ (page) => setBookingPage(page) }
+              />) }
+          </div>
+        </div>
+        <div className="flex flex-col rounded-[20px] border border-a-black/10 p-5 bg-white gap-y-2.5">
+          <SectionTitle title="Transactions"/>
+          <div className="overflow-x-scroll">
+            <Table
+              removeWrapper
+              classNames={ tableClassNames }
+              // sortDescriptor={ sortDescriptor }
+              // onSortChange={ setSortDescriptor }
+            >
+              <TableHeader>
+                <TableColumn key="createdAt" allowsSorting>
+                  Date
+                </TableColumn>
+                <TableColumn>Amount</TableColumn>
+                <TableColumn>Type</TableColumn>
+                <TableColumn>Description</TableColumn>
+              </TableHeader>
+              <TableBody>
+                { transactionItems.map((transaction) => {
+                  return (
+                    <TableRow key={ transaction.id }>
+                      <TableCell>
+                        { format(transaction.createdAt, "d/MM/y HH:mm") }
+                      </TableCell>
+                      <TableCell>{ transaction.amount }</TableCell>
+                      <TableCell>{ transactionTypes[transaction.type] }</TableCell>
+                      <TableCell>{ transaction.description }</TableCell>
+                    </TableRow>
+                  );
+                }) }
+              </TableBody>
+            </Table>
+          </div>
+          <div className="flex flex-row justify-center">
+            { transactionPages > 1 && (
+              <Pagination
+                showControls
+                isCompact
+                color="primary"
+                size="sm"
+                loop={ true }
+                page={ transactionPage }
+                total={ transactionPages }
+                onChange={ (page) => setTransactionPage(page) }
               />) }
           </div>
         </div>

@@ -101,7 +101,7 @@ export async function DELETE(request, { params }) {
         userId: userId,
         amount: 1,
         type: "refund",
-        description: `Refunded '${ bookedClass.name }'`,
+        description: `${ bookedClass.name } (${ format(bookedClass.date, "d/MM/y") }) at ${ format(currentDate, "d/MM/y HH:mm") } `,
       }, { transaction: t });
     }
 
