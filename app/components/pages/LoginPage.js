@@ -208,6 +208,7 @@ export default function Page() {
   return (
     <>
       <div className="w-screen h-screen flex flex-row justify-center p-8 bg-a-pink/80">
+        <p>test</p>
         <div
           className="w-[400px] h-full flex flex-col overflow-y-scroll justify-center p-5 gap-y-5 rounded-[20px] border border-a-black/10 bg-white">
           <div className="w-full flex flex-col items-center gap-y-5">
