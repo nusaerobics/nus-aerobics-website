@@ -12,6 +12,7 @@ export default function Page() {
   const [showToast, setShowToast] = useState(false);
   const [toast, setToast] = useState({});
 
+  // TODO: Might have to put functions in utils instead?
   async function handleLogin() {
     try {
       const res = await fetch("/api/auth/login", {
@@ -311,6 +312,7 @@ export default function Page() {
               <button
                 className="text-end text-sm text-a-navy font-bold underline cursor-pointer"
                 onClick={ () => changeView("forgot") }
+                data-testid={"forgotButton"}
               >
                 Forgot password?
               </button>
@@ -343,6 +345,7 @@ export default function Page() {
               <button
                 className="text-end text-sm text-a-navy font-bold underline cursor-pointer bottom-button"
                 onClick={ () => handleChangeView(view) }
+                data-testid={"bottomButton"}
               >
                 { bottomButton }
               </button>
