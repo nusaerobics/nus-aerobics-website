@@ -11,7 +11,7 @@ import {
   DropdownMenu,
   DropdownSection,
   DropdownTrigger,
-} from "@nextui-org/dropdown";
+} from "@heroui/dropdown";
 import {
   Table,
   TableHeader,
@@ -19,8 +19,8 @@ import {
   TableColumn,
   TableRow,
   TableCell,
-} from "@nextui-org/table";
-import { Input, Pagination } from "@nextui-org/react";
+} from "@heroui/table";
+import { Input, Pagination } from "@heroui/react";
 import { PageTitle, SectionTitle } from "../utils/Titles";
 import {
   inputClassNames,

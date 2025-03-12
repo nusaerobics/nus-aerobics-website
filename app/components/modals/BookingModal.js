@@ -4,8 +4,8 @@ import {
   ModalHeader,
   ModalBody,
   ModalFooter,
-} from "@nextui-org/modal";
-import { Chip, Spinner, Tooltip } from "@nextui-org/react";
+} from "@heroui/modal";
+import { Chip, Spinner, Tooltip } from "@heroui/react";
 import { chipClassNames, chipTypes, modalClassNames } from "../utils/ClassNames";
 import {
   MdCheckCircleOutline,
