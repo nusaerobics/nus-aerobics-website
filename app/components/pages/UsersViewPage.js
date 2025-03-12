@@ -2,9 +2,9 @@ import PropTypes from "prop-types";
 import { useEffect, useMemo, useState } from "react";
 import { format } from "date-fns";
 
-import { Pagination } from "@nextui-org/react";
+import { Pagination } from "@heroui/react";
 import { useRouter } from "next/navigation";
-import { Input } from "@nextui-org/input";
+import { Input } from "@heroui/input";
 import {
   Table,
   TableHeader,
@@ -12,13 +12,13 @@ import {
   TableColumn,
   TableRow,
   TableCell,
-} from "@nextui-org/table";
+} from "@heroui/table";
 import {
   Dropdown,
   DropdownTrigger,
   DropdownMenu,
   DropdownItem,
-} from "@nextui-org/dropdown";
+} from "@heroui/dropdown";
 import { MdChevronLeft, MdMoreVert } from "react-icons/md";
 import { PageTitle, SectionTitle } from "../utils/Titles";
 import { inputClassNames, tableClassNames } from "../utils/ClassNames";

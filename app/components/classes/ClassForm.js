@@ -7,7 +7,7 @@ import PropTypes from "prop-types";
 import { useEffect, useState } from "react";
 import { z } from "zod";
 
-import { Input, Textarea } from "@nextui-org/react";
+import { Input, Textarea } from "@heroui/react";
 import { inputClassNames } from "../utils/ClassNames";
 import { SectionTitle } from "../utils/Titles";
 import Toast from "../Toast";

@@ -10,9 +10,9 @@ import {
   DropdownMenu,
   DropdownSection,
   DropdownTrigger,
-} from "@nextui-org/dropdown";
-import { useDisclosure } from "@nextui-org/modal";
-import { Chip, Input, Pagination } from "@nextui-org/react";
+} from "@heroui/dropdown";
+import { useDisclosure } from "@heroui/modal";
+import { Chip, Input, Pagination } from "@heroui/react";
 import {
   Table,
   TableHeader,
@@ -20,7 +20,7 @@ import {
   TableColumn,
   TableRow,
   TableCell,
-} from "@nextui-org/table";
+} from "@heroui/table";
 
 import {
   chipClassNames,

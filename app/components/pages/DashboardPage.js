@@ -13,7 +13,7 @@ import {
   TableColumn,
   TableRow,
   TableCell,
-} from "@nextui-org/table";
+} from "@heroui/table";
 import ClassCard from "../dashboard/ClassCard";
 import { tableClassNames } from "../utils/ClassNames";
 import { PageTitle, SectionTitle } from "../utils/Titles";

@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { LinkIcon } from "@nextui-org/react";
+import { LinkIcon } from "@heroui/react";
 import {
   MdGridView,
   MdLogout,
@@ -145,7 +145,7 @@ export default function SideBar({ session }) {
         </div>
       ) : (
         // TODO: Change design to MobileSideBar
-        <div className="md:h-full flex flex-col py-2.5 md:py-10 md:px-2 md:gap-y-10">
+        (<div className="md:h-full flex flex-col py-2.5 md:py-10 md:px-2 md:gap-y-10">
           <img
             src="/images/logo.png"
             alt="NUS Aerobics"
@@ -196,7 +196,7 @@ export default function SideBar({ session }) {
               <p className="hidden md:block">Log out</p>
             </Link>
           </div>
-        </div>
+        </div>)
       ) }
       { showToast ? (
         <div onClick={ toggleShowToast }>

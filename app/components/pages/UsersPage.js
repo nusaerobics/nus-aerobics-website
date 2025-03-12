@@ -8,8 +8,8 @@ import {
   DropdownTrigger,
   DropdownMenu,
   DropdownItem,
-} from "@nextui-org/dropdown";
-import { Input } from "@nextui-org/input";
+} from "@heroui/dropdown";
+import { Input } from "@heroui/input";
 import {
   Modal,
   ModalContent,
@@ -17,7 +17,7 @@ import {
   ModalBody,
   ModalFooter,
   useDisclosure,
-} from "@nextui-org/modal";
+} from "@heroui/modal";
 import {
   Table,
   TableHeader,
@@ -25,8 +25,8 @@ import {
   TableColumn,
   TableRow,
   TableCell,
-} from "@nextui-org/table";
-import { Pagination, Spinner } from "@nextui-org/react";
+} from "@heroui/table";
+import { Pagination, Spinner } from "@heroui/react";
 import { MdMoreVert } from "react-icons/md";
 import {
   inputClassNames,
