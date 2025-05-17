@@ -30,7 +30,7 @@
     "zod": "^3.23.8"
   },
   "engines": {
-    "node": ">=18"
+    "node": "20.x"
   },
   "browser": {
     "fs": false,
