@@ -1,6 +1,6 @@
 import PropTypes from "prop-types";
 import { format } from "date-fns";
-import { useDisclosure } from "@nextui-org/modal";
+import { useDisclosure } from "@heroui/modal";
 import BookingModal from "../modals/BookingModal";
 
 export default function ClassCard({ booking }) {

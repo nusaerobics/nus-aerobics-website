@@ -5,7 +5,7 @@ import PropTypes from "prop-types";
 import { useEffect, useState } from "react";
 
 import { MdVisibility, MdVisibilityOff } from "react-icons/md";
-import { Input } from "@nextui-org/react";
+import { Input } from "@heroui/react";
 import { PageTitle, SectionTitle } from "../utils/Titles";
 import { inputClassNames } from "../utils/ClassNames";
 import Toast from "../Toast";

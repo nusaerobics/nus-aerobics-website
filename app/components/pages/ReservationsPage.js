@@ -2,15 +2,15 @@
 
 import { PageTitle } from "../utils/Titles";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Input, Pagination, Tab, Tabs } from "@nextui-org/react";
+import { Input, Pagination, Tab, Tabs } from "@heroui/react";
 import { inputClassNames, tableClassNames, tabsClassNames } from "../utils/ClassNames";
 import { MdAvTimer, MdCheckCircleOutline, MdOpenInNew } from "react-icons/md";
-import { Table, TableBody, TableCell, TableColumn, TableHeader, TableRow } from "@nextui-org/table";
+import { Table, TableBody, TableCell, TableColumn, TableHeader, TableRow } from "@heroui/table";
 import { format } from "date-fns";
-import { useDisclosure } from "@nextui-org/modal";
+import { useDisclosure } from "@heroui/modal";
 import BookingModal from "../modals/BookingModal";
 import WaitlistModal from "../modals/WaitlistModal";
-// import { Dropdown, DropdownItem, DropdownMenu, DropdownSection, DropdownTrigger } from "@nextui-org/dropdown";
+// import { Dropdown, DropdownItem, DropdownMenu, DropdownSection, DropdownTrigger } from "@heroui/dropdown";
 import Toast from "../Toast";
 
 export default function ReservationsPage({ session }) {

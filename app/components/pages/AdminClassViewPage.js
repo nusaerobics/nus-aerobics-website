@@ -11,7 +11,7 @@ import {
   DropdownTrigger,
   DropdownMenu,
   DropdownItem,
-} from "@nextui-org/dropdown";
+} from "@heroui/dropdown";
 import {
   Modal,
   ModalContent,
@@ -19,8 +19,8 @@ import {
   ModalBody,
   ModalFooter,
   useDisclosure,
-} from "@nextui-org/modal";
-import { Chip, Input, Pagination, Spinner } from "@nextui-org/react";
+} from "@heroui/modal";
+import { Chip, Input, Pagination, Spinner } from "@heroui/react";
 import {
   Table,
   TableHeader,
@@ -28,7 +28,7 @@ import {
   TableColumn,
   TableRow,
   TableCell,
-} from "@nextui-org/table";
+} from "@heroui/table";
 import {
   MdChevronLeft,
   MdMoreVert,

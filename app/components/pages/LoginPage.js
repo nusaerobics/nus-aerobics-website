@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Input } from "@nextui-org/react";
+import { Input } from "@heroui/react";
 import { MdVisibility, MdVisibilityOff } from "react-icons/md";
 import { inputClassNames } from "../utils/ClassNames";
 import { useRouter } from "next/navigation";

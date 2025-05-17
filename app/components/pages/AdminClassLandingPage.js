@@ -18,7 +18,7 @@ import {
   DropdownMenu,
   DropdownSection,
   DropdownTrigger,
-} from "@nextui-org/dropdown";
+} from "@heroui/dropdown";
 import {
   Table,
   TableHeader,
@@ -26,8 +26,8 @@ import {
   TableColumn,
   TableRow,
   TableCell,
-} from "@nextui-org/table";
-import { Chip, Input, Pagination } from "@nextui-org/react";
+} from "@heroui/table";
+import { Chip, Input, Pagination } from "@heroui/react";
 import Toast from "../Toast";
 
 export default function AdminClassLandingPage({ openCreate }) {
