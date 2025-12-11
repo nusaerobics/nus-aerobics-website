@@ -48,7 +48,7 @@ db.waitlists.belongsTo(db.users, { as: "user" });
   try {
     await sequelize.authenticate();
     console.log("Connection has been established successfully.");
-    await db.sequelize.sync();
+    // await db.sequelize.sync(); // NOTE: Recommend to use migrations
     // await sequelize.sync({ alter: true }); // NOTE: Use when altering tables in DB
     // await sequelize.sync({ force: true });  // NOTE: Use when wanting to clear and restart whole DB
   } catch (error) {

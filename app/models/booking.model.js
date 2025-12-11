@@ -5,6 +5,15 @@ module.exports = (sequelize, DataTypes) => {
       defaultValue: "absent",
       allowNull: false,
     },
+  }, {
+    indexes: [
+      {
+        unique: true,
+        fields: ["classId", "userId"],
+        name: "unique_class_user_booking"
+      }
+    ]
   });
   return Booking;
 }
+
