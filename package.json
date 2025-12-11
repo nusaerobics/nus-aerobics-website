@@ -1,6 +1,7 @@
 {
   "private": true,
   "scripts": {
+    "migrate": "npx sequelize-cli db:migrate",
     "build": "next build",
     "dev": "next dev",
     "start": "next start"
