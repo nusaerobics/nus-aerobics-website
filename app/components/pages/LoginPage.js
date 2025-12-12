@@ -44,10 +44,17 @@ export default function Page() {
         throw new Error(`Invalid values used for sign-up. Try again.`);
       }
 
+      if (email === "" || name === "" || password === "" || confirmPassword === "") {
+        throw new Error(`Please fill in all required fields.`);
+      }
+
+      const trimmedLowerEmail = email.trim().toLowerCase();
+      const trimmedName = name.trim();
+
       const res = await fetch("/api/users", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: name, email: email, password: password }),
+        body: JSON.stringify({ name: trimmedName, email: trimmedLowerEmail, password: password }),
       });
       if (!res.ok) {
         const response = await res.json();
@@ -56,7 +63,7 @@ export default function Page() {
 
       handleChangeView(view);
       setName("");
-      setEmail(email);
+      setEmail(trimmedLowerEmail);
       setPassword("");
       setConfirmPassword("");
 
@@ -182,7 +189,7 @@ export default function Page() {
     setIsCPWVisible(!isCPWVisible);
   };
 
-  const validateEmail = (value) => value.match(/^[A-Z0-9._%+-]+@u.nus.edu$/i);
+  const validateEmail = (value) => value.match(/^[A-Z0-9._%+-]+@(u\.nus\.edu|nus\.edu\.sg)$/i);
   const isInvalidEmail = useMemo(() => {
     if (email === "") return false;
     return !validateEmail(email);
@@ -243,7 +250,7 @@ export default function Page() {
               value={ email }
               onValueChange={ setEmail }
               isInvalid={ view === "signup" && isInvalidEmail }
-              errorMessage="Please enter a valid NUS email"
+              errorMessage="Enter a valid NUS email (e.g., e1234567@u.nus.edu or yourname@nus.edu.sg)"
               isRequired
               variant="bordered"
               size="sm"
