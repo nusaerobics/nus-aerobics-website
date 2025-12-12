@@ -1,6 +1,8 @@
 import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
 import { createSecretKey } from "crypto";
+import { isDynamicServerError } from "next/dist/client/components/hooks-server-context";
+
 
 const secretKey = createSecretKey(process.env.TOKEN_SECRET, "utf-8");
 
@@ -22,9 +24,19 @@ export async function decrypt(input) {
 
 // https://nextjs.org/docs/messages/dynamic-server-error
 export async function getSession() {
-  const session = cookies().get("session");
-  if (session == undefined) return null;
-
-  const sessionValue = session.value;
-  return await decrypt(sessionValue);
+  try {
+    const cookieStore = await cookies();
+    const session = cookieStore.get('session');
+    
+    if (session == undefined) return null;
+    
+    const sessionValue = session.value;
+    return await decrypt(sessionValue);
+  } catch (error) {
+    if (isDynamicServerError(error)) {
+      throw error;
+    }
+    console.log("Session error:", error);
+    return null; // Return null on any error
+  }
 }

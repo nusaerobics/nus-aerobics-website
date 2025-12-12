@@ -323,7 +323,7 @@ export default function UsersViewPage({ userId }) {
               // onSortChange={ setSortDescriptor }
             >
               <TableHeader>
-                <TableColumn key="createdAt" allowsSorting>
+                <TableColumn key="createdAt">
                   Date
                 </TableColumn>
                 <TableColumn>Amount</TableColumn>

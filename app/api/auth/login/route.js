@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { encrypt } from "../../../lib";
+import { isDynamicServerError } from "next/dist/client/components/hooks-server-context";
 
 const bcrypt = require("bcrypt");
 
@@ -33,7 +34,9 @@ export async function POST(request) {
     }
     const expires = new Date(Date.now() + (24 * 60 * 60 * 1000));
     const session = await encrypt({ user: user.toJSON(), expires: expires });
-    cookies().set("session", session, { expires, httpOnly: true });
+    
+    const cookieStore = await cookies();
+    cookieStore.set("session", session, { expires, httpOnly: true });
 
     const response = NextResponse.json({
       message: "Successful login",
@@ -41,6 +44,9 @@ export async function POST(request) {
     });
     return response;
   } catch (error) {
+    if (isDynamicServerError(error)) {
+      throw error;
+    }
     console.log(error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
