@@ -3,30 +3,19 @@ import { getSession } from "../lib";
 import SideBar from "../components/dashboard/SideBar";
 
 export default async function Layout({ children }) {
-  let redirectPath;
-  let user;
-  try {
-    const session = await getSession();
-    if (!session) {
-      redirectPath = "/";
-    } else {
-      user = {
-        id: session.user.id,
-        name: session.user.name,
-        email: session.user.email,
-        permission: session.user.permission,
-        balance: session.user.balance,
-      };
-    }
-  } catch (error) {
-    redirectPath = "/";
-    console.log(error);
-  } finally {
-    if (redirectPath) {
-      redirect(redirectPath);
-    }
+  const session = await getSession();
+  
+  if (!session) {
+    redirect("/");
   }
 
+  const user = {
+    id: session.user.id,
+    name: session.user.name,
+    email: session.user.email,
+    permission: session.user.permission,
+    balance: session.user.balance,
+  };
   return (
     <div className="w-screen h-screen flex flex-col md:flex-row">
       <div className="w-full md:w-64 flex-none">
