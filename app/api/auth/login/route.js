@@ -34,7 +34,6 @@ export async function POST(request) {
     }
     const expires = new Date(Date.now() + (24 * 60 * 60 * 1000));
     const session = await encrypt({ user: user.toJSON(), expires: expires });
-    
     const cookieStore = await cookies();
     cookieStore.set("session", session, { expires, httpOnly: true });
 

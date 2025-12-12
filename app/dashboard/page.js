@@ -18,7 +18,6 @@ export default async function Page() {
     permission: session.user.permission,
     balance: session.user.balance,
   };
-  
   return (
     <DashboardPage session={{ userId: user.id, permission: user.permission }} />
   );

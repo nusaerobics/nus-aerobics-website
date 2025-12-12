@@ -3,7 +3,6 @@ import { cookies } from "next/headers";
 import { createSecretKey } from "crypto";
 import { isDynamicServerError } from "next/dist/client/components/hooks-server-context";
 
-
 const secretKey = createSecretKey(process.env.TOKEN_SECRET, "utf-8");
 
 export async function encrypt(payload) {
@@ -36,7 +35,7 @@ export async function getSession() {
     if (isDynamicServerError(error)) {
       throw error;
     }
-    console.log("Session error:", error);
+    console.error("Session error:", error);
     return null; // Return null on any error
   }
 }
