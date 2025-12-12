@@ -11,7 +11,7 @@ export default async function Page() {
     redirect("/");
   }
 
-  if (session.user.permission === "normal") {
+  if (session.user.permission == "normal") {
     redirect("/dashboard");
   }
   return <UsersPage />;

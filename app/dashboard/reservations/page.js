@@ -12,7 +12,7 @@ export default async function Page() {
     redirect("/");
   }
 
-  if (session.user.permission === "admin") {
+  if (session.user.permission == "admin") {
     redirect("/dashboard");
   }
 
