@@ -30,7 +30,7 @@ export async function GET(request, { params }) {
 export async function PUT(request, { params }) {
   const t = await db.sequelize.transaction();
   try {
-    const id = await params.id;
+    const { id } = await params;
     const body = await request.json();
     let updates;
     const user = await User.findOne({ where: { id: id }, transaction: t });
