@@ -44,12 +44,12 @@ export default function Page() {
         throw new Error(`Invalid values used for sign-up. Try again.`);
       }
 
-      if (email === "" || name === "" || password === "" || confirmPassword === "") {
-        throw new Error(`Please fill in all required fields.`);
-      }
-
       const trimmedLowerEmail = email.trim().toLowerCase();
       const trimmedName = name.trim();
+
+      if (trimmedLowerEmail === "" || trimmedName === "" || password === "" || confirmPassword === "") {
+        throw new Error(`Please fill in all required fields.`);
+      }
 
       const res = await fetch("/api/users", {
         method: "POST",

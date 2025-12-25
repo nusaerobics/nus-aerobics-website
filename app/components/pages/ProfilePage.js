@@ -79,6 +79,9 @@ export default function ProfilePage({ session }) {
     try {
       const trimmedName = name.trim();
       const trimmedLowerEmail = email.trim().toLowerCase();
+      if (trimmedLowerEmail === "" || trimmedName === "") {
+        throw new Error(`Please fill in all required fields.`);
+      }
       const updatedUser = { name: trimmedName, email: trimmedLowerEmail };
       const res = await fetch(`/api/users/${ session.userId }`, {
         method: "PUT",
