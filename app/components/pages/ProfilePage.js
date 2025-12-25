@@ -77,7 +77,12 @@ export default function ProfilePage({ session }) {
 
   async function saveEdit() {
     try {
-      const updatedUser = { name: name, email: email };
+      const trimmedName = name.trim();
+      const trimmedLowerEmail = email.trim().toLowerCase();
+      if (trimmedLowerEmail === "" || trimmedName === "") {
+        throw new Error(`Please fill in all required fields.`);
+      }
+      const updatedUser = { name: trimmedName, email: trimmedLowerEmail };
       const res = await fetch(`/api/users/${ session.userId }`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },

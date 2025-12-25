@@ -30,7 +30,7 @@ export async function GET(request, { params }) {
 export async function PUT(request, { params }) {
   const t = await db.sequelize.transaction();
   try {
-    const id = await params.id;
+    const { id } = await params;
     const body = await request.json();
     let updates;
     const user = await User.findOne({ where: { id: id }, transaction: t });
@@ -51,6 +51,15 @@ export async function PUT(request, { params }) {
     if (body.name != undefined && body.email != undefined) {
       const name = body.name;
       const email = body.email;
+      if (email !== user.email) {
+        const existingUser = await User.findOne({ where: { email: email }, transaction: t });
+        if (existingUser) {
+          return NextResponse.json(
+            { error: `Email ${ email } is already registered. Please use a different email.` },
+            { status: 400 }
+          );
+        }
+      }
       updates = { name: name, email: email };
     }
 
