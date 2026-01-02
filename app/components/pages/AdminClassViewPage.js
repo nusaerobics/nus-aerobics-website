@@ -5,7 +5,7 @@ import { format } from "date-fns";
 import PropTypes from "prop-types";
 import { useEffect, useMemo, useState } from "react";
 
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import {
   Dropdown,
   DropdownTrigger,
@@ -49,7 +49,9 @@ import Toast from "../Toast";
 import { toZonedTime } from "date-fns-tz";
 
 // TODO: Add in filter for classes, "Present" and "Absent"
-export default function AdminClassViewPage({ classId }) {
+export default function AdminClassViewPage() {
+  const params = useParams();
+  const classId = params.id;
   const router = useRouter();
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
 
@@ -373,7 +375,7 @@ export default function AdminClassViewPage({ classId }) {
           <div className="overflow-x-scroll">
             <Table removeWrapper classNames={ tableClassNames }>
               <TableHeader>
-                <TableColumn key="name" allowsSorting>Name</TableColumn>
+                <TableColumn key="name">Name</TableColumn>
                 <TableColumn>Email</TableColumn>
                 <TableColumn>Attendance</TableColumn>
                 <TableColumn>Booking date</TableColumn>

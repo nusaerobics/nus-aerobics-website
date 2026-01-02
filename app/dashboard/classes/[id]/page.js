@@ -1,11 +1,19 @@
-"use client";
+"use server";
 
-import { useParams } from "next/navigation";
+import { redirect } from "next/navigation";
+import { getSession } from "../../../lib";
 import AdminClassViewPage from "../../../components/pages/AdminClassViewPage";
 
 export default async function Page() {
-  const params = useParams();
-  const classId = params.id;
+  const session = await getSession();
+  
+  if (!session) {
+    redirect("/");
+  }
+  
+  if (session.user.permission == "normal") {
+    redirect("/dashboard");
+  }
 
-  return <AdminClassViewPage classId={classId} />;
+  return <AdminClassViewPage />;
 }
