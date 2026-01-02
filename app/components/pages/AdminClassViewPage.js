@@ -557,7 +557,3 @@ export default function AdminClassViewPage() {
     </>
   );
 }
-
-AdminClassViewPage.propTypes = {
-  classId: PropTypes.number,
-};
