@@ -5,7 +5,7 @@ const Class = db.classes;
 
 export async function GET(request, { params }) {
   try {
-    const id = await params.id;
+    const { id } = await params;
     const c = await Class.findOne({ where: { id: id } });
     if (c == null) {
       throw new Error(`Class ${ id } does not exist`);
