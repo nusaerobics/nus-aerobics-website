@@ -188,12 +188,12 @@ export default function UsersPage() {
     for (let i = 1; i < csv.length; i++) {
       const row = csv[i];
       const submissionId = row[0];
-      const status = row[5];
+      const status = row[25];
       if (status === "Approved") {
         try {
-          const name = row[22];
-          const email = row[2];
-          const totalCredits = parseInt(row[32]) + (parseInt(row[33]) * 5) + (parseInt(row[34]) * 10);
+          const name = row[4];
+          const email = row[3];
+          const totalCredits = parseInt(row[21]) + (parseInt(row[22]) * 5) + (parseInt(row[23]) * 10);
 
           const res = await fetch("/api/submissions", {
             method: "POST",
