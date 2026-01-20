@@ -246,7 +246,7 @@ export default function Page() {
               <></>
             ) }
             <Input
-              label="Email"
+              label="Email (EXXXXXXX@u.nus.edu)"
               value={ email }
               onValueChange={ setEmail }
               isInvalid={ view === "signup" && isInvalidEmail }
