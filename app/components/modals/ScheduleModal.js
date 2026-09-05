@@ -171,7 +171,13 @@ export default function ScheduleModal({
                     </div>
                   </ModalBody>
                   <ModalFooter>
-                    <div className="flex justify-end">
+                    <div className="w-full flex flex-col items-end gap-2.5">
+                      { selectedClass.bookedCapacity < selectedClass.maxCapacity && (
+                        <p className="w-full text-right text-a-red text-xs md:text-sm">
+                          Reminder: credits cannot be refunded if you unbook within 12 hours before the class.
+                        </p>
+                      ) }
+                      <div className="flex justify-end">
                       { selectedClass.bookedCapacity < selectedClass.maxCapacity && (
                         <button
                           onClick={ bookClass }
@@ -200,6 +206,7 @@ export default function ScheduleModal({
                           </button>
                         </Tooltip>
                       ) }
+                      </div>
                     </div>
                   </ModalFooter>
                 </>
