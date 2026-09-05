@@ -133,12 +133,19 @@ export default function BookingModal({
                     </div>
                   </ModalBody>
                   <ModalFooter>
-                    { isUpcoming && (
-                      <button
-                        onClick={ unbookClass }
-                        className="rounded-[30px] px-[10px] md:px-[20px] py-[10px] text-xs md:text-sm bg-a-red text-white cursor-pointer">
-                        Unbook class
-                      </button>) }
+                    <div className="w-full flex flex-col items-end gap-2.5">
+                      { isUpcoming && (
+                        <p className="w-full text-right text-a-red text-xs md:text-sm">
+                          Reminder: credits cannot be refunded if you unbook within 12 hours before the class.
+                        </p>
+                      ) }
+                      { isUpcoming && (
+                        <button
+                          onClick={ unbookClass }
+                          className="rounded-[30px] px-[10px] md:px-[20px] py-[10px] text-xs md:text-sm bg-a-red text-white cursor-pointer">
+                          Unbook class
+                        </button>) }
+                    </div>
                     { !isUpcoming && (
                       <Tooltip
                         content="Only upcoming class bookings can be cancelled."
