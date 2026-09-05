@@ -28,6 +28,7 @@ db.bookings = require("../models/booking.model")(sequelize, Sequelize);
 db.transactions = require("../models/transaction.model")(sequelize, Sequelize);
 db.submissions = require("../models/submission.model")(sequelize, Sequelize);
 db.waitlists = require("../models/waitlist.model")(sequelize, Sequelize);
+db.cancellations = require("../models/cancellation.model")(sequelize, Sequelize);
 
 db.classes.hasMany(db.bookings, { as: "bookings" });
 db.bookings.belongsTo(db.classes, { as: "class" });
@@ -43,6 +44,11 @@ db.waitlists.belongsTo(db.classes, { as: "class" });
 
 db.users.hasMany(db.waitlists, { as: "waitlists" });
 db.waitlists.belongsTo(db.users, { as: "user" });
+
+db.users.hasMany(db.cancellations, { as: "cancellations" });
+db.cancellations.belongsTo(db.users, { as: "user" });
+db.classes.hasMany(db.cancellations, { as: "cancellations" });
+db.cancellations.belongsTo(db.classes, { as: "class" });
 
 (async () => {
   try {

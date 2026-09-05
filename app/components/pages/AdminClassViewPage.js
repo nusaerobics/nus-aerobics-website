@@ -264,6 +264,7 @@ export default function AdminClassViewPage() {
           {
             classId: selectedClass.id,
             userId: booking.userId,
+            isForced: true,
           }),
       });
       if (!res.ok) {
