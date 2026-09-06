@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 
 import db from "../../../config/sequelize";
 import { format } from "date-fns";
-import { toZonedTime } from "date-fns-tz";
+import { formatInTimeZone, toZonedTime } from "date-fns-tz";
 
 const Booking = db.bookings;
 const Class = db.classes;
@@ -54,8 +54,9 @@ export async function DELETE(request, { params }) {
     );
     const user = await User.findOne({ where: { id: userId }, transaction: t });
 
+    const cancellationInstant = new Date();
     const classDate = toZonedTime(bookedClass.date, "Asia/Singapore");
-    const currentDate = toZonedTime(new Date(), "Asia/Singapore");
+    const currentDate = toZonedTime(cancellationInstant, "Asia/Singapore");
 
     // 1. Delete booking.
     if (!isForced) {  // Only apply isUpcoming check on cancellations made from users.
@@ -96,7 +97,8 @@ export async function DELETE(request, { params }) {
       bookingId: booking.id,
       userId: userId,
       classId: classId,
-      cancelledAt: currentDate,
+      // Store the real instant in UTC. Convert to Singapore time only for display.
+      cancelledAt: cancellationInstant,
       eligibleForRefund: isAllowedCancel,
       isForced: Boolean(isForced),
     }, { transaction: t });
@@ -112,7 +114,7 @@ export async function DELETE(request, { params }) {
         userId: userId,
         amount: 1,
         type: "refund",
-        description: `${ bookedClass.name } (${ format(bookedClass.date, "d/MM/y") }) at ${ format(currentDate, "d/MM/y HH:mm") } `,
+        description: `${ bookedClass.name } (${ format(bookedClass.date, "d/MM/y") }) at ${ formatInTimeZone(cancellationInstant, "Asia/Singapore", "d/MM/y HH:mm") } `,
       }, { transaction: t });
     }
 
