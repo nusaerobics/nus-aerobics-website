@@ -9,6 +9,7 @@ const Class = db.classes;
 const Transaction = db.transactions;
 const User = db.users;
 const Waitlist = db.waitlists;
+const Cancellation = db.cancellations;
 
 const nodemailer = require('nodemailer');
 const transporter = nodemailer.createTransport({
@@ -89,6 +90,16 @@ export async function DELETE(request, { params }) {
     // 3. Update user's balance, only if cancelling before 12 hours.
     const cancelDeadline = toZonedTime(new Date(bookedClass.date.getTime() - 12 * 60 * 60 * 1000), "Asia/Singapore");
     const isAllowedCancel = currentDate < cancelDeadline;
+
+    // Preserve an audit record before deleting the active booking.
+    await Cancellation.create({
+      bookingId: booking.id,
+      userId: userId,
+      classId: classId,
+      cancelledAt: currentDate,
+      eligibleForRefund: isAllowedCancel,
+      isForced: Boolean(isForced),
+    }, { transaction: t });
 
     if (isAllowedCancel) {
       await User.update(

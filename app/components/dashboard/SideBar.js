@@ -12,7 +12,7 @@ import {
   MdLogout,
   MdPerson,
   MdWallet,
-  MdGroup, MdSportsGymnastics, MdCalendarMonth,
+  MdGroup, MdSportsGymnastics, MdCalendarMonth, MdHistory,
 } from "react-icons/md";
 import Toast from "../Toast";
 
@@ -36,6 +36,7 @@ const adminLinks = [
     icon: MdSportsGymnastics,
   },
   { name: "Users", href: "/dashboard/users", icon: MdGroup },
+  { name: "Unbooking monitor", href: "/dashboard/unbookings", icon: MdHistory },
   { name: "Wallet", href: "/dashboard/wallet", icon: MdWallet },
   { name: "Profile", href: "/dashboard/profile", icon: MdPerson },
 ];

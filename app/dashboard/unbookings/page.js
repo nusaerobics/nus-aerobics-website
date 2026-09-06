@@ -1,0 +1,12 @@
+"use server";
+
+import { redirect } from "next/navigation";
+import { getSession } from "../../lib";
+import UnbookingMonitorPage from "../../components/pages/UnbookingMonitorPage";
+
+export default async function Page() {
+  const session = await getSession();
+  if (!session) redirect("/");
+  if (session.user.permission === "normal") redirect("/dashboard");
+  return <UnbookingMonitorPage />;
+}
